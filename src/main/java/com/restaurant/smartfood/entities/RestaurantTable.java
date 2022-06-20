@@ -1,4 +1,4 @@
-package com.restaurant.smarfood.entities;
+package com.restaurant.smartfood.entities;
 
 import com.sun.istack.NotNull;
 import lombok.*;

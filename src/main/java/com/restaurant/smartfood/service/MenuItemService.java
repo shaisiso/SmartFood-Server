@@ -1,12 +1,11 @@
-package com.restaurant.smarfood.service;
+package com.restaurant.smartfood.service;
 
 
-import com.restaurant.smarfood.entities.MenuItem;
-import com.restaurant.smarfood.repostitory.MenuItemRepository;
+import com.restaurant.smartfood.entities.MenuItem;
+import com.restaurant.smartfood.repostitory.MenuItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;

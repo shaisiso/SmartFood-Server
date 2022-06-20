@@ -1,6 +1,6 @@
-package com.restaurant.smarfood.repostitory;
+package com.restaurant.smartfood.repostitory;
 
-import com.restaurant.smarfood.entities.MenuItem;
+import com.restaurant.smartfood.entities.MenuItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

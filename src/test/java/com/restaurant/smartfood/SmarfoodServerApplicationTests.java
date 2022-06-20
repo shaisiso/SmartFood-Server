@@ -1,4 +1,4 @@
-package com.restaurant.smarfood;
+package com.restaurant.smartfood;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,8 +1,8 @@
-package com.restaurant.smarfood.controller;
+package com.restaurant.smartfood.controller;
 
 
-import com.restaurant.smarfood.entities.MenuItem;
-import com.restaurant.smarfood.service.MenuItemService;
+import com.restaurant.smartfood.entities.MenuItem;
+import com.restaurant.smartfood.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.web.bind.annotation.*;

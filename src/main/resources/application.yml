@@ -31,22 +31,22 @@ spring:
       on-profile: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/restaurant_system
-    username: root
+    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
+    username: admin
     password: Aa123456
     #heroku DB
 #    url: jdbc:mysql://eu-cdbr-west-02.cleardb.net/heroku_a04d5356c8040dd
 #    username: b90558b4068387
 #    password: 41052d61
-
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-    #    format_sql: true
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQL8Dialect
+#        format_sql: true
     show-sql: true
+    database-platform: org.hibernate.dialect.MySQL5Dialect
 
 server:
   #  ssl:

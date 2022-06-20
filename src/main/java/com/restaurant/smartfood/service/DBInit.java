@@ -1,7 +1,7 @@
-package com.restaurant.smarfood.service;
+package com.restaurant.smartfood.service;
 
-import com.restaurant.smarfood.entities.MenuItem;
-import com.restaurant.smarfood.repostitory.MenuItemRepository;
+import com.restaurant.smartfood.entities.MenuItem;
+import com.restaurant.smartfood.repostitory.MenuItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;

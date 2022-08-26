@@ -11,8 +11,8 @@
     <groupId>com.restaurant</groupId>
     <artifactId>smarfood</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>smarfood-server</name>
-    <description>smarfood-server</description>
+    <name>smartfood-server</name>
+    <description>smartfood-server</description>
     <properties>
         <java.version>11</java.version>
     </properties>
@@ -56,7 +56,10 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

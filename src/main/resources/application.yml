@@ -3,6 +3,9 @@ spring:
     active: dev
 
 ---
+logging:
+  level:
+    com.restaurant.smartfood: trace
 spring:
   config:
     activate:

@@ -3,7 +3,6 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.MenuItem;
 import com.restaurant.smartfood.service.MenuItemService;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;

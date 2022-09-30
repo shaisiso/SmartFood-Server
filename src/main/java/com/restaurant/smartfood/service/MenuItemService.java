@@ -2,16 +2,19 @@ package com.restaurant.smartfood.service;
 
 
 import com.restaurant.smartfood.entities.MenuItem;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.repostitory.MenuItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 
 @Service
+@Transactional
 public class MenuItemService {
 
     @Autowired
@@ -24,6 +27,7 @@ public class MenuItemService {
     public MenuItem findItemById(Long id) throws ResponseStatusException {
         return itemRepository.findById(id)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Id was not found"));
+               // .orElseThrow(()->new ResourceNotFoundException("Id was not found"));
     }
 
     public List<MenuItem> getMenu() {

@@ -15,7 +15,10 @@ public class DBInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        addItemsToMenu();
 
+    }
+    private void addItemsToMenu(){
         itemRepository.deleteAll();
 
         MenuItem carpaccio =  MenuItem.builder()

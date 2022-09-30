@@ -29,7 +29,7 @@ public class MenuItemController {
 	
 	@GetMapping
 	public List<MenuItem>  getMenu() {
-		log.warn("get menu");
+		log.trace("get menu");
 		return menuItemService.getMenu();
 	}
 	

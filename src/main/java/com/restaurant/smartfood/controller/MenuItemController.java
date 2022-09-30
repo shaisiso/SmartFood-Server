@@ -27,6 +27,7 @@ public class MenuItemController {
 	
 	@GetMapping
 	public List<MenuItem>  getMenu() {
+		log.warn("test");
 		return menuItemService.getMenu();
 	}
 	

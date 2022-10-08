@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin
@@ -20,7 +21,7 @@ public class MenuItemController {
 	private MenuItemService menuItemService;
 	
 	@PostMapping
-	public MenuItem addItem(@RequestBody MenuItem item) {
+	public MenuItem addItem(@Valid @RequestBody MenuItem item) {
 		log.info("ADD Item");
 		return menuItemService.addItem(item);
 	}

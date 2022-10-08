@@ -23,8 +23,8 @@ import lombok.NoArgsConstructor;
 public class MenuItem {
 
     @Id
-    @SequenceGenerator(name ="order_sequence", sequenceName = "order_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_sequence")
+    @SequenceGenerator(name ="menu_sequence", sequenceName = "menu_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "menu_sequence")
     private Long itemId;
 
     @NotBlank

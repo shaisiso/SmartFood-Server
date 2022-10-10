@@ -2,13 +2,13 @@ package com.restaurant.smartfood.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
-import org.springframework.format.annotation.DateTimeFormat;
+
 
 import javax.persistence.*;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -40,6 +40,6 @@ public class TableReservation {
     @Min(1)
     private Integer numberOfDiners;
 
-    @Length(max = 255)
+    @Size(max = 255)
     private String additionalDetails;
 }

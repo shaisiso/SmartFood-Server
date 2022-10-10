@@ -22,5 +22,5 @@ public class RestaurantTable {
 
     @NotNull
     @Min(1)
-    private Integer numerOfSeats;
+    private Integer numberOfSeats;
 }

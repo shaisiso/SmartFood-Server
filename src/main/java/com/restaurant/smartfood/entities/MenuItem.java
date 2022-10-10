@@ -1,15 +1,8 @@
 package com.restaurant.smartfood.entities;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-
-import com.sun.istack.NotNull;
+import javax.validation.constraints.NotNull;
 
 import lombok.*;
 
@@ -28,10 +21,13 @@ public class MenuItem {
     private Long itemId;
 
     @NotBlank
+    @Column(length = 30)
     private String name;
 
-    //private String/enum category
-    private String category;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ItemCategory category;
 
     private String description;
 

@@ -91,8 +91,126 @@ public class DBInit implements CommandLineRunner {
                 .category(ItemCategory.MAIN_DISHES)
                 .build();
 
-        itemRepository.saveAll(Arrays.asList(carpaccio, wings, mushrooms, greekSalad,
-                lettuceSalad, matbucha, meatMix, burger, filet, tomahawk));
+        MenuItem chips = MenuItem.builder()
+                .name("French Fries")
+                .price((float) 35)
+                .description("Hot and crispy french fries. served with different sauces")
+                .category(ItemCategory.SIDE_DISHES)
+                .build();
+
+        MenuItem rice = MenuItem.builder()
+                .name("Asian rice")
+                .price((float) 25)
+                .description("Simple asian rice")
+                .category(ItemCategory.SIDE_DISHES)
+                .build();
+
+        MenuItem brulee = MenuItem.builder()
+                .name("Creme Brulee")
+                .price((float) 30)
+                .description("Rich custard base topped with a layer of hardened caramelized sugar. Served slightly chilled")
+                .category(ItemCategory.DESERTS)
+                .build();
+        MenuItem tiramisu = MenuItem.builder()
+                .name("Tiramisu")
+                .price((float) 38)
+                .description("Layers of biscotti with mascarpone cream, chocolate chips, espresso and Amaretto liqueur")
+                .category(ItemCategory.DESERTS)
+                .build();
+
+        MenuItem cola = MenuItem.builder()
+                .name("Coca Cola")
+                .price((float) 15)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+        MenuItem zero = MenuItem.builder()
+                .name("Coca Cola Zero")
+                .price((float) 15)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+        MenuItem sprite = MenuItem.builder()
+                .name("Sprite")
+                .price((float) 15)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+        MenuItem grapeJuice = MenuItem.builder()
+                .name("Grape Juice")
+                .price((float) 15)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+        MenuItem fuzeTea = MenuItem.builder()
+                .name("Fuze Tea - Peach")
+                .price((float) 15)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+        MenuItem water = MenuItem.builder()
+                .name("Mineral Water")
+                .price((float) 12)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+        MenuItem soda = MenuItem.builder()
+                .name("Soda")
+                .price((float) 10)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+        MenuItem lemonGarus = MenuItem.builder()
+                .name("Grated Minted Lemonade")
+                .price((float) 19)
+                .category(ItemCategory.COLD_DRINKS)
+                .build();
+
+        MenuItem shortEspresso = MenuItem.builder()
+                .name("Short Espresso")
+                .price((float) 10)
+                .category(ItemCategory.HOT_DRINKS)
+                .build();
+        MenuItem longEspresso = MenuItem.builder()
+                .name("Long Espresso")
+                .price((float) 10)
+                .category(ItemCategory.HOT_DRINKS)
+                .build();
+        MenuItem doubleEspresso = MenuItem.builder()
+                .name("Double Espresso")
+                .price((float) 12)
+                .category(ItemCategory.HOT_DRINKS)
+                .build();
+        MenuItem macchiato = MenuItem.builder()
+                .name("Macchiato")
+                .price((float) 11)
+                .category(ItemCategory.HOT_DRINKS)
+                .build();
+        MenuItem cappuccino = MenuItem.builder()
+                .name("Cappuccino")
+                .price((float) 15)
+                .category(ItemCategory.HOT_DRINKS)
+                .build();
+
+        MenuItem carlsberg = MenuItem.builder()
+                .name("Carlsberg")
+                .price((float) 32)
+                .description("1/2 Liter of Carlsberg beer from the barrel")
+                .category(ItemCategory.ALCOHOL)
+                .build();
+        MenuItem tuborg = MenuItem.builder()
+                .name("Tuborg")
+                .price((float) 32)
+                .description("1/2 Liter of Tuborg beer from the barrel")
+                .category(ItemCategory.ALCOHOL)
+                .build();
+        MenuItem weihenstephan = MenuItem.builder()
+                .name("Weihenstephan")
+                .price((float) 37)
+                .description("1/2 Liter of Weihenstephan beer from the barrel")
+                .category(ItemCategory.ALCOHOL)
+                .build();
+
+        itemRepository.saveAll(Arrays.asList(carpaccio, wings, mushrooms, greekSalad,lettuceSalad, matbucha,
+                meatMix, burger, filet, tomahawk,
+                chips, rice ,
+                brulee, tiramisu,
+                cola,zero,sprite,grapeJuice,fuzeTea,water,soda,lemonGarus,
+                shortEspresso,longEspresso,doubleEspresso,macchiato,cappuccino,
+                carlsberg,tuborg,weihenstephan));
     }
 
     private void createTables() {
@@ -127,6 +245,6 @@ public class DBInit implements CommandLineRunner {
         RestaurantTable t10 = RestaurantTable.builder()
                 .numberOfSeats(20)
                 .build();
-        restaurantTableRepository.saveAll(Arrays.asList(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10));
+        restaurantTableRepository.saveAll(Arrays.asList(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10));
     }
 }

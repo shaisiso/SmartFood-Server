@@ -203,6 +203,12 @@ public class DBInit implements CommandLineRunner {
                 .description("1/2 Liter of Weihenstephan beer from the barrel")
                 .category(ItemCategory.ALCOHOL)
                 .build();
+        MenuItem beluga = MenuItem.builder()
+                .name("Beluga vodka chaiser")
+                .price((float) 53)
+                .description("Beluga vodka chaiser")
+                .category(ItemCategory.ALCOHOL)
+                .build();
 
         itemRepository.saveAll(Arrays.asList(carpaccio, wings, mushrooms, greekSalad,lettuceSalad, matbucha,
                 meatMix, burger, filet, tomahawk,
@@ -210,7 +216,7 @@ public class DBInit implements CommandLineRunner {
                 brulee, tiramisu,
                 cola,zero,sprite,grapeJuice,fuzeTea,water,soda,lemonGarus,
                 shortEspresso,longEspresso,doubleEspresso,macchiato,cappuccino,
-                carlsberg,tuborg,weihenstephan));
+                carlsberg,tuborg,weihenstephan,beluga));
     }
 
     private void createTables() {

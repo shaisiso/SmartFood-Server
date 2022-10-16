@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.TableReservation;
+import com.restaurant.smartfood.repostitory.PersonRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,13 @@ public class TableReservationController {
 //    private TableReservationService tableReservationService;
 @Autowired
 private TableReservationRepository TableReservationRepository;
+@Autowired
+private PersonRepository personRepository;
     @PostMapping
     public TableReservation addTableReservation(@Valid @RequestBody TableReservation reservation){
-        log.info("Pass validation");
+        log.debug("Pass validation");
+        log.warn("Pass validation");
+        personRepository.save(reservation.getPerson());
         return TableReservationRepository.save(reservation);
         // TODO: add real implementation
     }

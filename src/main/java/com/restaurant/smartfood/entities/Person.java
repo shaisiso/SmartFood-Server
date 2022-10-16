@@ -23,14 +23,10 @@ public class Person {
     private String phoneNumber;
 
     @Column(nullable = false, length=20)
-    @Pattern(regexp = "^[a-zA-Z]{2,}",message = "First name must have only letters in english and at least 2 letters")
+    @Pattern(regexp = "^[a-zA-Z\\s-]{2,}",message = "Name must have at least 2 letters and contain only letters in english.")
     @NotBlank
-    private String firstName;
+    private String name;
 
-    @Column(nullable = false,length=20)
-    @Pattern(regexp = "^[a-zA-Z]{2,}",message = "Last name must have only letters in english and at least 2 letters")
-    @NotBlank
-    private String lastName;
 
     @Column(unique = true)
     @Email

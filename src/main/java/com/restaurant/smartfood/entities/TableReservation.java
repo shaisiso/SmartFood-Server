@@ -16,14 +16,14 @@ import java.time.LocalTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter
+@Getter @Setter @ToString
 @Entity
 @Table(name = "table_reservation")
 public class TableReservation {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reservation_sequence")
     @SequenceGenerator(name = "reservation_sequence")
-    private Long id;
+    private Long reservationId;
 
     @ManyToOne()
     private RestaurantTable table;

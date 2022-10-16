@@ -23,8 +23,10 @@ private TableReservationRepository TableReservationRepository;
 private PersonRepository personRepository;
     @PostMapping
     public TableReservation addTableReservation(@Valid @RequestBody TableReservation reservation){
-        log.debug("Pass validation");
-        log.warn("Pass validation");
+        log.debug("Pass validation "+reservation.toString());
+        if(reservation.getPerson().getEmail().isEmpty())
+            reservation.getPerson().setEmail(null);
+
         personRepository.save(reservation.getPerson());
         return TableReservationRepository.save(reservation);
         // TODO: add real implementation

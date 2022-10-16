@@ -24,14 +24,13 @@ public class DBInit implements CommandLineRunner {
         addItemsToMenu();
         createTables();
         personRepository.save(Person.builder()
-                        .firstName("Avi")
-                        .lastName("Cohen")
-                        .phoneNumber("0523535353")
-                        .address(Address.builder()
-                                .city("Haifa")
-                                .houseNumber(2)
-                                .streetName("Dekel")
-                                .build())
+                .name("Avi Ben-Shabat")
+                .phoneNumber("0523535353")
+                .address(Address.builder()
+                        .city("Haifa")
+                        .houseNumber(2)
+                        .streetName("Dekel")
+                        .build())
                 .build());
     }
 

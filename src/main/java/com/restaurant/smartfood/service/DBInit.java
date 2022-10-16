@@ -1,9 +1,8 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.ItemCategory;
-import com.restaurant.smartfood.entities.MenuItem;
-import com.restaurant.smartfood.entities.RestaurantTable;
+import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.MenuItemRepository;
+import com.restaurant.smartfood.repostitory.PersonRepository;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -15,14 +14,25 @@ import java.util.Arrays;
 public class DBInit implements CommandLineRunner {
     @Autowired
     private MenuItemRepository itemRepository;
-
     @Autowired
     private RestaurantTableRepository restaurantTableRepository;
+    @Autowired
+    private PersonRepository personRepository;
 
     @Override
     public void run(String... args) throws Exception {
         addItemsToMenu();
         createTables();
+        personRepository.save(Person.builder()
+                        .firstName("Avi")
+                        .lastName("Cohen")
+                        .phoneNumber("0523535353")
+                        .address(Address.builder()
+                                .city("Haifa")
+                                .houseNumber(2)
+                                .streetName("Dekel")
+                                .build())
+                .build());
     }
 
     private void addItemsToMenu() {

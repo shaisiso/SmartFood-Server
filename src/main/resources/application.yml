@@ -3,6 +3,11 @@ spring:
     active: dev
 
 ---
+-spring:
+  devtools:
+    restart:
+      enabled=true:
+
 spring:
   config:
     activate:

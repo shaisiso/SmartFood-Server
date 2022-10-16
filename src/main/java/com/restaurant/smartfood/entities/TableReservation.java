@@ -5,6 +5,7 @@ import lombok.*;
 
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -42,4 +43,10 @@ public class TableReservation {
 
     @Size(max = 255)
     private String additionalDetails;
+
+    @ManyToOne
+    @JoinColumn(name = "person_phone_number")
+    @NotNull
+    @Valid
+    private Person person;
 }

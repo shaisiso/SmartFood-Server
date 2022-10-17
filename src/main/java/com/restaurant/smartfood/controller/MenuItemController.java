@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -22,15 +22,16 @@ public class MenuItemController {
 	
 	@GetMapping("/categories")
 	public List<String> getCategories(){
-		return ItemCategory.stream().
-				map(category->category.toString())
-				.collect(Collectors.toList());
+		return ItemCategory.getCategoriesNames();
 	}
 	@GetMapping
 	public List<MenuItem>  getMenu() {
 		return menuItemService.getMenu();
 	}
-	
+	@GetMapping("/categorized")
+	public Map<String,List<MenuItem>> getCategorizedMenu() {
+		return menuItemService.getCategorizedMenu();
+	}
 	@GetMapping("/{id}")
 	public MenuItem getItemByID(@PathVariable("id") Long itemId) throws NotFoundException {
 		return menuItemService.findItemById(itemId);

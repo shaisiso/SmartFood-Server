@@ -28,6 +28,7 @@ public class MenuItemController {
 	public List<MenuItem>  getMenu() {
 		return menuItemService.getMenu();
 	}
+
 	@GetMapping("/categorized")
 	public Map<String,List<MenuItem>> getCategorizedMenu() {
 		return menuItemService.getCategorizedMenu();

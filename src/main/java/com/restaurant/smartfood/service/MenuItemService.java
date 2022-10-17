@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,7 +42,7 @@ public class MenuItemService {
         var menu = itemRepository.findAll();
         var categories = ItemCategory.stream()
                 .collect(Collectors.toList());
-        Map<String, List<MenuItem>> categorizedMenus = new HashMap<>();
+        Map<String, List<MenuItem>> categorizedMenus = new LinkedHashMap<>();
         categories.forEach(category -> {
             var itemsForCategory = menu.stream()
                     .filter(menuItem -> menuItem.getCategory().equals(category))

@@ -18,6 +18,7 @@ public class Address {
     @Column(length=85)
     @NotBlank
     private String city;
+    //test
 
     @Column(length=85)
     @NotBlank

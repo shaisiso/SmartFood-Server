@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Builder
 @AllArgsConstructor
@@ -18,13 +19,12 @@ public class Address {
     @Column(length=85)
     @NotBlank
     private String city;
-    //test
 
     @Column(length=85)
     @NotBlank
     private String streetName;
 
-    @NonNull
+    @NotNull
     private Integer houseNumber;
 
     private Character entrance;

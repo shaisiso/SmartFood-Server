@@ -1,19 +1,24 @@
 package com.restaurant.smartfood.entities;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Polymorphism;
+import org.hibernate.annotations.PolymorphismType;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@Polymorphism(type = PolymorphismType.EXPLICIT)
 @Table(name = "person")
 public class Person {
     @Id

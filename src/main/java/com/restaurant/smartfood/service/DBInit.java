@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.MenuItemRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
@@ -19,6 +20,9 @@ public class DBInit implements CommandLineRunner {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     @Override
     public void run(String... args) throws Exception {
         addItemsToMenu();
@@ -32,6 +36,7 @@ public class DBInit implements CommandLineRunner {
                         .streetName("Dekel")
                         .build())
                 .build());
+        addEmployee();
     }
 
     private void addItemsToMenu() {
@@ -264,5 +269,24 @@ public class DBInit implements CommandLineRunner {
                 .numberOfSeats(4)
                 .build();
         restaurantTableRepository.saveAll(Arrays.asList(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10,t11));
+    }
+
+    private void addEmployee() {
+        employeeRepository.deleteAll();
+
+        Employee employee1 = Employee.builder()
+                .name("Dolev Haziza")
+                .email("Haziza@gmail.com")
+                .address(Address.builder()
+                        .city("Haifa")
+                        .streetName("Horev")
+                        .houseNumber(8)
+                        .build())
+                .phoneNumber("0588888888")
+                .employeeID((long) 1234)
+                .password("123456")
+                .role("cook")
+                .build();
+        employeeRepository.saveAll(Arrays.asList(employee1));
     }
 }

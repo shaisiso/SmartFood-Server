@@ -1,38 +1,50 @@
 package com.restaurant.smartfood.controller;
 
 
+import com.restaurant.smartfood.entities.ItemCategory;
 import com.restaurant.smartfood.entities.MenuItem;
 import com.restaurant.smartfood.service.MenuItemService;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/api/menu")
-@Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MenuItemController {
-
-	@Autowired
-	private MenuItemService menuItemService;
+	private final MenuItemService menuItemService;
 	
+<<<<<<< HEAD
 	@PostMapping
 	public MenuItem addItem(@RequestBody MenuItem item) {
 		return menuItemService.addItem(item);
+=======
+	@GetMapping("/categories")
+	public List<String> getCategories(){
+		return ItemCategory.getCategoriesNames();
+>>>>>>> dev-shai
 	}
-	
-	
 	@GetMapping
 	public List<MenuItem>  getMenu() {
 		return menuItemService.getMenu();
 	}
-	
+
+	@GetMapping("/categorized")
+	public Map<String,List<MenuItem>> getCategorizedMenu() {
+		return menuItemService.getCategorizedMenu();
+	}
 	@GetMapping("/{id}")
 	public MenuItem getItemByID(@PathVariable("id") Long itemId) throws NotFoundException {
 		return menuItemService.findItemById(itemId);
+	}
+	@PostMapping
+	public MenuItem addItem(@Valid @RequestBody MenuItem item) {
+		return menuItemService.addItem(item);
 	}
 }

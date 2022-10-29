@@ -1,20 +1,13 @@
 package com.restaurant.smartfood.entities;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-import com.sun.istack.NotNull;
+import lombok.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -23,18 +16,22 @@ import lombok.NoArgsConstructor;
 public class MenuItem {
 
     @Id
-    @SequenceGenerator(name ="order_sequence", sequenceName = "order_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_sequence")
+    @SequenceGenerator(name ="menu_sequence", sequenceName = "menu_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "menu_sequence")
     private Long itemId;
 
     @NotBlank
+    @Column(length = 30)
     private String name;
 
-    //private String/enum category
-    private String category;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ItemCategory category;
 
     private String description;
 
     @NotNull
+    @DecimalMin(value = "0",inclusive = false)
     private Float price;
 }

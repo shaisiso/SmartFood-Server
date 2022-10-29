@@ -20,15 +20,15 @@ import java.util.Map;
 public class MenuItemController {
 	private final MenuItemService menuItemService;
 	
-<<<<<<< HEAD
+
 	@PostMapping
 	public MenuItem addItem(@RequestBody MenuItem item) {
 		return menuItemService.addItem(item);
-=======
+	}
 	@GetMapping("/categories")
 	public List<String> getCategories(){
 		return ItemCategory.getCategoriesNames();
->>>>>>> dev-shai
+
 	}
 	@GetMapping
 	public List<MenuItem>  getMenu() {
@@ -42,9 +42,5 @@ public class MenuItemController {
 	@GetMapping("/{id}")
 	public MenuItem getItemByID(@PathVariable("id") Long itemId) throws NotFoundException {
 		return menuItemService.findItemById(itemId);
-	}
-	@PostMapping
-	public MenuItem addItem(@Valid @RequestBody MenuItem item) {
-		return menuItemService.addItem(item);
 	}
 }

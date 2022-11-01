@@ -15,15 +15,16 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "shift")
+@Table(name = "shifts")
 public class Shift {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "shift_seq")
     @SequenceGenerator(name = "shift_seq")
+    @Column(name = "shift_id")
     private Long shiftID;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Employee employee;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm")

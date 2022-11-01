@@ -3,6 +3,7 @@ package com.restaurant.smartfood.entities;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -41,6 +42,6 @@ public class ItemInOrder {
 
     @NotNull
     @Column(nullable = false)
-    @Min(0)
+    @DecimalMin(value = "0")
     private Float price;
 }

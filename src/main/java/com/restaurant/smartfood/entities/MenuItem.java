@@ -21,17 +21,18 @@ public class MenuItem {
     private Long itemId;
 
     @NotBlank
-    @Column(length = 30)
+    @Column(length = 30,nullable = false)
     private String name;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 20,nullable = false)
     private ItemCategory category;
 
     private String description;
 
     @NotNull
+    @Column(nullable = false)
     @DecimalMin(value = "0",inclusive = false)
     private Float price;
 }

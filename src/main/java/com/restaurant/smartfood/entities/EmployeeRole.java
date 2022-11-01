@@ -1,14 +1,15 @@
 package com.restaurant.smartfood.entities;
 
+//need to be Class for spring security
 public enum EmployeeRole {
-    Hostess,
-    Waiter,
-    Kitchen,
-    Kitchen_Manager,
-    Bar,
-    Bar_Manager,
-    Delivery_Guy,
-    Shift_Manager,
-    Delivery_Manager,
-    Manager
+    HOSTESS,
+    WAITER,
+    KITCHEN,
+    KITCHEN_MANAGER,
+    BAR,
+    BAR_MANAGER,
+    DELIVERY_GUY,
+    SHIFT_MANAGER,
+    DELIVERY_MANAGER,
+    MANAGER
 }

@@ -26,13 +26,10 @@ public class Shift {
     @ManyToOne
     private Employee employee;
 
-    @NotNull
-    @FutureOrPresent
     @JsonFormat(pattern="dd-MM-yyyy HH:mm")
     @Column(nullable = false)
     private LocalDateTime shiftEntrance;
 
-    @FutureOrPresent
     @JsonFormat(pattern="dd-MM-yyyy HH:mm")
     private LocalDateTime shiftExit;
 }

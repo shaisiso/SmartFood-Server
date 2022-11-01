@@ -12,7 +12,6 @@ import javax.persistence.Table;
 
 @SuperBuilder
 @AllArgsConstructor
-@NoArgsConstructor
 @ToString
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)

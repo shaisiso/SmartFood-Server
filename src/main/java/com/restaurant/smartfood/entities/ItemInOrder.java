@@ -24,7 +24,7 @@ public class ItemInOrder {
 
     @NotNull
     @OneToOne
-    private Item item;
+    private MenuItem item;
 
     private String itemComment;
 

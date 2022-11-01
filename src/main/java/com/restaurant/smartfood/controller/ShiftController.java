@@ -3,6 +3,7 @@ package com.restaurant.smartfood.controller;
 import com.restaurant.smartfood.entities.Shift;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
+import com.restaurant.smartfood.service.ShiftService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +15,15 @@ import javax.validation.Valid;
 public class ShiftController {
 
     @Autowired
-    private ShiftRepository shiftRepository;
+    private ShiftService shiftService;
 
     @PostMapping
-    public Shift addShift(@Valid @RequestBody Shift newShift) {
-        return shiftRepository.save(newShift);
+    public Shift enterShift(@Valid @RequestBody Shift newShift) {
+        return shiftService.saveShift(newShift);
     }
 
-
+    @PutMapping
+    public Shift exitShift(@Valid @RequestBody Shift shift) {
+        return shiftService.exitShift(shift);
+    }
 }

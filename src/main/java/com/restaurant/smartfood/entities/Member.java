@@ -5,11 +5,10 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Polymorphism;
 import org.hibernate.annotations.PolymorphismType;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @SuperBuilder
 @AllArgsConstructor
@@ -20,6 +19,9 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "member")
 public class Member extends Customer {
-    @NotNull
+
+    @NotBlank
+    @Column(nullable = false)
+    @Size(min = 6,message = "Password needs to be at least 8 characters")
     private String password;
 }

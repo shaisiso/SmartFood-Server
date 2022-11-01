@@ -21,21 +21,26 @@ public class ItemInOrder {
     @SequenceGenerator(name = "items_in_orders_seq")
     private Long id;
 
-    @NotNull
+
     @ManyToOne
+    @NotNull
+    @Column(nullable = false)
     private Order order;
 
-    @NotNull
     @ManyToOne
+    @NotNull
+    @Column(nullable = false)
     private MenuItem item;
 
     private String itemComment;
 
     @NotNull
+    @Column(nullable = false)
     @Min(1)
     private Integer quantity;
 
     @NotNull
+    @Column(nullable = false)
     @Min(0)
     private Float price;
 }

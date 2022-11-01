@@ -17,12 +17,13 @@ import javax.validation.constraints.NotNull;
 public class Delivery extends Order {
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
     private Employee deliveryGuy;
 
     private String comment;
 
-    @ManyToOne
-   // @JoinColumn(name = "customer_phone_number")
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
     private Customer customerDetails;
 }

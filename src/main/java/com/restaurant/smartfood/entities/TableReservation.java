@@ -50,7 +50,7 @@ public class TableReservation {
     private String additionalDetails;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "person_phone_number")
+    @JoinColumn(name = "person_phone_number",nullable = false)
     @NotNull
     @Valid
     private Person person;

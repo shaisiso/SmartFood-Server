@@ -25,10 +25,12 @@ public class ItemInOrder {
 
     @ManyToOne(optional = false)
     @NotNull
+    @JoinColumn(nullable = false)
     private Order order;
 
     @ManyToOne(optional = false)
     @NotNull
+    @JoinColumn(nullable = false)
     private MenuItem item;
 
     private String itemComment;

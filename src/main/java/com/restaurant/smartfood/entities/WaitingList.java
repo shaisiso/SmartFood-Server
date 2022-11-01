@@ -40,6 +40,7 @@ public class WaitingList {
 
     @NotNull
     @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
     private Member customer;
 
     @NotNull

@@ -25,6 +25,7 @@ public class Shift {
 
     @NotNull
     @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
     private Employee employee;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm")

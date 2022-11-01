@@ -10,6 +10,7 @@ import javax.validation.constraints.Min;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -19,7 +20,6 @@ import java.util.Set;
 @Setter
 @ToString
 @Entity
-@Table(name = "discount")
 public class Discount {
     @Id
     @Column(name = "discountID", nullable = false)
@@ -55,4 +55,7 @@ public class Discount {
     @Min(0)
     @Max(100)
     private Integer percent;
+
+    @ElementCollection
+    private  List<ItemCategory> discountCategories;
 }

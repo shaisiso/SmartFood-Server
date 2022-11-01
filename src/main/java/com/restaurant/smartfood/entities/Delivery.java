@@ -24,5 +24,5 @@ public class Delivery extends Order {
 
     @ManyToOne
    // @JoinColumn(name = "customer_phone_number")
-    private Customer customer;
+    private Customer customerDetails;
 }

@@ -16,7 +16,9 @@ import java.time.LocalTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "table_reservation")
 public class TableReservation {
@@ -30,7 +32,7 @@ public class TableReservation {
 
     @NotNull
     @FutureOrPresent
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate date;
 
     @NotNull

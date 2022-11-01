@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)
-
 public class Employee extends Person {
 
     @NotNull

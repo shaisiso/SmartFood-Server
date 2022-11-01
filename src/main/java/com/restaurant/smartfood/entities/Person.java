@@ -19,7 +19,6 @@ import javax.validation.constraints.Pattern;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Polymorphism(type = PolymorphismType.EXPLICIT)
-@Table(name = "person")
 public class Person {
     @Id
     @Column(nullable = false, length = 10)

@@ -6,6 +6,7 @@ import lombok.experimental.SuperBuilder;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @SuperBuilder
 @AllArgsConstructor
@@ -23,6 +24,7 @@ public class Employee extends Person {
 
     @NotBlank
     @Column(nullable = false)
+    @Size(min = 8,message = "Password needs to be at least 8 characters")
     private String password;
 
     @Enumerated(EnumType.STRING)

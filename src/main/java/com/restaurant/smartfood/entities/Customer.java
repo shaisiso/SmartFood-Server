@@ -16,6 +16,6 @@ import javax.persistence.Table;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Polymorphism(type = PolymorphismType.EXPLICIT)
-@Table(name = "customer")
+@Table(name = "customers")
 public class Customer extends Person {
 }

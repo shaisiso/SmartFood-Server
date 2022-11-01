@@ -14,6 +14,7 @@ import javax.validation.constraints.Size;
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)
+@Table(name = "employees")
 public class Employee extends Person {
 
     @NotNull

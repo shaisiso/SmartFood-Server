@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @ToString
 @Entity
-@Table(name = "delivery")
+@Table(name = "deliveries")
 public class Delivery extends Order {
 
     @NotNull

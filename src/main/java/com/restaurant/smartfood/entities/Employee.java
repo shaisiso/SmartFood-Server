@@ -24,7 +24,7 @@ public class Employee extends Person {
 
 
     @OneToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, name = "employee_id")
     private EmployeeID employeeID;
 
     @NotBlank

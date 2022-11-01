@@ -20,33 +20,36 @@ import java.time.LocalTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "table_reservation")
+@Table(name = "table_reservations")
 public class TableReservation {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reservation_sequence")
-    @SequenceGenerator(name = "reservation_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reservation_seq")
+    @SequenceGenerator(name = "reservation_seq")
     private Long reservationId;
 
-    @ManyToOne()
+    @ManyToOne(optional = false)
     private RestaurantTable table;
 
     @NotNull
+    @Column(nullable = false)
     @FutureOrPresent
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate date;
 
     @NotNull
+    @Column(nullable = false)
     @JsonFormat(pattern = "HH:00")
     private LocalTime hour;
 
     @NotNull
+    @Column(nullable = false)
     @Min(1)
     private Integer numberOfDiners;
 
     @Size(max = 255)
     private String additionalDetails;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "person_phone_number")
     @NotNull
     @Valid

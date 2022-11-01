@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -24,4 +25,8 @@ public class OrderOfTable extends Order {
     @NotNull
     @Min(1)
     private Integer numberOfDiners;
+
+    @ManyToOne(optional = false)
+    @NotNull
+    private RestaurantTable table;
 }

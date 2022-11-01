@@ -1,9 +1,9 @@
 package com.restaurant.smartfood.entities;
 
 public enum OrderStatus {
-    Accepted,
-    Preparation,
-    Ready,
-    OnItsWay,
-    Closed
+    ACCEPTED,
+    PREPARATION,
+    READY,
+    ON_ITS_WAY,
+    CLOSED
 }

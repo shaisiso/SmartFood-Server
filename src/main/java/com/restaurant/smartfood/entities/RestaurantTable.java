@@ -12,15 +12,16 @@ import javax.validation.constraints.Min;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "restaurant_table")
+@Table(name = "restaurant_tables")
 public class RestaurantTable {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tables_sequence")
-    @SequenceGenerator(name ="tables_sequence", sequenceName = "tables_sequence", allocationSize = 1,initialValue = 10)
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tables_seq")
+    @SequenceGenerator(name ="tables_seq", sequenceName = "tables_seq", allocationSize = 1,initialValue = 10)
+    @Column( nullable = false)
     private Integer tableId;
 
     @NotNull
+    @Column(nullable = false)
     @Min(1)
     private Integer numberOfSeats;
 }

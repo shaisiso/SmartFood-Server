@@ -33,15 +33,17 @@ public class WaitingList {
     private LocalDate date;
 
     @NotNull
+    @Column(nullable = false)
     @FutureOrPresent
     @JsonFormat(pattern="HH:mm")
     private LocalTime time;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member customer;
 
     @NotNull
+    @Column(nullable = false)
     private Integer numberOfDiners;
 
 }

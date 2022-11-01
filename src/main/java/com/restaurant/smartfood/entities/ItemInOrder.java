@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @ToString
 @Entity
-@Table(name = "item_in_order")
+@Table(name = "items_in_orders")
 public class ItemInOrder {
     @Id
     @Column(name = "id", nullable = false)

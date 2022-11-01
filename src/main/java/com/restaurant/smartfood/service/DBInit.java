@@ -1,10 +1,7 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
-import com.restaurant.smartfood.repostitory.EmployeeRepository;
-import com.restaurant.smartfood.repostitory.MenuItemRepository;
-import com.restaurant.smartfood.repostitory.PersonRepository;
-import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
+import com.restaurant.smartfood.repostitory.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -19,9 +16,10 @@ public class DBInit implements CommandLineRunner {
     private RestaurantTableRepository restaurantTableRepository;
     @Autowired
     private PersonRepository personRepository;
-
     @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private EmployeeIDRepository employeeIDRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -282,9 +280,9 @@ public class DBInit implements CommandLineRunner {
                         .streetName("Horev")
                         .houseNumber(8)
                         .build())
-                .phoneNumber("0588888888")
-                .employeeID((long) 1234)
+                .phoneNumber("0588888881")
                 .password("123456")
+                .employeeID(employeeIDRepository.save(new EmployeeID()))
                 .role(EmployeeRole.BAR)
                 .build();
         employeeRepository.saveAll(Arrays.asList(employee1));

@@ -5,6 +5,8 @@ import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @SuperBuilder
 @AllArgsConstructor
@@ -13,11 +15,13 @@ import javax.persistence.Table;
 @Setter
 @ToString
 @Entity
-@Table(name = "order_of_table")
+@Table(name = "orders_of_table")
 public class OrderOfTable extends Order {
 
-    @NonNull
+    @NotNull
     private Boolean isBusy;
 
+    @NotNull
+    @Min(1)
     private Integer numberOfDiners;
 }

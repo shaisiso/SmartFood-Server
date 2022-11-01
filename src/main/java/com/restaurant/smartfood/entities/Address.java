@@ -16,15 +16,16 @@ import javax.validation.constraints.NotNull;
 @Embeddable
 public class Address {
 
-    @Column(length=85)
     @NotBlank
+    @Column(length=85,nullable = false)
     private String city;
 
-    @Column(length=85)
     @NotBlank
+    @Column(length=85, nullable = false)
     private String streetName;
 
     @NotNull
+    @Column(nullable = false)
     private Integer houseNumber;
 
     private Character entrance;

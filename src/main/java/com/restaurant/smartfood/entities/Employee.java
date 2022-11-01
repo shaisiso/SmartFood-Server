@@ -3,8 +3,7 @@ package com.restaurant.smartfood.entities;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -17,11 +16,14 @@ import javax.validation.constraints.NotNull;
 public class Employee extends Person {
 
     @NotNull
+    @Column(nullable = false)
     private Long employeeID;
 
     @NotBlank
+    @Column(nullable = false)
     private String password;
 
-    @NotNull
+    @Enumerated(EnumType.STRING)
+    @NotBlank
     private EmployeeRole role;
 }

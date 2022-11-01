@@ -7,6 +7,7 @@ import org.hibernate.annotations.Polymorphism;
 import org.hibernate.annotations.PolymorphismType;
 
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -22,7 +23,7 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Polymorphism(type = PolymorphismType.EXPLICIT)
-@Table(name = "order")
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_seq")
@@ -31,30 +32,30 @@ public class Order {
     private Long id;
 
     @NotNull
+    @Column(nullable = false)
     @FutureOrPresent
     @JsonFormat(pattern="dd-MM-yyyy HH:mm")
     private LocalDateTime date;
 
     @OneToMany
     @NotNull
+    @Column(nullable = false)
     private List<ItemInOrder> items;
 
     private String orderComment;
 
     @NotNull
-    @Min(0)
+    @Column(nullable = false)
+    @DecimalMin(value = "0",inclusive = false)
     private Float totalPrice;
 
+    @Column(nullable = false)
+    @DecimalMin(value = "0")
     private Float alreadyPaid;
 
     @NotNull
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
-
-
-
-
-
-
-
 
 }

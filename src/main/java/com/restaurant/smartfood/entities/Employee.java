@@ -16,7 +16,9 @@ import javax.validation.constraints.NotNull;
 public class Employee extends Person {
 
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
+    @SequenceGenerator(name ="employee_id_sequence", sequenceName = "employee_id_sequence", allocationSize = 1,initialValue = 1000)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "employee_id_sequence")
     private Long employeeID;
 
     @NotBlank

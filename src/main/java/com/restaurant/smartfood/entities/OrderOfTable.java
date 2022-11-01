@@ -16,6 +16,7 @@ import javax.persistence.Table;
 @Table(name = "order_of_table")
 public class OrderOfTable extends Order {
 
+    @NonNull
     private Boolean isBusy;
 
     private Integer numberOfDiners;

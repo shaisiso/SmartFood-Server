@@ -23,14 +23,12 @@ public class ItemInOrder {
     private Long id;
 
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @NotNull
-    @Column(nullable = false)
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @NotNull
-    @Column(nullable = false)
     private MenuItem item;
 
     private String itemComment;

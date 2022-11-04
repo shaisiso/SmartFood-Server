@@ -14,7 +14,6 @@ import java.util.List;
 @RestController()
 @CrossOrigin
 @RequestMapping("/api/shift")
-@Slf4j
 public class ShiftController {
 
     @Autowired

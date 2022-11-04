@@ -30,9 +30,9 @@ public class ShiftService {
 
     public Shift exitShift(Shift shift) {
         var shiftFound = shiftRepository.findById(shift.getShiftID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"The requested shift was not found"));
-
-        shiftFound.setShiftExit(LocalDateTime.now());
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found"));
+        if (shiftFound.getShiftExit() == null)
+            shiftFound.setShiftExit(LocalDateTime.now());
         return shiftRepository.save(shiftFound);
     }
 
@@ -43,36 +43,35 @@ public class ShiftService {
     }
 
     public void deleteShift(Shift shift) {
-        shiftRepository.findById(shift.getShiftID()).ifPresentOrElse(s->{
-                    shiftRepository.delete(shift);
-                }, ()-> {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"The requested shift was not found");
+        shiftRepository.findById(shift.getShiftID()).ifPresentOrElse(s -> {
+            shiftRepository.delete(shift);
+        }, () -> {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found");
         });
     }
 
     public List<Shift> getShiftsByEmployeeAndDates(String phoneNumber, String startDate, String endDate) {
-        try{
+        try {
             LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            return shiftRepository.getShiftsByEmployeeAndDates(phoneNumber, start, end);
-        }
-        catch(Exception exception){
+
+            return shiftRepository.findByEmployeePhoneNumberAndShiftEntranceIsBetween(phoneNumber, start.atStartOfDay(), end.atTime(23,59));
+        } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"The request was in bad format");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
     }
 
     public List<Shift> getShiftsByDates(String startDate, String endDate) {
-        try{
+        try {
             LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
-            return shiftRepository.findByShiftEntranceIsGreaterThanEqualAndShiftExitLessThanEqual
-                    (start.atTime(0,0), end.atTime(0,0));
-        }
-        catch(Exception exception){
+            return shiftRepository.findByShiftEntranceIsBetween
+                    (start.atStartOfDay(), end.atTime(23, 59));
+        } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"The request was in bad format");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
     }
 }

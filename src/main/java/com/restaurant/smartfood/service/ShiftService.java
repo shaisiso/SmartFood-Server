@@ -30,7 +30,7 @@ public class ShiftService {
 
     public Shift exitShift(Shift shift) {
         var shiftFound = shiftRepository.findById(shift.getShiftID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"The requested shift was not found"));
 
         shiftFound.setShiftExit(LocalDateTime.now());
         return shiftRepository.save(shiftFound);
@@ -38,14 +38,16 @@ public class ShiftService {
 
     public Shift updateShift(Shift shift) {
         shiftRepository.findById(shift.getShiftID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found"));
         return shiftRepository.save(shift);
     }
 
     public void deleteShift(Shift shift) {
-        shiftRepository.findById(shift.getShiftID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        shiftRepository.delete(shift);
+        shiftRepository.findById(shift.getShiftID()).ifPresentOrElse(s->{
+                    shiftRepository.delete(shift);
+                }, ()-> {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"The requested shift was not found");
+        });
     }
 
     public List<Shift> getShiftsByEmployeeAndDates(String phoneNumber, String startDate, String endDate) {
@@ -55,7 +57,8 @@ public class ShiftService {
             return shiftRepository.getShiftsByEmployeeAndDates(phoneNumber, start, end);
         }
         catch(Exception exception){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            log.error(exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"The request was in bad format");
         }
     }
 
@@ -69,7 +72,7 @@ public class ShiftService {
         }
         catch(Exception exception){
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"The request was in bad format");
         }
     }
 }

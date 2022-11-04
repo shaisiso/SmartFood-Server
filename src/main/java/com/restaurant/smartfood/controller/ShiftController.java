@@ -40,9 +40,9 @@ public class ShiftController {
         shiftService.deleteShift(shift);
     }
 
-    @GetMapping("/{employee_phoneNumber}/{startDate}/{endDate}")
+    @GetMapping("/{phoneNumber}/{startDate}/{endDate}")
     public List<Shift> getShiftsByEmployeeAndDates(
-            @PathVariable("employee_phoneNumber") String phoneNumber,
+            @PathVariable("phoneNumber") String phoneNumber,
             @PathVariable("startDate") String startDate,
             @PathVariable("endDate") String endDate) {
         return shiftService.getShiftsByEmployeeAndDates(phoneNumber, startDate, endDate);

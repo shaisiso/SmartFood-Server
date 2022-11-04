@@ -23,6 +23,6 @@ public class EmployeeService {
 
     public Employee getEmployeeByPhoneNumber(String employeePhoneNumber) {
         return employeeRepository.findById(employeePhoneNumber)
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"There is no employee with phone number: "+employeePhoneNumber));
     }
 }

@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Shift;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -10,9 +11,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class ShiftService {
 
     @Autowired
@@ -25,13 +29,47 @@ public class ShiftService {
     }
 
     public Shift exitShift(Shift shift) {
-        if (shift.getShiftEntrance() == null)
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
-
         var shiftFound = shiftRepository.findById(shift.getShiftID())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         shiftFound.setShiftExit(LocalDateTime.now());
         return shiftRepository.save(shiftFound);
+    }
+
+    public Shift updateShift(Shift shift) {
+        shiftRepository.findById(shift.getShiftID())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return shiftRepository.save(shift);
+    }
+
+    public void deleteShift(Shift shift) {
+        shiftRepository.findById(shift.getShiftID())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        shiftRepository.delete(shift);
+    }
+
+    public List<Shift> getShiftsByEmployeeAndDates(String phoneNumber, String startDate, String endDate) {
+        try{
+            LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            return shiftRepository.getShiftsByEmployeeAndDates(phoneNumber, start, end);
+        }
+        catch(Exception exception){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public List<Shift> getShiftsByDates(String startDate, String endDate) {
+        try{
+            LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
+            return shiftRepository.findByShiftEntranceIsGreaterThanEqualAndShiftExitLessThanEqual
+                    (start.atTime(0,0), end.atTime(0,0));
+        }
+        catch(Exception exception){
+            log.error(exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
     }
 }

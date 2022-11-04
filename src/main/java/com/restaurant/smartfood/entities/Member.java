@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
 @ToString
 @Entity
 @Table(name = "members")
-public class Member extends Customer {
+public class Member extends Customer { // add extends RegisteredUser (also for employee)
 
     @NotBlank
     @Column(nullable = false)

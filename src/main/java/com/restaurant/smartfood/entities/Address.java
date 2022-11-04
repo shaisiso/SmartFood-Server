@@ -17,15 +17,14 @@ import javax.validation.constraints.NotNull;
 public class Address {
 
     @NotBlank
-    @Column(length=85,nullable = false)
+    @Column(length=85)
     private String city;
 
     @NotBlank
-    @Column(length=85, nullable = false)
+    @Column(length=85)
     private String streetName;
 
     @NotNull
-    @Column(nullable = false)
     private Integer houseNumber;
 
     private Character entrance;

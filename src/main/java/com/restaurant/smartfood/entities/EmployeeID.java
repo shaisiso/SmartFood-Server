@@ -9,6 +9,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "employee_id")
+@ToString
 public class EmployeeID {
 
     @Id
@@ -17,4 +18,7 @@ public class EmployeeID {
     @Column(name = "id", nullable = false)
     private Long id;
 
+//    @OneToOne
+//
+//    private Employee employee;
 }

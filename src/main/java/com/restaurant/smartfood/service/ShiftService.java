@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Shift;
+import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,15 @@ public class ShiftService {
 
     @Autowired
     private ShiftRepository shiftRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     public Shift saveShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)
             newShift.setShiftEntrance(LocalDateTime.now());
+        employeeRepository.findById(newShift.getEmployee().getPhoneNumber())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "There is no employee with phone number: " + newShift.getEmployee().getPhoneNumber()));
         return shiftRepository.save(newShift);
     }
 
@@ -55,7 +61,7 @@ public class ShiftService {
             LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
-            return shiftRepository.findByEmployeePhoneNumberAndShiftEntranceIsBetween(phoneNumber, start.atStartOfDay(), end.atTime(23,59));
+            return shiftRepository.findByEmployeePhoneNumberAndShiftEntranceIsBetween(phoneNumber, start.atStartOfDay(), end.atTime(23, 59));
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");

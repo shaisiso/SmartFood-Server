@@ -23,8 +23,8 @@ import javax.validation.constraints.Size;
 public class Employee extends Person {
 
 
-    @OneToOne
-    @JoinColumn(nullable = false, name = "employee_id",unique = true)
+    @OneToOne(optional = false)
+    @JoinColumn(nullable = false, name = "employee_id",referencedColumnName = "id")
     private EmployeeID employeeID;
 
     @NotBlank

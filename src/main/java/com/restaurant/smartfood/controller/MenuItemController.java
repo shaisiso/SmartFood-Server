@@ -22,7 +22,7 @@ public class MenuItemController {
 	
 
 	@PostMapping
-	public MenuItem addItem(@RequestBody MenuItem item) {
+	public MenuItem addItem(@Valid @RequestBody MenuItem item) {
 		return menuItemService.addItem(item);
 	}
 	@GetMapping("/categories")

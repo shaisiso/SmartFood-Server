@@ -26,6 +26,7 @@ public class CustomerService {
                 customerFromDB->{
                     if (newCustomer.getEmail()!=null && !newCustomer.getEmail().equals(customerFromDB.getEmail())) // email updated
                         personService.validateEmail(newCustomer);
+                    newCustomer.setId(customerFromDB.getId());
                 },
                 ()->{
                     personService.validateFields(newCustomer);

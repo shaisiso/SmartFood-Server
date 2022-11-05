@@ -282,7 +282,6 @@ public class DBInit implements CommandLineRunner {
                         .build())
                 .phoneNumber("0588888881")
                 .password("123456")
-                .employeeID(employeeIDRepository.save(new EmployeeID()))
                 .role(EmployeeRole.BAR)
                 .build();
         employeeRepository.saveAll(Arrays.asList(employee1));

@@ -20,6 +20,4 @@ import java.util.Set;
 @OnDelete(action = OnDeleteAction.CASCADE)
 public class Customer extends Person {
 
-//    @OneToMany(cascade = CascadeType.ALL)
-//    private Set<TableReservation> reservations;
 }

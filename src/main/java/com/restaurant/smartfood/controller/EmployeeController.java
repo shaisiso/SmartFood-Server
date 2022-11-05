@@ -42,9 +42,9 @@ public class EmployeeController {
         return employeeService.getAllEmployees();
     }
 
-    @GetMapping("/{employeeID}")
-    public Employee getEmployeeByEmployeeID(@PathVariable("employeeID") Long employeeID) {
-        return employeeService.getEmployeeByEmployeeID(employeeID);
+    @GetMapping("/{id}")
+    public Employee getEmployeeByID(@PathVariable("id") Long employeeID) {
+        return employeeService.getEmployeeByID(employeeID);
     }
 
 }

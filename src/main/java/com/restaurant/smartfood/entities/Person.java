@@ -22,7 +22,7 @@ import javax.validation.constraints.Pattern;
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "person_seq")
-    @SequenceGenerator(name = "person_seq")
+    @SequenceGenerator(name = "person_seq",allocationSize = 1,initialValue = 1000)
     @Column(name = "id", nullable = false)
     private Long id;
 

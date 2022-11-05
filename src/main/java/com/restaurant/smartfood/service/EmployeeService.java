@@ -24,7 +24,6 @@ public class EmployeeService {
 
     public Employee saveEmployee(Employee newEmployee) {
         personService.validateFields(newEmployee);
-        newEmployee.setEmployeeID(employeeIDRepository.save(new EmployeeID()));
         return employeeRepository.save(newEmployee);
     }
 
@@ -48,7 +47,7 @@ public class EmployeeService {
     }
 
     public void deleteEmployee(Employee employee) {
-        employeeRepository.findByPhoneNumber(employee.getPhoneNumber())
+        employeeRepository.findById(employee.getId())
                 .ifPresentOrElse(e -> {
                             employeeRepository.delete(employee);
                         },
@@ -58,8 +57,8 @@ public class EmployeeService {
                         });
     }
 
-    public Employee getEmployeeByEmployeeID(Long employeeID) {
-        return employeeRepository.findByEmployeeID_Id(employeeID)
+    public Employee getEmployeeByID(Long employeeID) {
+        return employeeRepository.findById(employeeID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with employeeID: " + employeeID));
     }
 }

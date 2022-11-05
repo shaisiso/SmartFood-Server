@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 
+import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.ItemCategory;
 import com.restaurant.smartfood.entities.MenuItem;
 import com.restaurant.smartfood.repostitory.MenuItemRepository;
@@ -10,10 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -50,5 +50,30 @@ public class MenuItemService {
             categorizedMenus.put(category.toString(), itemsForCategory);
         });
         return categorizedMenus;
+    }
+
+    public MenuItem updateItem(MenuItem updatedItem) {
+        return itemRepository.save(updatedItem);
+    }
+
+    public void deleteMenuItem(MenuItem item) {
+        itemRepository.findById(item.getItemId())
+                .ifPresentOrElse(i -> {
+                            itemRepository.delete(item);
+                        },
+                        () -> {
+                            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                    "There is no item with item id: " + item.getItemId());
+                        });
+    }
+
+    public MenuItem getItemByName(String name) {
+        return itemRepository.findByName(name).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "There is no item with the name: " + name));
+    }
+
+    public List<MenuItem> getItemByCategory(ItemCategory category) {
+        return itemRepository.findByCategory(category);
     }
 }

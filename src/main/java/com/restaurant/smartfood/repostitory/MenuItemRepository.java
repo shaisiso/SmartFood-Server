@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
-//    @Query(value = "SELECT * FROM menu_items GROUP BY category"
-//            , nativeQuery = true)
-//    Object findAllGroupByCategory();
+    Optional<MenuItem> findByName(String name);
+    List<MenuItem> findByCategory(ItemCategory category);
 }

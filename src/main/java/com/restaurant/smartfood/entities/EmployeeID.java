@@ -10,6 +10,10 @@ import javax.persistence.*;
 @Entity
 @Table(name = "employee_id")
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class EmployeeID {
 
     @Id

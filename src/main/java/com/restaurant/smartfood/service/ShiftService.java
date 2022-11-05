@@ -28,7 +28,7 @@ public class ShiftService {
     public Shift saveShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)
             newShift.setShiftEntrance(LocalDateTime.now());
-        employeeRepository.findById(newShift.getEmployee().getPhoneNumber())
+        employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no employee with phone number: " + newShift.getEmployee().getPhoneNumber()));
         return shiftRepository.save(newShift);

@@ -22,13 +22,15 @@ public class CustomerService {
 
     //TODO: finish add Reservation(failed with postman)
     public Customer saveCustomer(Customer newCustomer) {
-        var customerFromDB = customerRepository.findById(newCustomer.getPhoneNumber()).get();
-        if (customerFromDB != null) { // the update is not of the phone
-            if (newCustomer.getEmail()!=null && !newCustomer.getEmail().equals(customerFromDB.getEmail())) // email updated
-                personService.validateEmail(newCustomer);
-            customerRepository.delete(customerFromDB);
-        } else
-            personService.validateFields(newCustomer);
+        customerRepository.findByPhoneNumber(newCustomer.getPhoneNumber()).ifPresentOrElse(
+                customerFromDB->{
+                    if (newCustomer.getEmail()!=null && !newCustomer.getEmail().equals(customerFromDB.getEmail())) // email updated
+                        personService.validateEmail(newCustomer);
+                },
+                ()->{
+                    personService.validateFields(newCustomer);
+                }
+        );
         return customerRepository.save(newCustomer);
     }
 }

@@ -29,7 +29,7 @@ public class EmployeeService {
     }
 
     public Employee getEmployeeByPhoneNumber(String employeePhoneNumber) {
-        return employeeRepository.findById(employeePhoneNumber)
+        return employeeRepository.findByPhoneNumber(employeePhoneNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with phone number: " + employeePhoneNumber));
     }
 
@@ -38,7 +38,7 @@ public class EmployeeService {
     }
 
     public Employee updateEmployee(Employee updatedEmployee, String phoneNumber) {
-        var employeeFromDB = employeeRepository.findById(phoneNumber).get();
+        var employeeFromDB = employeeRepository.findByPhoneNumber(phoneNumber).get();
         if (!updatedEmployee.getPhoneNumber().equals(phoneNumber)) // phone updated
             personService.validatePhoneNumber(updatedEmployee);
 
@@ -48,7 +48,7 @@ public class EmployeeService {
         return employeeRepository.save(updatedEmployee);
     }
     public void deleteEmployee(Employee employee) {
-        employeeRepository.findById(employee.getPhoneNumber())
+        employeeRepository.findByPhoneNumber(employee.getPhoneNumber())
                 .ifPresentOrElse(e -> {
                             employeeRepository.delete(employee);
                         },

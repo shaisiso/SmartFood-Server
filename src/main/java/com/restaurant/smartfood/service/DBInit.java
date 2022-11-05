@@ -290,19 +290,20 @@ public class DBInit implements CommandLineRunner {
 
     private void addTableReservation() {
         tableReservationRepository.deleteAll();
+        var c = Customer.builder()
+                .name("Avi Ben-Shabat")
+                .phoneNumber("0523535353")
+                .address(Address.builder()
+                        .city("Haifa")
+                        .houseNumber(2)
+                        .streetName("Dekel")
+                        .build())
+                .build();
         TableReservation t = TableReservation.builder().
                 table(restaurantTableRepository.findById(10).get())
                 .hour(LocalTime.now())
                 .date(LocalDate.now())
-                .customer(customerRepository.save(Customer.builder()
-                        .name("Avi Ben-Shabat")
-                        .phoneNumber("0523535353")
-                        .address(Address.builder()
-                                .city("Haifa")
-                                .houseNumber(2)
-                                .streetName("Dekel")
-                                .build())
-                        .build()))
+                .customer(customerRepository.save(c))
                 .numberOfDiners(4)
         .build();
         tableReservationRepository.saveAll(Arrays.asList(t));

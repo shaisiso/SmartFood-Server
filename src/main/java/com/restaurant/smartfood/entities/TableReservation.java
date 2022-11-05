@@ -49,7 +49,7 @@ public class TableReservation {
     @Size(max = 255)
     private String additionalDetails;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false,cascade ={ CascadeType.MERGE,CascadeType.REMOVE})
     @JoinColumn(name = "phone_number",nullable = false)
     @NotNull
     @Valid

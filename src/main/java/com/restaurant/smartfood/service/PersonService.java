@@ -14,11 +14,14 @@ public class PersonService {
     private PersonRepository personRepository;
 
     public Person getPersonByPhone(String phoneNumber) {
-        return personRepository.findById(phoneNumber)
+        return personRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"There is no person with phone number: "+phoneNumber));
     }
+    public void deletePerson(Person person){
+        personRepository.delete(person);
+    }
     public void validatePhoneNumber(Person person) {
-        personRepository.findById(person.getPhoneNumber())
+        personRepository.findByPhoneNumber(person.getPhoneNumber())
                 .ifPresent(p -> {
                     throw new ResponseStatusException
                             (HttpStatus.CONFLICT, p.getName() + " has this phone number.");
@@ -26,13 +29,14 @@ public class PersonService {
     }
 
     public void validateEmail(Person person) {
-        personRepository.findByEmail(person.getEmail())
-                .ifPresent(p -> {
-                    throw new ResponseStatusException
-                            (HttpStatus.CONFLICT, p.getName() + " has this email.");
-                });
+        if(person.getEmail()!=null){
+            personRepository.findByEmail(person.getEmail())
+                    .ifPresent(p -> {
+                        throw new ResponseStatusException
+                                (HttpStatus.CONFLICT, p.getName() + " has this email.");
+                    });
+        }
     }
-
     public void validateFields(Person person) {
         validatePhoneNumber(person);
         validateEmail(person);

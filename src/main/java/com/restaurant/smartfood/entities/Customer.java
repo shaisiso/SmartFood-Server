@@ -2,13 +2,13 @@ package com.restaurant.smartfood.entities;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Polymorphism;
 import org.hibernate.annotations.PolymorphismType;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Set;
 
 @SuperBuilder
 @AllArgsConstructor
@@ -17,5 +17,9 @@ import javax.persistence.Table;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Polymorphism(type = PolymorphismType.EXPLICIT)
 @Table(name = "customers")
+@OnDelete(action = OnDeleteAction.CASCADE)
 public class Customer extends Person {
+
+//    @OneToMany(cascade = CascadeType.ALL)
+//    private Set<TableReservation> reservations;
 }

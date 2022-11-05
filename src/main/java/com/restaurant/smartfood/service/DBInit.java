@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Arrays;
 
 @Service
@@ -21,19 +23,17 @@ public class DBInit implements CommandLineRunner {
     @Autowired
     private EmployeeIDRepository employeeIDRepository;
 
+    @Autowired
+    private TableReservationRepository tableReservationRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
     @Override
     public void run(String... args) throws Exception {
         addItemsToMenu();
         createTables();
-        personRepository.save(Person.builder()
-                .name("Avi Ben-Shabat")
-                .phoneNumber("0523535353")
-                .address(Address.builder()
-                        .city("Haifa")
-                        .houseNumber(2)
-                        .streetName("Dekel")
-                        .build())
-                .build());
+        addTableReservation();
         addEmployee();
     }
 
@@ -222,13 +222,13 @@ public class DBInit implements CommandLineRunner {
                 .category(ItemCategory.ALCOHOL)
                 .build();
 
-        itemRepository.saveAll(Arrays.asList(carpaccio, wings, mushrooms, greekSalad,lettuceSalad, matbucha,
+        itemRepository.saveAll(Arrays.asList(carpaccio, wings, mushrooms, greekSalad, lettuceSalad, matbucha,
                 meatMix, burger, filet, tomahawk,
-                chips, rice ,
+                chips, rice,
                 brulee, tiramisu,
-                cola,zero,sprite,grapeJuice,fuzeTea,water,soda,lemonGarus,
-                shortEspresso,longEspresso,doubleEspresso,macchiato,cappuccino,
-                carlsberg,tuborg,weihenstephan,beluga));
+                cola, zero, sprite, grapeJuice, fuzeTea, water, soda, lemonGarus,
+                shortEspresso, longEspresso, doubleEspresso, macchiato, cappuccino,
+                carlsberg, tuborg, weihenstephan, beluga));
     }
 
     private void createTables() {
@@ -266,7 +266,7 @@ public class DBInit implements CommandLineRunner {
         RestaurantTable t11 = RestaurantTable.builder()
                 .numberOfSeats(4)
                 .build();
-        restaurantTableRepository.saveAll(Arrays.asList(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10,t11));
+        restaurantTableRepository.saveAll(Arrays.asList(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11));
     }
 
     private void addEmployee() {
@@ -286,5 +286,25 @@ public class DBInit implements CommandLineRunner {
                 .role(EmployeeRole.BAR)
                 .build();
         employeeRepository.saveAll(Arrays.asList(employee1));
+    }
+
+    private void addTableReservation() {
+        tableReservationRepository.deleteAll();
+        TableReservation t = TableReservation.builder().
+                table(restaurantTableRepository.findById(10).get())
+                .hour(LocalTime.now())
+                .date(LocalDate.now())
+                .customer(customerRepository.save(Customer.builder()
+                        .name("Avi Ben-Shabat")
+                        .phoneNumber("0523535353")
+                        .address(Address.builder()
+                                .city("Haifa")
+                                .houseNumber(2)
+                                .streetName("Dekel")
+                                .build())
+                        .build()))
+                .numberOfDiners(4)
+        .build();
+        tableReservationRepository.saveAll(Arrays.asList(t));
     }
 }

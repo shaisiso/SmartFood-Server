@@ -50,8 +50,8 @@ public class TableReservation {
     private String additionalDetails;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "person_phone_number",nullable = false)
+    @JoinColumn(name = "phone_number",nullable = false)
     @NotNull
     @Valid
-    private Person person;
+    private Customer customer;
 }

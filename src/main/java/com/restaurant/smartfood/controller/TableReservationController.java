@@ -1,13 +1,17 @@
 package com.restaurant.smartfood.controller;
 
+import com.restaurant.smartfood.entities.Customer;
 import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
+import com.restaurant.smartfood.service.TableReservationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController()
 @CrossOrigin
@@ -15,20 +19,38 @@ import javax.validation.Valid;
 @Slf4j
 public class TableReservationController {
 
-//    @Autowired
-//    private TableReservationService tableReservationService;
-@Autowired
-private TableReservationRepository TableReservationRepository;
-@Autowired
-private PersonRepository personRepository;
-    @PostMapping
-    public TableReservation addTableReservation(@Valid @RequestBody TableReservation reservation){
-        log.debug("Pass validation "+reservation.toString());
-        if(reservation.getPerson().getEmail().isEmpty())
-            reservation.getPerson().setEmail(null);
+    @Autowired
+    private TableReservationService tableReservationService;
 
-        personRepository.save(reservation.getPerson());
-        return TableReservationRepository.save(reservation);
-        // TODO: add real implementation
+    @PostMapping
+    public TableReservation addTableReservation(@Valid @RequestBody TableReservation reservation) {
+        return tableReservationService.saveTableReservation(reservation);
+    }
+
+    @PutMapping
+    public TableReservation updateTableReservation(@Valid @RequestBody TableReservation updatedReservation) {
+        return tableReservationService.saveTableReservation(updatedReservation);
+    }
+
+    @DeleteMapping
+    public void deleteTableReservation(@RequestBody TableReservation reservation) {
+        tableReservationService.deleteTableReservation(reservation);
+    }
+
+    @GetMapping
+    public List<TableReservation> getAll(){
+        return tableReservationService.findAll();
+    }
+
+    @GetMapping("/date/{startDate}/{endDate}")
+    public List<TableReservation> getTableReservationsByDates(@PathVariable("startDate") LocalDate startDate,
+                                                              @PathVariable(required = false,
+                                                                      name = "endDate") LocalDate endDate) {
+        return tableReservationService.getTableReservationsByDates(startDate, endDate);
+    }
+
+    @GetMapping("/phoneNumber/{phoneNumber}")
+    public List<TableReservation> getTableReservationsByCustomer(@PathVariable("phoneNumber") String phoneNumber) {
+        return tableReservationService.getTableReservationsByCustomer(phoneNumber);
     }
 }

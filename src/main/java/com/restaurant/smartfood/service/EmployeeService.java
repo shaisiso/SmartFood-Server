@@ -13,15 +13,17 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
-@Slf4j
 public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
     @Autowired
     private EmployeeIDRepository employeeIDRepository;
 
+    @Autowired
+    private PersonService personService;
+
     public Employee saveEmployee(Employee newEmployee) {
-        validateFields(newEmployee);
+        personService.validateFields(newEmployee);
         newEmployee.setEmployeeID(employeeIDRepository.save(new EmployeeID()));
         return employeeRepository.save(newEmployee);
     }
@@ -38,35 +40,13 @@ public class EmployeeService {
     public Employee updateEmployee(Employee updatedEmployee, String phoneNumber) {
         var employeeFromDB = employeeRepository.findById(phoneNumber).get();
         if (!updatedEmployee.getPhoneNumber().equals(phoneNumber)) // phone updated
-            validatePhoneNumber(updatedEmployee);
+            personService.validatePhoneNumber(updatedEmployee);
 
         if (!updatedEmployee.getEmail().equals(employeeFromDB.getEmail())) // email updated
-            validateEmail(updatedEmployee);
+            personService.validateEmail(updatedEmployee);
         employeeRepository.delete(employeeFromDB);
         return employeeRepository.save(updatedEmployee);
     }
-
-    private void validatePhoneNumber(Employee employee) {
-        employeeRepository.findById(employee.getPhoneNumber())
-                .ifPresent(e -> {
-                    throw new ResponseStatusException
-                            (HttpStatus.CONFLICT, "The employee " + e.getName() + " has this phone number.");
-                });
-    }
-
-    private void validateEmail(Employee employee) {
-        employeeRepository.findByEmail(employee.getEmail())
-                .ifPresent(e -> {
-                    throw new ResponseStatusException
-                            (HttpStatus.CONFLICT, "The employee " + e.getName() + " has this email.");
-                });
-    }
-
-    private void validateFields(Employee employee) {
-        validatePhoneNumber(employee);
-        validateEmail(employee);
-    }
-
     public void deleteEmployee(Employee employee) {
         employeeRepository.findById(employee.getPhoneNumber())
                 .ifPresentOrElse(e -> {

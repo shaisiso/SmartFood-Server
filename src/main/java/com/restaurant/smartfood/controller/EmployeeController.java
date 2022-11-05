@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController()
 @CrossOrigin
-@Slf4j
 @RequestMapping("/api/employee")
 public class EmployeeController {
     @Autowired

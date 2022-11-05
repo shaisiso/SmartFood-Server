@@ -23,17 +23,30 @@ public class EmployeeController {
         return employeeService.saveEmployee(newEmployee);
     }
 
-    @GetMapping("/{phoneNumber}")
+    @GetMapping("/phone/{phoneNumber}")
     public Employee getEmployeeByPhoneNumber(@PathVariable("phoneNumber") String employeePhoneNumber) {
         return employeeService.getEmployeeByPhoneNumber(employeePhoneNumber);
     }
+
     @PutMapping("/{phoneNumber}")
     public Employee updateEmployee(@PathVariable("phoneNumber") String employeePhoneNumber,
-                                   @Valid @RequestBody Employee updatedEmployee){
+                                   @Valid @RequestBody Employee updatedEmployee) {
         return employeeService.updateEmployee(updatedEmployee, employeePhoneNumber);
     }
-    @GetMapping
-    public List<Employee> getAllEmployees(){
-        return  employeeService.getAllEmployees();
+
+    @DeleteMapping
+    public void deleteEmployee(@RequestBody Employee employee) {
+        employeeService.deleteEmployee(employee);
     }
+
+    @GetMapping
+    public List<Employee> getAllEmployees() {
+        return employeeService.getAllEmployees();
+    }
+
+    @GetMapping("/{employeeID}")
+    public Employee getEmployeeByEmployeeID(@PathVariable("employeeID") Long employeeID) {
+        return employeeService.getEmployeeByEmployeeID(employeeID);
+    }
+
 }

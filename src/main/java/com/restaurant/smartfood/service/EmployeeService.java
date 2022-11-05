@@ -45,6 +45,7 @@ public class EmployeeService {
         employeeRepository.delete(employeeFromDB);
         return employeeRepository.save(updatedEmployee);
     }
+
     private void validatePhoneNumber(Employee employee) {
         employeeRepository.findById(employee.getPhoneNumber())
                 .ifPresent(e -> {
@@ -64,5 +65,21 @@ public class EmployeeService {
     private void validateFields(Employee employee) {
         validatePhoneNumber(employee);
         validateEmail(employee);
+    }
+
+    public void deleteEmployee(Employee employee) {
+        employeeRepository.findById(employee.getPhoneNumber())
+                .ifPresentOrElse(e -> {
+                            employeeRepository.delete(employee);
+                        },
+                        () -> {
+                            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                    "There is no employee with phone number: " + employee.getPhoneNumber());
+                        });
+    }
+
+    public Employee getEmployeeByEmployeeID(Long employeeID) {
+        return employeeRepository.findByEmployeeID_Id(employeeID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with employeeID: " + employeeID));
     }
 }

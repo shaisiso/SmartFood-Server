@@ -37,16 +37,16 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    public Employee updateEmployee(Employee updatedEmployee, String phoneNumber) {
-        var employeeFromDB = employeeRepository.findByPhoneNumber(phoneNumber).get();
-        if (!updatedEmployee.getPhoneNumber().equals(phoneNumber)) // phone updated
+    public Employee updateEmployee(Employee updatedEmployee) {
+        var employeeFromDB = employeeRepository.findById(updatedEmployee.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with phone number: " + updatedEmployee.getPhoneNumber()));
+        if (!updatedEmployee.getPhoneNumber().equals(employeeFromDB.getPhoneNumber())) // phone updated
             personService.validatePhoneNumber(updatedEmployee);
-
         if (!updatedEmployee.getEmail().equals(employeeFromDB.getEmail())) // email updated
             personService.validateEmail(updatedEmployee);
-        employeeRepository.delete(employeeFromDB);
         return employeeRepository.save(updatedEmployee);
     }
+
     public void deleteEmployee(Employee employee) {
         employeeRepository.findByPhoneNumber(employee.getPhoneNumber())
                 .ifPresentOrElse(e -> {

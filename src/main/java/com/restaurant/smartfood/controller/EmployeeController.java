@@ -27,10 +27,9 @@ public class EmployeeController {
         return employeeService.getEmployeeByPhoneNumber(employeePhoneNumber);
     }
 
-    @PutMapping("/{phoneNumber}")
-    public Employee updateEmployee(@PathVariable("phoneNumber") String employeePhoneNumber,
-                                   @Valid @RequestBody Employee updatedEmployee) {
-        return employeeService.updateEmployee(updatedEmployee, employeePhoneNumber);
+    @PutMapping
+    public Employee updateEmployee(@Valid @RequestBody Employee updatedEmployee) {
+        return employeeService.updateEmployee(updatedEmployee);
     }
 
     @DeleteMapping

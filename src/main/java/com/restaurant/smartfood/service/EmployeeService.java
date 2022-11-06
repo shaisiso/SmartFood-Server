@@ -16,8 +16,6 @@ import java.util.List;
 public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
-    @Autowired
-    private EmployeeIDRepository employeeIDRepository;
 
     @Autowired
     private PersonService personService;

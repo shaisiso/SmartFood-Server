@@ -21,9 +21,6 @@ public class DBInit implements CommandLineRunner {
     @Autowired
     private EmployeeRepository employeeRepository;
     @Autowired
-    private EmployeeIDRepository employeeIDRepository;
-
-    @Autowired
     private TableReservationRepository tableReservationRepository;
 
     @Autowired
@@ -31,15 +28,20 @@ public class DBInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        tableReservationRepository.deleteAll();
+        customerRepository.deleteAll();
+        employeeRepository.deleteAll();
+        personRepository.deleteAll();
+        itemRepository.deleteAll();
+        restaurantTableRepository.deleteAll();
+
         addItemsToMenu();
         createTables();
-        //    addTableReservation();
+        addTableReservation();
         addEmployee();
     }
 
     private void addItemsToMenu() {
-        itemRepository.deleteAll();
-
         MenuItem carpaccio = MenuItem.builder()
                 .name("Beef Carpaccio")
                 .price((float) 80)
@@ -232,7 +234,6 @@ public class DBInit implements CommandLineRunner {
     }
 
     private void createTables() {
-        restaurantTableRepository.deleteAll();
         RestaurantTable t1 = RestaurantTable.builder()
                 .numberOfSeats(2)
                 .build();
@@ -270,8 +271,6 @@ public class DBInit implements CommandLineRunner {
     }
 
     private void addEmployee() {
-        employeeRepository.deleteAll();
-
         Employee employee1 = Employee.builder()
                 .name("Dolev Haziza")
                 .email("Haziza@gmail.com")
@@ -288,7 +287,6 @@ public class DBInit implements CommandLineRunner {
     }
 
     private void addTableReservation() {
-        tableReservationRepository.deleteAll();
         var c = Customer.builder()
                 .name("Avi Ben-Shabat")
                 .phoneNumber("0523535353")

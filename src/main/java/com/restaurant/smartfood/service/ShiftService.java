@@ -5,6 +5,7 @@ import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -24,13 +26,16 @@ public class ShiftService {
     private ShiftRepository shiftRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
+    @Value("${timezone.name}")
+    private String timezone;
 
     public Shift saveShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)
-            newShift.setShiftEntrance(LocalDateTime.now());
-        employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
+            newShift.setShiftEntrance(LocalDateTime.now(ZoneId.of(timezone)));
+        var employee =employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no employee with phone number: " + newShift.getEmployee().getPhoneNumber()));
+        newShift.setEmployee(employee);
         return shiftRepository.save(newShift);
     }
 
@@ -38,7 +43,7 @@ public class ShiftService {
         var shiftFound = shiftRepository.findById(shift.getShiftID())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found"));
         if (shiftFound.getShiftExit() == null)
-            shiftFound.setShiftExit(LocalDateTime.now());
+            shiftFound.setShiftExit(LocalDateTime.now(ZoneId.of(timezone)));
         return shiftRepository.save(shiftFound);
     }
 

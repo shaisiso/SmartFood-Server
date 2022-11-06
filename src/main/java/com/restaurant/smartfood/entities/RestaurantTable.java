@@ -2,6 +2,8 @@ package com.restaurant.smartfood.entities;
 
 import com.sun.istack.NotNull;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -13,6 +15,7 @@ import javax.validation.constraints.Min;
 @NoArgsConstructor
 @Entity
 @Table(name = "restaurant_tables")
+@OnDelete(action = OnDeleteAction.CASCADE)
 public class RestaurantTable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tables_seq")

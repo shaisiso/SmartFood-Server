@@ -2,6 +2,7 @@ package com.restaurant.smartfood.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 
 import javax.persistence.*;
@@ -27,7 +28,8 @@ public class TableReservation {
     @SequenceGenerator(name = "reservation_seq")
     private Long reservationId;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false,cascade ={ CascadeType.MERGE,CascadeType.REMOVE} )
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private RestaurantTable table;
 
     @NotNull
@@ -53,5 +55,7 @@ public class TableReservation {
     @JoinColumn(name = "phone_number",nullable = false)
     @NotNull
     @Valid
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
+
     private Customer customer;
 }

@@ -33,7 +33,7 @@ public class DBInit implements CommandLineRunner {
     public void run(String... args) throws Exception {
         addItemsToMenu();
         createTables();
-        addTableReservation();
+        //    addTableReservation();
         addEmployee();
     }
 
@@ -304,7 +304,7 @@ public class DBInit implements CommandLineRunner {
                 .date(LocalDate.now())
                 .customer(customerRepository.save(c))
                 .numberOfDiners(4)
-        .build();
+                .build();
         tableReservationRepository.saveAll(Arrays.asList(t));
     }
 }

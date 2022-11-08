@@ -13,6 +13,19 @@ public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
+    public Person savePerson(Person newPerson) {
+        personRepository.findByPhoneNumber(newPerson.getPhoneNumber()).ifPresentOrElse(
+                personFromDB->{
+                    if (newPerson.getEmail()!=null && !newPerson.getEmail().equals(personFromDB.getEmail())) // email updated
+                        validateEmail(newPerson);
+                    newPerson.setId(personFromDB.getId());
+                },
+                ()->{
+                    validateFields(newPerson);
+                }
+        );
+        return personRepository.save(newPerson);
+    }
     public Person getPersonByPhone(String phoneNumber) {
         return personRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"There is no person with phone number: "+phoneNumber));

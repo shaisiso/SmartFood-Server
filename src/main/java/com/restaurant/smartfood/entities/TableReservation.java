@@ -53,5 +53,5 @@ public class TableReservation {
     @JoinColumn(name = "phone_number",nullable = false)
     @NotNull
     @Valid
-    private Customer customer;
+    private Person person;
 }

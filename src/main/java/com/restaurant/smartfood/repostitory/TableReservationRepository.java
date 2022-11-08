@@ -15,5 +15,5 @@ public interface TableReservationRepository extends JpaRepository<TableReservati
 
     List<TableReservation> findByDateIsBetween(LocalDate startDate, LocalDate endDate);
 
-    List<TableReservation> findByCustomerPhoneNumber(String phoneNumber);
+    List<TableReservation> findByPersonPhoneNumber(String phoneNumber);
 }

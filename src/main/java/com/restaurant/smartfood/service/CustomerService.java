@@ -22,6 +22,8 @@ public class CustomerService {
 
     //TODO: finish add Reservation(failed with postman)
     public Customer saveCustomer(Customer newCustomer) {
+        if (newCustomer.getEmail()!=null && newCustomer.getEmail().isEmpty()) // email from UI is empty if no email was written
+            newCustomer.setEmail(null);
         customerRepository.findByPhoneNumber(newCustomer.getPhoneNumber()).ifPresentOrElse(
                 customerFromDB->{
                     if (newCustomer.getEmail()!=null && !newCustomer.getEmail().equals(customerFromDB.getEmail())) // email updated

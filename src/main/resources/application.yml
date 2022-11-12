@@ -21,7 +21,7 @@ spring:
     password: Aa123456
   jpa:
     hibernate:
-      ddl-auto:  create-drop #update
+      ddl-auto: create-drop  #  update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect

@@ -52,10 +52,9 @@ public class TableReservation {
     private String additionalDetails;
 
     @ManyToOne(optional = false,cascade ={ CascadeType.MERGE,CascadeType.REMOVE})
-    @JoinColumn(name = "phone_number",nullable = false)
+    @JoinColumn(name = "person_id",nullable = false)
     @NotNull
     @Valid
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
-
     private Customer customer;
 }

@@ -1,8 +1,10 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Customer;
+import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.repostitory.CustomerRepository;
+import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,14 @@ public class TableReservationService {
     @Autowired
     private CustomerService customerService;
 
+    @Autowired
+    private RestaurantTableRepository restaurantTableRepository;
+
     public TableReservation saveTableReservation(TableReservation reservation) {
         //if (reservation.getCustomer().getEmail().isEmpty())
         //    reservation.getCustomer().setEmail(null);
         customerService.saveCustomer(reservation.getCustomer());
+        reservation.setTable(restaurantTableRepository.findById(10).get());
         return tableReservationRepository.save(reservation);
         //TODO: check hours availability
     }

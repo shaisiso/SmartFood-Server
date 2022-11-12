@@ -23,13 +23,9 @@ public class DBInit implements CommandLineRunner {
     @Autowired
     private TableReservationRepository tableReservationRepository;
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
     @Override
     public void run(String... args) throws Exception {
         tableReservationRepository.deleteAll();
-        customerRepository.deleteAll();
         employeeRepository.deleteAll();
         personRepository.deleteAll();
         itemRepository.deleteAll();
@@ -287,7 +283,8 @@ public class DBInit implements CommandLineRunner {
     }
 
     private void addTableReservation() {
-        var c = Customer.builder()
+        tableReservationRepository.deleteAll();
+        var p = Person.builder()
                 .name("Avi Ben-Shabat")
                 .phoneNumber("0523535353")
                 .address(Address.builder()
@@ -300,7 +297,7 @@ public class DBInit implements CommandLineRunner {
                 table(restaurantTableRepository.findById(10).get())
                 .hour(LocalTime.now())
                 .date(LocalDate.now())
-                .customer(customerRepository.save(c))
+                .person(personRepository.save(p))
                 .numberOfDiners(4)
                 .build();
         tableReservationRepository.saveAll(Arrays.asList(t));

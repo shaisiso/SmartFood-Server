@@ -1,9 +1,7 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.Customer;
-import com.restaurant.smartfood.entities.RestaurantTable;
+
 import com.restaurant.smartfood.entities.TableReservation;
-import com.restaurant.smartfood.repostitory.CustomerRepository;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -24,16 +21,14 @@ public class TableReservationService {
     private TableReservationRepository tableReservationRepository;
 
     @Autowired
-    private CustomerService customerService;
+    private PersonService personService;
 
-    @Autowired
-    private RestaurantTableRepository restaurantTableRepository;
+
 
     public TableReservation saveTableReservation(TableReservation reservation) {
         //if (reservation.getCustomer().getEmail().isEmpty())
         //    reservation.getCustomer().setEmail(null);
-        customerService.saveCustomer(reservation.getCustomer());
-        reservation.setTable(restaurantTableRepository.findById(10).get());
+        personService.savePerson(reservation.getPerson());
         return tableReservationRepository.save(reservation);
         //TODO: check hours availability
     }
@@ -56,7 +51,7 @@ public class TableReservationService {
     }
 
     public List<TableReservation> getTableReservationsByCustomer(String phoneNumber) {
-        return tableReservationRepository.findByCustomerPhoneNumber(phoneNumber);
+        return tableReservationRepository.findByPersonPhoneNumber(phoneNumber);
     }
 
     public List<TableReservation> findAll() {

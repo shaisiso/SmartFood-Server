@@ -1,9 +1,6 @@
 package com.restaurant.smartfood.controller;
 
-import com.restaurant.smartfood.entities.Customer;
 import com.restaurant.smartfood.entities.TableReservation;
-import com.restaurant.smartfood.repostitory.PersonRepository;
-import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import com.restaurant.smartfood.service.TableReservationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -56,5 +56,5 @@ public class TableReservation {
     @NotNull
     @Valid
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
-    private Customer customer;
+    private Person person;
 }

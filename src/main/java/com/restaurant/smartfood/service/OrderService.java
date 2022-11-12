@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -27,18 +28,26 @@ public class OrderService {
     @Autowired
     private ItemInOrderService itemInOrderService;
 
-    @Value("${timeZone.name}")
-    private String timeZone;
+    @Value("${timezone.name}")
+    private String timezone;
 
-    public List<Order> getAllOrders() { // TODO: order get all prints infinity
+    public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
     public Order addOrder(Order order) {
-        order.setDate(LocalDate.now(ZoneId.of(timeZone)));
-        order.setHour(LocalTime.now(ZoneId.of(timeZone)));
+        order.setDate(LocalDate.now(ZoneId.of(timezone)));
+        order.setHour(LocalTime.now(ZoneId.of(timezone)));
         order.setStatus(OrderStatus.ACCEPTED);
-        return orderRepository.save(order);
+        order.setAlreadyPaid((float)0);
+        order.setTotalPrice((float)0);
+        var orderInDB = orderRepository.save(order);
+        orderInDB.getItems().forEach(i ->{
+            i.setOrder(orderInDB);
+            itemInOrderService.save(i);
+        });
+        orderInDB.setTotalPrice(calculateTotalPrice(orderInDB));
+       return orderRepository.save(orderInDB);
     }
 
     public Order addItemToOrder(Long orderId, ItemInOrder item) {
@@ -48,10 +57,9 @@ public class OrderService {
         order.getItems().add(item);
         return orderRepository.save(order);
     }
-    private Order totalPriceCalculation(Order order) {
-        for (var item: order.getItems())
-            order.setTotalPrice(order.getTotalPrice() + item.getPrice());
-        return order;
+    private float calculateTotalPrice(Order order) {
+       return order.getItems().stream().map(i->i.getPrice())
+                .reduce((float)0,Float::sum);
     }
     public Order payment(Long orderId, Float amount) {
         var order = getOrder(orderId);

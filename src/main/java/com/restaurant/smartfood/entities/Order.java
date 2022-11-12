@@ -1,8 +1,12 @@
 package com.restaurant.smartfood.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Polymorphism;
 import org.hibernate.annotations.PolymorphismType;
 
@@ -26,6 +30,7 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Polymorphism(type = PolymorphismType.EXPLICIT)
 @Table(name = "orders")
+@JsonIdentityInfo(property = "id",generator = ObjectIdGenerators.PropertyGenerator.class)
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_seq")
@@ -33,34 +38,28 @@ public class Order {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
     @Column(nullable = false)
     @FutureOrPresent
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate date;
 
-    @NotNull
     @Column(nullable = false)
     @JsonFormat(pattern = "HH:mm")
     private LocalTime hour;
 
-    @OneToMany
-    //@NotNull TODO: maybe uncomment
-    // @Column(nullable = false) TODO: maybe uncomment
+    @OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
     private List<ItemInOrder> items;
 
     private String orderComment;
 
-    @NotNull
     @Column(nullable = false)
-    @DecimalMin(value = "0",inclusive = false)
+    @DecimalMin(value = "0", inclusive = false)
     private Float totalPrice;
 
     @Column(nullable = false)
     @DecimalMin(value = "0")
     private Float alreadyPaid;
 
-    @NotNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

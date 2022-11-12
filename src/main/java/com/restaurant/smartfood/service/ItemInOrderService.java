@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 public class ItemInOrderService {
     @Autowired
     private ItemInOrderRepository itemInOrderRepository;
-    public ItemInOrder save(ItemInOrder item) {
-        return itemInOrderRepository.save(item);
+    public ItemInOrder save(ItemInOrder itemInOrder) {
+        itemInOrder.setPrice(itemInOrder.getItem().getPrice());
+        return itemInOrderRepository.save(itemInOrder);
     }
 }

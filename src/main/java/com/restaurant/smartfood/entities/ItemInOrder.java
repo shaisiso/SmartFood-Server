@@ -1,5 +1,8 @@
 package com.restaurant.smartfood.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,6 +18,7 @@ import javax.validation.constraints.NotNull;
 @ToString
 @Entity
 @Table(name = "items_in_orders")
+@JsonIdentityInfo(property = "id",generator = ObjectIdGenerators.PropertyGenerator.class)
 public class ItemInOrder {
 
     @Id
@@ -32,7 +36,6 @@ public class ItemInOrder {
 
     private String itemComment;
 
-    @NotNull
     @Column(nullable = false)
     @DecimalMin(value = "0")
     private Float price;

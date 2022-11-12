@@ -29,6 +29,9 @@ public class ShiftService {
     @Value("${timezone.name}")
     private String timezone;
 
+    @Value("${timeZone.name}")
+    private String timeZone;
+
     public Shift saveShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)
             newShift.setShiftEntrance(LocalDateTime.now(ZoneId.of(timezone)));

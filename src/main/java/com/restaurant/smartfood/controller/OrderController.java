@@ -5,13 +5,10 @@ import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.service.OrderService;
-import com.restaurant.smartfood.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @CrossOrigin
@@ -84,11 +81,16 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
-    @GetMapping("/date/{startDate}/{endDate}/{startTime}/{endTime}")
-    public List<Order> getOrderByDates(@PathVariable("startDate") LocalDate startDate,
-                                       @PathVariable("endDate") LocalDate endDate,
-                                       @PathVariable(required = false, name = "startTime") LocalTime startTime,
-                                       @PathVariable(required = false, name = "endTime") LocalTime endTime) {
-        return orderService.getOrderByDates(startDate, endDate, startTime, endTime);
+    @GetMapping("/datetime/{startDate}/{endDate}/{startTime}/{endTime}")
+    public List<Order> getOrdersByDatesAndHours(@PathVariable("startDate") String startDate,
+                                        @PathVariable("endDate") String endDate,
+                                        @PathVariable( "startTime") String startTime,
+                                        @PathVariable("endTime") String endTime) {
+        return orderService.getOrdersByDatesAndHours(startDate, endDate, startTime, endTime);
+    }
+    @GetMapping("/date/{startDate}/{endDate}")
+    public List<Order> getOrdersByDatesAndHours(@PathVariable("startDate") String startDate,
+                                                @PathVariable("endDate") String endDate) {
+        return orderService.getOrdersByDates(startDate, endDate);
     }
 }

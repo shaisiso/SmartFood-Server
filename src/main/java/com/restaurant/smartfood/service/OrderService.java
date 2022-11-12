@@ -5,6 +5,7 @@ import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.repostitory.OrderRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -15,11 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
+@Slf4j
 public class OrderService {
 
     @Autowired
@@ -66,7 +68,11 @@ public class OrderService {
 
     public Order payment(Long orderId, Float amount) {
         var order = getOrder(orderId);
+        if (order.getTotalPrice() < amount + order.getAlreadyPaid())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't pay more then the remaining amount.");
         order.setAlreadyPaid(order.getAlreadyPaid() + amount);
+        if (order.getAlreadyPaid().equals(order.getTotalPrice()))
+            order.setStatus(OrderStatus.CLOSED);
         return orderRepository.save(order);
     }
 
@@ -90,7 +96,7 @@ public class OrderService {
         if (percent < 0 || percent > 100)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "discount percent invalid.");
-        order.setTotalPrice(order.getTotalPrice() * ((100 - percent) /(float) 100));
+        order.setTotalPrice(order.getTotalPrice() * ((100 - percent) / (float) 100));
         return orderRepository.save(order);
 
     }
@@ -107,12 +113,17 @@ public class OrderService {
                         "There is no order with the id: " + orderId));
     }
 
-    public List<Order> getOrderByDates(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
-        if (startTime == null) {
-            startTime = LocalTime.of(0, 0);
-            endTime = LocalTime.of(23, 59);
+    public List<Order> getOrdersByDatesAndHours(String startDateStr, String endDateStr, String startTimeStr, String endTimeStr) {
+        try {
+            LocalDate startDate = LocalDate.parse(startDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate endDate = LocalDate.parse(endDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalTime startTime = LocalTime.parse(startTimeStr, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime endTime = LocalTime.parse(endTimeStr, DateTimeFormatter.ofPattern("HH:mm"));
+            return orderRepository.findByDateIsBetweenAndHourIsBetween(startDate, endDate, startTime, endTime);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
-        return orderRepository.findByDateIsBetweenAndHourIsBetween(startDate, endDate, startTime, endTime);
     }
 
     public Order updateStatus(Long orderId, OrderStatus status) {
@@ -123,5 +134,9 @@ public class OrderService {
 
     public void deleteOrder(Long orderId) {
         orderRepository.delete(getOrder(orderId));
+    }
+
+    public List<Order> getOrdersByDates(String startDate, String endDate) {
+       return getOrdersByDatesAndHours(startDate,endDate,"00:00","23:59");
     }
 }

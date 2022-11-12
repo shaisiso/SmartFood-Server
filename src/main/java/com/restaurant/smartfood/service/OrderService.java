@@ -120,4 +120,8 @@ public class OrderService {
         order.setStatus(status);
         return orderRepository.save(order);
     }
+
+    public void deleteOrder(Long orderId) {
+        orderRepository.delete(getOrder(orderId));
+    }
 }

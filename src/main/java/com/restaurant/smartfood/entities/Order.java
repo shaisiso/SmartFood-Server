@@ -47,7 +47,7 @@ public class Order {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime hour;
 
-    @OneToMany(mappedBy = "order",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order",fetch = FetchType.LAZY, cascade = {CascadeType.MERGE,CascadeType.REMOVE})
     private List<ItemInOrder> items;
 
     private String orderComment;

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @Service
@@ -21,19 +22,19 @@ public class DBInit implements CommandLineRunner {
     @Autowired
     private EmployeeRepository employeeRepository;
     @Autowired
-    private EmployeeIDRepository employeeIDRepository;
-
+    private ItemInOrderRepository itemInOrderRepository;
     @Autowired
     private TableReservationRepository tableReservationRepository;
-
+    @Autowired
+    private OrderRepository orderRepository;
     @Override
     public void run(String... args) throws Exception {
         addItemsToMenu();
         createTables();
         addTableReservation();
         addEmployee();
+        addOrder();
     }
-
     private void addItemsToMenu() {
         itemRepository.deleteAll();
 
@@ -303,5 +304,26 @@ public class DBInit implements CommandLineRunner {
                 .numberOfDiners(4)
         .build();
         tableReservationRepository.saveAll(Arrays.asList(t));
+    }
+    private void addOrder() {
+        orderRepository.deleteAll();
+        var o = Order.builder()
+                .date(LocalDate.now())
+                .hour(LocalTime.now())
+                .totalPrice(itemRepository.findById((long)1).get().getPrice())
+                .status(OrderStatus.ACCEPTED)
+                .alreadyPaid((float)0)
+                .build();
+        var newOrder = orderRepository.save(o);
+
+        var i = ItemInOrder.builder()
+                .order(newOrder)
+                .item(itemRepository.findById((long)1).get())
+                .price(itemRepository.findById((long)1).get().getPrice())
+                .build();
+        itemInOrderRepository.save(i);
+        newOrder.setItems(Arrays.asList(i));
+        orderRepository.save(newOrder);
+
     }
 }

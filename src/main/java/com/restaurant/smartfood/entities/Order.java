@@ -11,7 +11,9 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @SuperBuilder
@@ -34,12 +36,17 @@ public class Order {
     @NotNull
     @Column(nullable = false)
     @FutureOrPresent
-    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
-    private LocalDateTime date;
+    @JsonFormat(pattern="dd-MM-yyyy")
+    private LocalDate date;
 
-    @OneToMany
     @NotNull
     @Column(nullable = false)
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime hour;
+
+    @OneToMany
+    //@NotNull TODO: maybe uncomment
+    // @Column(nullable = false) TODO: maybe uncomment
     private List<ItemInOrder> items;
 
     private String orderComment;

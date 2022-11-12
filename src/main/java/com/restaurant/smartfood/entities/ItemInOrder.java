@@ -22,10 +22,7 @@ public class ItemInOrder {
     @SequenceGenerator(name = "items_in_orders_seq")
     private Long id;
 
-
     @ManyToOne(optional = false)
-    @NotNull
-    @JoinColumn(nullable = false)
     private Order order;
 
     @ManyToOne(optional = false)
@@ -34,11 +31,6 @@ public class ItemInOrder {
     private MenuItem item;
 
     private String itemComment;
-
-    @NotNull
-    @Column(nullable = false)
-    @Min(1)
-    private Integer quantity;
 
     @NotNull
     @Column(nullable = false)

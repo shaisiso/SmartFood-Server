@@ -55,6 +55,7 @@ public class OrderService {
         item.setOrder(order);
         itemInOrderService.save(item);
         order.getItems().add(item);
+        order.setTotalPrice(calculateTotalPrice(order));
         return orderRepository.save(order);
     }
     private float calculateTotalPrice(Order order) {

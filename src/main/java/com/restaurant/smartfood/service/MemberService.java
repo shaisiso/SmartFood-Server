@@ -36,7 +36,7 @@ public class MemberService {
         return member;
     }
 
-    public Member addMember(Member member) { //TODO: add member that already person fails
+    public Member addMember(Member member) {
         personRepository.findByPhoneNumber(member.getPhoneNumber()).ifPresentOrElse(
                 personFromDB -> {
                     // person is existed in DB

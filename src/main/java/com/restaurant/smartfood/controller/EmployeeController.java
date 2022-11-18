@@ -2,11 +2,9 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.service.EmployeeService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Path;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -19,7 +17,7 @@ public class EmployeeController {
 
     @PostMapping
     public Employee addEmployee(@Valid @RequestBody Employee newEmployee) {
-        return employeeService.saveEmployee(newEmployee);
+        return employeeService.addEmployee(newEmployee);
     }
 
     @GetMapping("/phone/{phoneNumber}")

@@ -1,6 +1,5 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.Person;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,21 @@ public class PersonService {
                 }
         );
         return personRepository.save(newPerson);
+    }
+    public Person updatePerson(Person person){
+        personRepository.findById(person.getId()).ifPresentOrElse(
+                personFromDB->{
+                    if (person.getEmail()!=null && !person.getEmail().equals(personFromDB.getEmail())) // email updated
+                        validateEmail(person);
+                    if (!person.getPhoneNumber().equals(personFromDB.getPhoneNumber()))
+                        validatePhoneNumber(person);
+                    personRepository.save(person);
+                },
+                ()->{
+                   throw  new ResponseStatusException(HttpStatus.NOT_FOUND,"There is no one with id : "+person.getId());
+                }
+        );
+        return person;
     }
     public Person getPersonByPhone(String phoneNumber) {
         return personRepository.findByPhoneNumber(phoneNumber)

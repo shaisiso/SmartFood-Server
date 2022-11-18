@@ -2,7 +2,6 @@ package com.restaurant.smartfood.service;
 
 
 import com.restaurant.smartfood.entities.TableReservation;
-import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

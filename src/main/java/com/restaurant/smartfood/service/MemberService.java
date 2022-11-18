@@ -1,13 +1,10 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Member;
-import com.restaurant.smartfood.entities.Person;
 import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +23,20 @@ public class MemberService {
     @Autowired
     private PersonRepository personRepository;
 
-    public Member saveMember(Member member) { //TODO: add member that already person fails
+    public Member updateMember(Member member) {
+        memberRepository.findById(member.getId()).ifPresentOrElse(
+                memberDB -> {
+                    personService.updatePerson(member);
+                    memberRepository.updateMember(member.getId(), member.getPassword());
+                },
+                () -> {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + member.getId());
+                }
+        );
+        return member;
+    }
+
+    public Member addMember(Member member) { //TODO: add member that already person fails
         personRepository.findByPhoneNumber(member.getPhoneNumber()).ifPresentOrElse(
                 personFromDB -> {
                     // person is existed in DB

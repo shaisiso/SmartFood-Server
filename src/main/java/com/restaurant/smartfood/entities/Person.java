@@ -36,7 +36,6 @@ public class Person {
     @NotBlank
     private String name;
 
-
     @Column(unique = true)
     @Email
     private String email;

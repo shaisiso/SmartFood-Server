@@ -1,11 +1,8 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Member;
-import com.restaurant.smartfood.entities.Person;
 import com.restaurant.smartfood.service.MemberService;
-import com.restaurant.smartfood.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,12 +17,12 @@ public class MemberController {
 
     @PostMapping
     public Member addMember(@RequestBody @Valid Member newMember) {
-        return memberService.saveMember(newMember);
+        return memberService.addMember(newMember);
     }
 
     @PutMapping
     public Member updateMember(@RequestBody @Valid Member member) {
-        return memberService.saveMember(member);
+        return memberService.updateMember(member);
     }
 
     @GetMapping("/{phone}")

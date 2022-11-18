@@ -22,17 +22,17 @@ import javax.validation.constraints.Pattern;
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "person_seq")
-    @SequenceGenerator(name = "person_seq",allocationSize = 1,initialValue = 1000)
+    @SequenceGenerator(name = "person_seq", allocationSize = 1, initialValue = 1000)
     @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(nullable = false, length = 10, unique = true)
-    @Pattern(regexp = "^[0][5][0-9]{8}",message = "Phone number must be 10 consecutive digits in format: 05xxxxxxxxx")
+    @Pattern(regexp = "^[0][5][0-9]{8}", message = "Phone number must be 10 consecutive digits in format: 05xxxxxxxxx")
     @NotBlank
     private String phoneNumber;
 
-    @Column(nullable = false, length=20)
-    @Pattern(regexp = "^[a-zA-Z\\s-]{2,}",message = "Name must have at least 2 letters and contain only letters in english.")
+    @Column(nullable = false, length = 20)
+    @Pattern(regexp = "^[a-zA-Z\\s-]{2,}", message = "Name must have at least 2 letters and contain only letters in english.")
     @NotBlank
     private String name;
 
@@ -43,4 +43,15 @@ public class Person {
 
     @Embedded
     private Address address;
+
+    public static Person personOfMember(Member member) {
+        Person person = Person.builder()
+                .address(member.getAddress())
+                .email(member.getEmail())
+                .id(member.getId())
+                .name(member.getName())
+                .phoneNumber(member.getPhoneNumber())
+                .build();
+        return person;
+    }
 }

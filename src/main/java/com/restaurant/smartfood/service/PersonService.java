@@ -32,7 +32,7 @@ public class PersonService {
     }
     public void deletePerson(Person person){
         personRepository.delete(person);
-    }
+    } //TODO: maybe not needed
     public void validatePhoneNumber(Person person) {
         personRepository.findByPhoneNumber(person.getPhoneNumber())
                 .ifPresent(p -> {

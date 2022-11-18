@@ -4,7 +4,9 @@ import com.restaurant.smartfood.entities.ItemInOrder;
 import com.restaurant.smartfood.repostitory.ItemInOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 public class ItemInOrderService {
     @Autowired

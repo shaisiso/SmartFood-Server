@@ -53,7 +53,7 @@ public class OrderController {
         return orderService.applyDiscount(orderId, percent);
     }
 
-    @PutMapping("/price/member/{orderId}")
+    @PutMapping("/price/member/{orderId}") //TODO: check if member and check in postman
     public Order applyMemberDiscount(@PathVariable("orderId") Long orderId,
                                      @RequestBody Member member) {
         return orderService.applyMemberDiscount(orderId, member);
@@ -89,7 +89,7 @@ public class OrderController {
         return orderService.getOrdersByDatesAndHours(startDate, endDate, startTime, endTime);
     }
     @GetMapping("/date/{startDate}/{endDate}")
-    public List<Order> getOrdersByDatesAndHours(@PathVariable("startDate") String startDate,
+    public List<Order> getOrdersByDates(@PathVariable("startDate") String startDate,
                                                 @PathVariable("endDate") String endDate) {
         return orderService.getOrdersByDates(startDate, endDate);
     }

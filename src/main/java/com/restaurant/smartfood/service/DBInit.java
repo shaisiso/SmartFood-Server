@@ -27,6 +27,9 @@ public class DBInit implements CommandLineRunner {
     private TableReservationRepository tableReservationRepository;
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
     @Override
     public void run(String... args) throws Exception {
         tableReservationRepository.deleteAll();
@@ -40,6 +43,7 @@ public class DBInit implements CommandLineRunner {
         addTableReservation();
         addEmployee();
         addOrder();
+        addMember();
     }
     private void addItemsToMenu() {
         MenuItem carpaccio = MenuItem.builder()
@@ -288,9 +292,22 @@ public class DBInit implements CommandLineRunner {
 
     private void addTableReservation() {
         tableReservationRepository.deleteAll();
+
+        var p2 = Person.builder()
+                .name("Cristiano Ronaldo")
+                .phoneNumber("0577777777")
+                .address(Address.builder()
+                        .city("Portugal")
+                        .houseNumber(7)
+                        .streetName("Midiera")
+                        .build())
+                .build();
+        personRepository.save(p2);
+
         var p = Person.builder()
                 .name("Avi Ben-Shabat")
                 .phoneNumber("0523535353")
+                .email("aviBen@gmail.com")
                 .address(Address.builder()
                         .city("Haifa")
                         .houseNumber(2)
@@ -325,6 +342,20 @@ public class DBInit implements CommandLineRunner {
         itemInOrderRepository.save(i);
         newOrder.setItems(Arrays.asList(i));
         orderRepository.save(newOrder);
+    }
 
+    private void addMember() {
+        Member member = Member.builder()
+                .name("Frank Lampard")
+                .email("Franky@gmail.com")
+                .address(Address.builder()
+                        .city("London")
+                        .streetName("Stamford")
+                        .houseNumber(8)
+                        .build())
+                .phoneNumber("0521234567")
+                .password("123456")
+                .build();
+        memberRepository.saveAll(Arrays.asList(member));
     }
 }

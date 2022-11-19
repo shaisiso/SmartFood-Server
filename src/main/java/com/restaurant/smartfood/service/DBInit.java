@@ -27,9 +27,10 @@ public class DBInit implements CommandLineRunner {
     private TableReservationRepository tableReservationRepository;
     @Autowired
     private OrderRepository orderRepository;
-
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private DeliveryRepository deliveryRepository;
 
     @Autowired
     private WaitingListRepository waitingListRepository;
@@ -48,7 +49,9 @@ public class DBInit implements CommandLineRunner {
         addOrder();
         addMember();
         addWaitingList();
+        addDelivery();
     }
+
     private void addItemsToMenu() {
         MenuItem carpaccio = MenuItem.builder()
                 .name("Beef Carpaccio")
@@ -289,7 +292,7 @@ public class DBInit implements CommandLineRunner {
                         .build())
                 .phoneNumber("0588888881")
                 .password("123456")
-                .role(EmployeeRole.BAR)
+                .role(EmployeeRole.DELIVERY_GUY)
                 .build();
         employeeRepository.saveAll(Arrays.asList(employee1));
     }
@@ -370,5 +373,28 @@ public class DBInit implements CommandLineRunner {
                 .member(memberRepository.findById((long)1003).get())
                 .build();
         waitingListRepository.save(w);
+    }
+
+    private void addDelivery() {
+        Delivery d = Delivery.builder()
+                .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
+                .hour(LocalTime.now())
+                .personDetails(personRepository.findByPhoneNumber("0521234567").get())
+                .date(LocalDate.now())
+                .totalPrice(itemRepository.findById((long)1).get().getPrice())
+                .status(OrderStatus.ACCEPTED)
+                .alreadyPaid((float)0)
+                .build();
+        var newDelivery = deliveryRepository.save(d);
+
+        var i = ItemInOrder.builder()
+                .order(newDelivery)
+                .item(itemRepository.findById((long)1).get())
+                .price(itemRepository.findById((long)1).get().getPrice())
+                .build();
+        itemInOrderRepository.save(i);
+        newDelivery.setItems(Arrays.asList(i));
+
+        deliveryRepository.save(newDelivery);
     }
 }

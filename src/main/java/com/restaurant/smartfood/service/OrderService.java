@@ -61,7 +61,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    private float calculateTotalPrice(Order order) {
+    public float calculateTotalPrice(Order order) {
         return order.getItems().stream().map(i -> i.getPrice())
                 .reduce((float) 0, Float::sum);
     }

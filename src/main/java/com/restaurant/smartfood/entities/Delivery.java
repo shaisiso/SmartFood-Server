@@ -21,8 +21,6 @@ public class Delivery extends Order {
     @JoinColumn(nullable = false)
     private Employee deliveryGuy;
 
-    private String comment;
-
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
     private Person personDetails;

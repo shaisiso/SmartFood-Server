@@ -30,6 +30,9 @@ public class DBInit implements CommandLineRunner {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private WaitingListRepository waitingListRepository;
     @Override
     public void run(String... args) throws Exception {
         tableReservationRepository.deleteAll();
@@ -44,6 +47,7 @@ public class DBInit implements CommandLineRunner {
         addEmployee();
         addOrder();
         addMember();
+        addWaitingList();
     }
     private void addItemsToMenu() {
         MenuItem carpaccio = MenuItem.builder()
@@ -357,5 +361,14 @@ public class DBInit implements CommandLineRunner {
                 .password("123456")
                 .build();
         memberRepository.saveAll(Arrays.asList(member));
+    }
+    private void addWaitingList() {
+        WaitingList w = WaitingList.builder()
+                .date(LocalDate.of(2022,11,20))
+                .numberOfDiners(4)
+                .time(LocalTime.of(20,00))
+                .member(memberRepository.findById((long)1003).get())
+                .build();
+        waitingListRepository.save(w);
     }
 }

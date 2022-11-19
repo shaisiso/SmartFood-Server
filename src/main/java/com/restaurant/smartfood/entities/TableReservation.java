@@ -7,10 +7,7 @@ import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import javax.validation.Valid;
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -46,6 +43,7 @@ public class TableReservation {
     @NotNull
     @Column(nullable = false)
     @Min(1)
+    @Max(value=15, message = "For more that 15 people, call us")
     private Integer numberOfDiners;
 
     @Size(max = 255)

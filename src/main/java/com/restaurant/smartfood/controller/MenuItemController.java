@@ -33,9 +33,9 @@ public class MenuItemController {
         return menuItemService.updateItem(updatedItem);
     }
 
-    @DeleteMapping
-    public void deleteItem(@RequestBody MenuItem item) {
-        menuItemService.deleteMenuItem(item);
+    @DeleteMapping("/{itemId}")
+    public void deleteItem(@PathVariable("itemId") Long itemId) {
+        menuItemService.deleteMenuItem(itemId);
     }
 
     @GetMapping("/categories")

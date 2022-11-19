@@ -5,6 +5,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.*;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -13,6 +16,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "menu_items")
+@OnDelete(action = OnDeleteAction.CASCADE)
 public class MenuItem {
 
     @Id

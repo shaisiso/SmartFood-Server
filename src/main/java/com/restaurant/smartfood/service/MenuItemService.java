@@ -30,7 +30,7 @@ public class MenuItemService {
 
     public MenuItem findItemById(Long id) throws ResponseStatusException {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id was not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item with item id" + id));
     }
 
     public List<MenuItem> getMenu() {
@@ -56,15 +56,9 @@ public class MenuItemService {
         return itemRepository.save(updatedItem);
     }
 
-    public void deleteMenuItem(MenuItem item) {
-        itemRepository.findById(item.getItemId())
-                .ifPresentOrElse(i -> {
-                            itemRepository.delete(item);
-                        },
-                        () -> {
-                            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "There is no item with item id: " + item.getItemId());
-                        });
+    public void deleteMenuItem(Long itemId) {
+        var item = findItemById(itemId);
+        itemRepository.delete(item);
     }
 
     public MenuItem getItemByName(String name) {

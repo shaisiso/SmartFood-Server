@@ -15,7 +15,7 @@ import java.util.List;
 public class DiscountController {
 
     @Autowired
-    public DiscountService discountService;
+    private DiscountService discountService;
 
     @PostMapping
     public Discount addDiscount(@RequestBody @Valid Discount discount) {
@@ -47,5 +47,4 @@ public class DiscountController {
     public List<Discount> getTodayDiscounts() {
         return discountService.getTodayDiscounts();
     }
-
 }

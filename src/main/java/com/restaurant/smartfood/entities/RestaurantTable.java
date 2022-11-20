@@ -1,12 +1,12 @@
 package com.restaurant.smartfood.entities;
 
-import com.sun.istack.NotNull;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -27,4 +27,7 @@ public class RestaurantTable {
     @Column(nullable = false)
     @Min(1)
     private Integer numberOfSeats;
+
+    @Column(nullable = false)
+    private Boolean isBusy;
 }

@@ -21,7 +21,7 @@ import java.util.List;
 public class WaitingListService {
 
     @Autowired
-    public WaitingListRepository waitingListRepository;
+    private WaitingListRepository waitingListRepository;
 
     public WaitingList addToWaitingList(WaitingList waitingList) {
         waitingListRepository.findByMemberIdAndDateAndTime(waitingList.getMember().getId(),

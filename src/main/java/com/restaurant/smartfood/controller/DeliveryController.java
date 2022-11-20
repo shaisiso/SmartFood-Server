@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Delivery;
+import com.restaurant.smartfood.entities.OrderOfTable;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.service.DeliveryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.util.List;
 public class DeliveryController {
 
     @Autowired
-    public DeliveryService deliveryService;
+    private DeliveryService deliveryService;
 
     @PostMapping
     public Delivery addDelivery(@RequestBody @Valid Delivery newDelivery) {
@@ -50,6 +51,11 @@ public class DeliveryController {
     @GetMapping("/status/{status}")
     public List<Delivery> getDeliveriesByStatus(@PathVariable("status") OrderStatus status) {
         return deliveryService.getDeliveriesByStatus(status);
+    }
+
+    @GetMapping("/active")
+    public List<Delivery> getActiveDeliveries() {
+        return deliveryService.getActiveDeliveries();
     }
 
 }

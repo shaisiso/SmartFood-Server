@@ -37,13 +37,17 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Order addOrder(Order order) {
+    private Order initOrder(Order order) {
         order.setDate(LocalDate.now(ZoneId.of(timezone)));
         order.setHour(LocalTime.now(ZoneId.of(timezone)));
         order.setStatus(OrderStatus.ACCEPTED);
         order.setAlreadyPaid((float) 0);
         order.setTotalPrice((float) 0);
-        var orderInDB = orderRepository.save(order);
+        return order;
+    }
+    public Order addOrder(Order order) {
+        var o = initOrder(order);
+        var orderInDB = orderRepository.save(o);
         orderInDB.getItems().forEach(i -> {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);

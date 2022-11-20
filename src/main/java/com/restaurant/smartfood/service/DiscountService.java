@@ -22,7 +22,7 @@ import java.util.List;
 public class DiscountService {
 
     @Autowired
-    public DiscountRepository discountRepository;
+    private DiscountRepository discountRepository;
 
     @Value("${timezone.name}")
     private String timezone;

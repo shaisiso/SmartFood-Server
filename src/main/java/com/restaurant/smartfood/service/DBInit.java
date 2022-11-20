@@ -253,36 +253,47 @@ public class DBInit implements CommandLineRunner {
     private void createTables() {
         RestaurantTable t1 = RestaurantTable.builder()
                 .numberOfSeats(2)
+                .isBusy(false)
                 .build();
         RestaurantTable t2 = RestaurantTable.builder()
                 .numberOfSeats(2)
+                .isBusy(false)
                 .build();
         RestaurantTable t3 = RestaurantTable.builder()
                 .numberOfSeats(2)
+                .isBusy(false)
                 .build();
         RestaurantTable t4 = RestaurantTable.builder()
                 .numberOfSeats(4)
+                .isBusy(false)
                 .build();
         RestaurantTable t5 = RestaurantTable.builder()
                 .numberOfSeats(4)
+                .isBusy(false)
                 .build();
         RestaurantTable t6 = RestaurantTable.builder()
                 .numberOfSeats(6)
+                .isBusy(false)
                 .build();
         RestaurantTable t7 = RestaurantTable.builder()
                 .numberOfSeats(6)
+                .isBusy(false)
                 .build();
         RestaurantTable t8 = RestaurantTable.builder()
                 .numberOfSeats(8)
+                .isBusy(false)
                 .build();
         RestaurantTable t9 = RestaurantTable.builder()
                 .numberOfSeats(8)
+                .isBusy(false)
                 .build();
         RestaurantTable t10 = RestaurantTable.builder()
                 .numberOfSeats(20)
+                .isBusy(false)
                 .build();
         RestaurantTable t11 = RestaurantTable.builder()
                 .numberOfSeats(4)
+                .isBusy(false)
                 .build();
         restaurantTableRepository.saveAll(Arrays.asList(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11));
     }

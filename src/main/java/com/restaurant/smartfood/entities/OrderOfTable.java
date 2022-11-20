@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -19,9 +20,6 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "orders_of_table")
 public class OrderOfTable extends Order {
-
-    @NotNull
-    private Boolean isBusy;
 
     @NotNull
     @Min(1)

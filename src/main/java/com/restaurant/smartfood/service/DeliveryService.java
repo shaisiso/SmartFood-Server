@@ -21,13 +21,13 @@ import java.util.List;
 @Service
 public class DeliveryService {
     @Autowired
-    public DeliveryRepository deliveryRepository;
+    private DeliveryRepository deliveryRepository;
 
     @Autowired
-    public ItemInOrderService itemInOrderService;
+    private ItemInOrderService itemInOrderService;
 
     @Autowired
-    public OrderService orderService;
+    private OrderService orderService;
 
     @Value("${timezone.name}")
     private String timezone;
@@ -85,5 +85,9 @@ public class DeliveryService {
 
     public List<Delivery> getDeliveriesByStatus(OrderStatus status) {
         return deliveryRepository.findByStatus(status);
+    }
+
+    public List<Delivery> getActiveDeliveries() {
+        return deliveryRepository.findByStatusIsNot(OrderStatus.CLOSED);
     }
 }

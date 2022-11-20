@@ -41,7 +41,7 @@ public class DeliveryService {
         var deliveryInDB = deliveryRepository.save(newDelivery);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
-            itemInOrderService.save(i);
+            itemInOrderService.addItemToOrder(i);
         });
         deliveryInDB.setTotalPrice(orderService.calculateTotalPrice(deliveryInDB));
         return deliveryRepository.save(deliveryInDB);

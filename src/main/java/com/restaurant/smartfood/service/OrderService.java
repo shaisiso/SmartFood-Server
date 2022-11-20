@@ -46,7 +46,7 @@ public class OrderService {
         var orderInDB = orderRepository.save(order);
         orderInDB.getItems().forEach(i -> {
             i.setOrder(orderInDB);
-            itemInOrderService.save(i);
+            itemInOrderService.addItemToOrder(i);
         });
         orderInDB.setTotalPrice(calculateTotalPrice(orderInDB));
         return orderRepository.save(orderInDB);
@@ -55,7 +55,7 @@ public class OrderService {
     public Order addItemToOrder(Long orderId, ItemInOrder item) {
         var order = getOrder(orderId);
         item.setOrder(order);
-        itemInOrderService.save(item);
+        itemInOrderService.addItemToOrder(item);
         order.getItems().add(item);
         order.setTotalPrice(calculateTotalPrice(order));
         return orderRepository.save(order);
@@ -138,5 +138,14 @@ public class OrderService {
 
     public List<Order> getOrdersByDates(String startDate, String endDate) {
        return getOrdersByDatesAndHours(startDate,endDate,"00:00","23:59");
+    }
+
+    public Order updateItemInOrder(ItemInOrder item) {
+        var i = itemInOrderService.updateItemInOrder(item);
+        return getOrder(i.getOrder().getId());
+    }
+
+    public void deleteItemFromOrder(Long itemId) {
+        itemInOrderService.deleteItemFromOrder(itemId);
     }
 }

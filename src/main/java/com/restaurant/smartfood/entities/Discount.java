@@ -23,6 +23,8 @@ import java.util.Set;
 @Entity
 @Table(name = "discounts")
 public class Discount {
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "discount_seq")
+    @SequenceGenerator(name = "discount_seq")
     @Id
     @Column(name = "discount_id", nullable = false)
     private Long discountId;
@@ -48,14 +50,11 @@ public class Discount {
     @Column(nullable = false)
     private Set<DayOfWeek> days;
 
-
-    @FutureOrPresent
     @JsonFormat(pattern = "HH:mm")
     @NotNull
     @Column(nullable = false)
     private LocalTime startHour;
 
-    @FutureOrPresent
     @JsonFormat(pattern = "HH:mm")
     @NotNull
     @Column(nullable = false)
@@ -82,4 +81,6 @@ public class Discount {
     @NotNull
     @Column(nullable = false)
     private List<ItemCategory> categories;
+
+    private String discountDescription;
 }

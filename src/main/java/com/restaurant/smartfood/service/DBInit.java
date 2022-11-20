@@ -2,14 +2,18 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.*;
+import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+import java.sql.Array;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 @Service
 public class DBInit implements CommandLineRunner {
@@ -31,9 +35,10 @@ public class DBInit implements CommandLineRunner {
     private MemberRepository memberRepository;
     @Autowired
     private DeliveryRepository deliveryRepository;
-
     @Autowired
     private WaitingListRepository waitingListRepository;
+    @Autowired
+    private DiscountRepository discountRepository;
     @Override
     public void run(String... args) throws Exception {
         tableReservationRepository.deleteAll();
@@ -50,6 +55,7 @@ public class DBInit implements CommandLineRunner {
         addMember();
         addWaitingList();
         addDelivery();
+        addDiscount();
     }
 
     private void addItemsToMenu() {
@@ -330,6 +336,7 @@ public class DBInit implements CommandLineRunner {
                 .build();
         tableReservationRepository.saveAll(Arrays.asList(t));
     }
+
     private void addOrder() {
         orderRepository.deleteAll();
         var o = Order.builder()
@@ -350,7 +357,6 @@ public class DBInit implements CommandLineRunner {
         newOrder.setItems(Arrays.asList(i));
         orderRepository.save(newOrder);
     }
-
     private void addMember() {
         Member member = Member.builder()
                 .name("Frank Lampard")
@@ -365,6 +371,7 @@ public class DBInit implements CommandLineRunner {
                 .build();
         memberRepository.saveAll(Arrays.asList(member));
     }
+
     private void addWaitingList() {
         WaitingList w = WaitingList.builder()
                 .date(LocalDate.of(2022,11,20))
@@ -374,7 +381,6 @@ public class DBInit implements CommandLineRunner {
                 .build();
         waitingListRepository.save(w);
     }
-
     private void addDelivery() {
         Delivery d = Delivery.builder()
                 .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
@@ -396,5 +402,22 @@ public class DBInit implements CommandLineRunner {
         newDelivery.setItems(Arrays.asList(i));
 
         deliveryRepository.save(newDelivery);
+    }
+
+    private void addDiscount() {
+        var d = Discount.builder()
+                .startDate(LocalDate.of(2022,11,20))
+                .endDate(LocalDate.of(2022,11,30))
+                .days(new HashSet<>(Arrays.asList(DayOfWeek.SUNDAY)))
+                .categories(Arrays.asList(ItemCategory.STARTERS))
+                .startHour(LocalTime.of(13,30))
+                .endHour(LocalTime.of(22,00))
+                .forMembersOnly(false)
+                .percent(20)
+                .ifYouOrder(1)
+                .youGetDiscountFor(1)
+                .discountDescription("20% on all the STARTERS!!")
+                .build();
+        discountRepository.save(d);
     }
 }

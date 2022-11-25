@@ -6,6 +6,8 @@ import org.hibernate.annotations.Polymorphism;
 
 import javax.persistence.*;
 import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,10 +43,12 @@ public class WaitingList {
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
-    private Member customer;
+    private Member member;
 
     @NotNull
     @Column(nullable = false)
+    @Min(1)
+    @Max(value=15, message = "For more that 15 people, call us")
     private Integer numberOfDiners;
 
 }

@@ -2,14 +2,18 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.*;
+import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+import java.sql.Array;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 @Service
 public class DBInit implements CommandLineRunner {
@@ -27,9 +31,14 @@ public class DBInit implements CommandLineRunner {
     private TableReservationRepository tableReservationRepository;
     @Autowired
     private OrderRepository orderRepository;
-
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private DeliveryRepository deliveryRepository;
+    @Autowired
+    private WaitingListRepository waitingListRepository;
+    @Autowired
+    private DiscountRepository discountRepository;
     @Override
     public void run(String... args) throws Exception {
         tableReservationRepository.deleteAll();
@@ -44,7 +53,11 @@ public class DBInit implements CommandLineRunner {
         addEmployee();
         addOrder();
         addMember();
+        addWaitingList();
+        addDelivery();
+        addDiscount();
     }
+
     private void addItemsToMenu() {
         MenuItem carpaccio = MenuItem.builder()
                 .name("Beef Carpaccio")
@@ -240,36 +253,47 @@ public class DBInit implements CommandLineRunner {
     private void createTables() {
         RestaurantTable t1 = RestaurantTable.builder()
                 .numberOfSeats(2)
+                .isBusy(false)
                 .build();
         RestaurantTable t2 = RestaurantTable.builder()
                 .numberOfSeats(2)
+                .isBusy(false)
                 .build();
         RestaurantTable t3 = RestaurantTable.builder()
                 .numberOfSeats(2)
+                .isBusy(false)
                 .build();
         RestaurantTable t4 = RestaurantTable.builder()
                 .numberOfSeats(4)
+                .isBusy(false)
                 .build();
         RestaurantTable t5 = RestaurantTable.builder()
                 .numberOfSeats(4)
+                .isBusy(false)
                 .build();
         RestaurantTable t6 = RestaurantTable.builder()
                 .numberOfSeats(6)
+                .isBusy(false)
                 .build();
         RestaurantTable t7 = RestaurantTable.builder()
                 .numberOfSeats(6)
+                .isBusy(false)
                 .build();
         RestaurantTable t8 = RestaurantTable.builder()
                 .numberOfSeats(8)
+                .isBusy(false)
                 .build();
         RestaurantTable t9 = RestaurantTable.builder()
                 .numberOfSeats(8)
+                .isBusy(false)
                 .build();
         RestaurantTable t10 = RestaurantTable.builder()
                 .numberOfSeats(20)
+                .isBusy(false)
                 .build();
         RestaurantTable t11 = RestaurantTable.builder()
                 .numberOfSeats(4)
+                .isBusy(false)
                 .build();
         restaurantTableRepository.saveAll(Arrays.asList(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11));
     }
@@ -285,7 +309,7 @@ public class DBInit implements CommandLineRunner {
                         .build())
                 .phoneNumber("0588888881")
                 .password("123456")
-                .role(EmployeeRole.BAR)
+                .role(EmployeeRole.DELIVERY_GUY)
                 .build();
         employeeRepository.saveAll(Arrays.asList(employee1));
     }
@@ -323,6 +347,7 @@ public class DBInit implements CommandLineRunner {
                 .build();
         tableReservationRepository.saveAll(Arrays.asList(t));
     }
+
     private void addOrder() {
         orderRepository.deleteAll();
         var o = Order.builder()
@@ -343,7 +368,6 @@ public class DBInit implements CommandLineRunner {
         newOrder.setItems(Arrays.asList(i));
         orderRepository.save(newOrder);
     }
-
     private void addMember() {
         Member member = Member.builder()
                 .name("Frank Lampard")
@@ -357,5 +381,54 @@ public class DBInit implements CommandLineRunner {
                 .password("123456")
                 .build();
         memberRepository.saveAll(Arrays.asList(member));
+    }
+
+    private void addWaitingList() {
+        WaitingList w = WaitingList.builder()
+                .date(LocalDate.of(2022,11,20))
+                .numberOfDiners(4)
+                .time(LocalTime.of(20,00))
+                .member(memberRepository.findById((long)1003).get())
+                .build();
+        waitingListRepository.save(w);
+    }
+    private void addDelivery() {
+        Delivery d = Delivery.builder()
+                .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
+                .hour(LocalTime.now())
+                .personDetails(personRepository.findByPhoneNumber("0521234567").get())
+                .date(LocalDate.now())
+                .totalPrice(itemRepository.findById((long)1).get().getPrice())
+                .status(OrderStatus.ACCEPTED)
+                .alreadyPaid((float)0)
+                .build();
+        var newDelivery = deliveryRepository.save(d);
+
+        var i = ItemInOrder.builder()
+                .order(newDelivery)
+                .item(itemRepository.findById((long)1).get())
+                .price(itemRepository.findById((long)1).get().getPrice())
+                .build();
+        itemInOrderRepository.save(i);
+        newDelivery.setItems(Arrays.asList(i));
+
+        deliveryRepository.save(newDelivery);
+    }
+
+    private void addDiscount() {
+        var d = Discount.builder()
+                .startDate(LocalDate.of(2022,11,20))
+                .endDate(LocalDate.of(2022,11,30))
+                .days(new HashSet<>(Arrays.asList(DayOfWeek.SUNDAY)))
+                .categories(Arrays.asList(ItemCategory.STARTERS))
+                .startHour(LocalTime.of(13,30))
+                .endHour(LocalTime.of(22,00))
+                .forMembersOnly(false)
+                .percent(20)
+                .ifYouOrder(1)
+                .youGetDiscountFor(1)
+                .discountDescription("20% on all the STARTERS!!")
+                .build();
+        discountRepository.save(d);
     }
 }

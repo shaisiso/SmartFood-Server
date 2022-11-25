@@ -29,10 +29,20 @@ public class OrderController {
         orderService.deleteOrder(orderId);
     }
 
-    @PutMapping("/additem/{orderId}")
+    @PostMapping("/item/{orderId}")
     public Order addItemToOrder(@PathVariable("orderId") Long orderId,
                                 @Valid @RequestBody ItemInOrder item) {
         return orderService.addItemToOrder(orderId, item);
+    }
+
+    @PutMapping("/item")
+    public Order updateItemInOrder(@RequestBody @Valid ItemInOrder item) {
+        return orderService.updateItemInOrder(item);
+    }
+
+    @DeleteMapping("/item/{itemid}")
+    public void deleteItemFromOrder(@PathVariable("itemid") Long itemId) {
+        orderService.deleteItemFromOrder(itemId);
     }
 
     @PutMapping("/comment/{orderId}")

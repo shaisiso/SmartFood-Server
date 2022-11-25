@@ -37,16 +37,20 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Order addOrder(Order order) {
+    private Order initOrder(Order order) {
         order.setDate(LocalDate.now(ZoneId.of(timezone)));
         order.setHour(LocalTime.now(ZoneId.of(timezone)));
         order.setStatus(OrderStatus.ACCEPTED);
         order.setAlreadyPaid((float) 0);
         order.setTotalPrice((float) 0);
-        var orderInDB = orderRepository.save(order);
+        return order;
+    }
+    public Order addOrder(Order order) {
+        var o = initOrder(order);
+        var orderInDB = orderRepository.save(o);
         orderInDB.getItems().forEach(i -> {
             i.setOrder(orderInDB);
-            itemInOrderService.save(i);
+            itemInOrderService.addItemToOrder(i);
         });
         orderInDB.setTotalPrice(calculateTotalPrice(orderInDB));
         return orderRepository.save(orderInDB);
@@ -55,13 +59,13 @@ public class OrderService {
     public Order addItemToOrder(Long orderId, ItemInOrder item) {
         var order = getOrder(orderId);
         item.setOrder(order);
-        itemInOrderService.save(item);
+        itemInOrderService.addItemToOrder(item);
         order.getItems().add(item);
         order.setTotalPrice(calculateTotalPrice(order));
         return orderRepository.save(order);
     }
 
-    private float calculateTotalPrice(Order order) {
+    public float calculateTotalPrice(Order order) {
         return order.getItems().stream().map(i -> i.getPrice())
                 .reduce((float) 0, Float::sum);
     }
@@ -138,5 +142,14 @@ public class OrderService {
 
     public List<Order> getOrdersByDates(String startDate, String endDate) {
        return getOrdersByDatesAndHours(startDate,endDate,"00:00","23:59");
+    }
+
+    public Order updateItemInOrder(ItemInOrder item) {
+        var i = itemInOrderService.updateItemInOrder(item);
+        return getOrder(i.getOrder().getId());
+    }
+
+    public void deleteItemFromOrder(Long itemId) {
+        itemInOrderService.deleteItemFromOrder(itemId);
     }
 }

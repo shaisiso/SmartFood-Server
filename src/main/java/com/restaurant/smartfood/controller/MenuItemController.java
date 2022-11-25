@@ -21,8 +21,6 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MenuItemController {
     private final MenuItemService menuItemService;
-
-
     @PostMapping
     public MenuItem addItem(@Valid @RequestBody MenuItem item) {
         return menuItemService.addItem(item);

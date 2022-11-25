@@ -25,8 +25,6 @@ public class TableReservationService {
 
 
     public TableReservation saveTableReservation(TableReservation reservation) {
-        //if (reservation.getCustomer().getEmail().isEmpty())
-        //    reservation.getCustomer().setEmail(null);
         personService.savePerson(reservation.getPerson());
         return tableReservationRepository.save(reservation);
         //TODO: check hours availability

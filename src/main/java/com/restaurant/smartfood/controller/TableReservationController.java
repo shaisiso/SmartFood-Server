@@ -13,7 +13,6 @@ import java.util.List;
 @RestController()
 @CrossOrigin
 @RequestMapping("/api/reservation")
-@Slf4j
 public class TableReservationController {
 
     @Autowired

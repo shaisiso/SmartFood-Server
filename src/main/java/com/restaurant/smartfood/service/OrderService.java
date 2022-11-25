@@ -5,6 +5,7 @@ import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.repostitory.OrderRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,13 +23,12 @@ import java.util.List;
 @Service
 @Transactional
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private ItemInOrderService itemInOrderService;
+    private final OrderRepository orderRepository;
+    private final ItemInOrderService itemInOrderService;
+    private final MemberService memberService;
 
     @Value("${timezone.name}")
     private String timezone;
@@ -66,7 +66,7 @@ public class OrderService {
     }
 
     public float calculateTotalPrice(Order order) {
-        return order.getItems().stream().map(i -> i.getPrice())
+        return order.getItems().stream().map(ItemInOrder::getPrice)
                 .reduce((float) 0, Float::sum);
     }
 
@@ -107,6 +107,7 @@ public class OrderService {
 
     public Order applyMemberDiscount(Long orderId, Member member) {
         var order = getOrder(orderId);
+        memberService.getMemberByPhoneNumber(member.getPhoneNumber());
         order.setTotalPrice(order.getTotalPrice() * (float) 0.9);
         return orderRepository.save(order);
     }

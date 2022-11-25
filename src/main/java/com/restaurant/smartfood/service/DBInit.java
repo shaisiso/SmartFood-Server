@@ -2,45 +2,34 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.*;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
-import java.sql.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DBInit implements CommandLineRunner {
-    @Autowired
-    private MenuItemRepository itemRepository;
-    @Autowired
-    private RestaurantTableRepository restaurantTableRepository;
-    @Autowired
-    private PersonRepository personRepository;
-    @Autowired
-    private EmployeeRepository employeeRepository;
-    @Autowired
-    private ItemInOrderRepository itemInOrderRepository;
-    @Autowired
-    private TableReservationRepository tableReservationRepository;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private DeliveryRepository deliveryRepository;
-    @Autowired
-    private WaitingListRepository waitingListRepository;
-    @Autowired
-    private DiscountRepository discountRepository;
+
+    private final MenuItemRepository itemRepository;
+    private final RestaurantTableRepository restaurantTableRepository;
+    private final PersonRepository personRepository;
+    private final EmployeeRepository employeeRepository;
+    private final ItemInOrderRepository itemInOrderRepository;
+    private final TableReservationRepository tableReservationRepository;
+    private final OrderRepository orderRepository;
+    private final MemberRepository memberRepository;
+    private final DeliveryRepository deliveryRepository;
+    private final WaitingListRepository waitingListRepository;
+    private final DiscountRepository discountRepository;
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args)  {
         tableReservationRepository.deleteAll();
         employeeRepository.deleteAll();
         personRepository.deleteAll();
@@ -385,7 +374,7 @@ public class DBInit implements CommandLineRunner {
 
     private void addWaitingList() {
         WaitingList w = WaitingList.builder()
-                .date(LocalDate.of(2022,11,20))
+                .date(LocalDate.now())
                 .numberOfDiners(4)
                 .time(LocalTime.of(20,00))
                 .member(memberRepository.findById((long)1003).get())
@@ -417,8 +406,8 @@ public class DBInit implements CommandLineRunner {
 
     private void addDiscount() {
         var d = Discount.builder()
-                .startDate(LocalDate.of(2022,11,20))
-                .endDate(LocalDate.of(2022,11,30))
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.of(2023,11,30))
                 .days(new HashSet<>(Arrays.asList(DayOfWeek.SUNDAY)))
                 .categories(Arrays.asList(ItemCategory.STARTERS))
                 .startHour(LocalTime.of(13,30))

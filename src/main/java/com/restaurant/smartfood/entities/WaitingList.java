@@ -36,7 +36,6 @@ public class WaitingList {
 
     @NotNull
     @Column(nullable = false)
-    @FutureOrPresent
     @JsonFormat(pattern="HH:mm")
     private LocalTime time;
 

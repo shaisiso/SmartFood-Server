@@ -85,7 +85,7 @@ public class RegisteredUserPrincipalService implements UserDetailsService {
         } catch (SignatureVerificationException e) { // token was changed
             log.error("Authorization was failed. " + e.getMessage());
             log.error("Token was changed and cannot be trusted");
-
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Authorization was failed.");
         } catch (TokenExpiredException e) { // token expired
             log.error(e.toString());
             response.setHeader("Error", e.getMessage());

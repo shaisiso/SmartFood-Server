@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -49,6 +50,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }catch(SignatureVerificationException e) {
             log.error("Authorization was failed. "+e.getMessage());
             log.error("Token was changed and cannot be trusted");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization was failed.");
         }
         catch(TokenExpiredException e) {
             tokenErrorHandler(response, log, e.toString(), e.getMessage(), e);

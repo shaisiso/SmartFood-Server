@@ -101,13 +101,7 @@ public class RegisteredUserPrincipalService implements UserDetailsService {
             response.setContentType("application/json");
             new ObjectMapper().writeValue(response.getOutputStream(), error);
         } catch (Exception e) {
-            log.error(e.toString());
-            response.setHeader("Error", e.getMessage());
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            Map<String, String> error = new HashMap<>();
-            error.put("Error_message", e.getMessage());
-            response.setContentType("application/json");
-            new ObjectMapper().writeValue(response.getOutputStream(), error);
+            JwtAuthorizationFilter.tokenErrorHandler(response, log, e.toString(), e.getMessage(), e);
         }
     }
 

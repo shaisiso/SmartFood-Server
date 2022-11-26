@@ -36,6 +36,7 @@ public class DBInit implements CommandLineRunner {
         itemRepository.deleteAll();
         restaurantTableRepository.deleteAll();
 
+
         addItemsToMenu();
         createTables();
         addTableReservation();

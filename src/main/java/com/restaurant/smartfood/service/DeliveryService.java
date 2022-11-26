@@ -33,12 +33,8 @@ public class DeliveryService {
     private String timezone;
 
     public Delivery addDelivery(Delivery newDelivery) {
-        newDelivery.setDate(LocalDate.now(ZoneId.of(timezone)));
-        newDelivery.setHour(LocalTime.now(ZoneId.of(timezone)));
-        newDelivery.setStatus(OrderStatus.ACCEPTED);
-        newDelivery.setAlreadyPaid((float) 0);
-        newDelivery.setTotalPrice((float) 0);
-        var deliveryInDB = deliveryRepository.save(newDelivery);
+        var d =(Delivery) orderService.initOrder(newDelivery) ;
+        var deliveryInDB = deliveryRepository.save(d);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
             itemInOrderService.addItemToOrder(i);

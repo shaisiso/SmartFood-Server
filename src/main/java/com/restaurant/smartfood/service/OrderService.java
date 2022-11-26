@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,7 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    private Order initOrder(Order order) {
+    public Order initOrder(Order order) {
         order.setDate(LocalDate.now(ZoneId.of(timezone)));
         order.setHour(LocalTime.now(ZoneId.of(timezone)));
         order.setStatus(OrderStatus.ACCEPTED);

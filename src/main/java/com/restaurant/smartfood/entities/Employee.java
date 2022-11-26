@@ -20,17 +20,10 @@ import javax.validation.constraints.Size;
 @Entity
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "employees")
-public class Employee extends Person {
+public class Employee extends RegisteredUser {
 
+    
 
-//    @OneToOne(optional = false)
-//    @JoinColumn(nullable = false, name = "employee_id",referencedColumnName = "id")
-//    private EmployeeID employeeID;
-
-    @NotBlank
-    @Column(nullable = false)
-    @Size(min = 6,message = "Password needs to be at least 8 characters")
-    private String password;
 
     @Enumerated(EnumType.STRING)
     @NotNull

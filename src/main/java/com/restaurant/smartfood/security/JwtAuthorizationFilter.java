@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {

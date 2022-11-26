@@ -1,7 +1,6 @@
 package com.restaurant.smartfood.controller;
 
 
-import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.ItemCategory;
 import com.restaurant.smartfood.entities.MenuItem;
 import com.restaurant.smartfood.service.MenuItemService;
@@ -11,7 +10,6 @@ import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +25,7 @@ public class MenuItemController {
     }
 
     @PutMapping
-    public MenuItem updaetItem(@Valid @RequestBody MenuItem updatedItem) {
+    public MenuItem updateItem(@Valid @RequestBody MenuItem updatedItem) {
         return menuItemService.updateItem(updatedItem);
     }
 

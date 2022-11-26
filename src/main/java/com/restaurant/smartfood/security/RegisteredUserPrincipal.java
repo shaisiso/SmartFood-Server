@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Slf4j
-public class UserPrincipal implements UserDetails {
+public class RegisteredUserPrincipal implements UserDetails {
     /**
      *
      */
@@ -19,7 +19,7 @@ public class UserPrincipal implements UserDetails {
 
     private RegisteredUser registeredUser;
 
-    public UserPrincipal(RegisteredUser registeredUser) {
+    public RegisteredUserPrincipal(RegisteredUser registeredUser) {
         this.registeredUser=registeredUser;
     }
 

@@ -385,7 +385,7 @@ public class DBInit implements CommandLineRunner {
 
     private void addWaitingList() {
         WaitingList w = WaitingList.builder()
-                .date(LocalDate.of(2022,11,20))
+                .date(LocalDate.of(2022,12,20))
                 .numberOfDiners(4)
                 .time(LocalTime.of(20,00))
                 .member(memberRepository.findById((long)1003).get())
@@ -417,8 +417,8 @@ public class DBInit implements CommandLineRunner {
 
     private void addDiscount() {
         var d = Discount.builder()
-                .startDate(LocalDate.of(2022,11,20))
-                .endDate(LocalDate.of(2022,11,30))
+                .startDate(LocalDate.of(2022,12,20))
+                .endDate(LocalDate.of(2022,12,30))
                 .days(new HashSet<>(Arrays.asList(DayOfWeek.SUNDAY)))
                 .categories(Arrays.asList(ItemCategory.STARTERS))
                 .startHour(LocalTime.of(13,30))

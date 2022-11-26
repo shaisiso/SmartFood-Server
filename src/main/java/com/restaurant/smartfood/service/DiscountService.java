@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -66,5 +67,19 @@ public class DiscountService {
         var today = LocalDate.now(ZoneId.of(timezone));
         return discountRepository.findByStartDateIsLessThanEqualAndEndDateIsGreaterThanEqual
                 (today, today);
+    }
+
+    public List<Discount> getDiscountsByDatesAndHours(String startDate, String endDate, String startHour, String endHour) {
+        try {
+            LocalDate localStartDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate localEndDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalTime localStartHour = LocalTime.parse(startHour, DateTimeFormatter.ofPattern("HH-mm"));
+            LocalTime localEndHour = LocalTime.parse(endHour, DateTimeFormatter.ofPattern("HH-mm"));
+            return discountRepository.findByStartDateIsBetweenAndStartHourIsLessThanEqualAndEndHourIsGreaterThanEqual
+                    (localStartDate, localEndDate, localStartHour, localEndHour);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+        }
     }
 }

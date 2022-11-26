@@ -38,6 +38,14 @@ public class DiscountController {
         return discountService.getDiscountsByDates(startDate, endDate);
     }
 
+    @GetMapping("/dates/{startDate}/{endDate}/{startHour}/{endHour}")
+    public List<Discount> getDiscountsByDates(@PathVariable("startDate") String startDate,
+                                              @PathVariable("endDate") String endDate,
+                                              @PathVariable("startHour") String startHour,
+                                              @PathVariable("endHour") String endHour) {
+        return discountService.getDiscountsByDatesAndHours(startDate, endDate, startHour, endHour);
+    }
+
     @GetMapping("/category/{category}")
     public List<Discount> getDiscountsByCategory(@PathVariable("category") ItemCategory category) {
         return discountService.getDiscountsByCategory(category);

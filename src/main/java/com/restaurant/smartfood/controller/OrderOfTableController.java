@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+@CrossOrigin
+@RestController
+@RequestMapping("/api/orderoftable")
 public class OrderOfTableController {
 
     @Autowired
@@ -27,9 +30,9 @@ public class OrderOfTableController {
         return orderOfTableService.updateOrderOfTable(orderOfTable);
     }
 
-    @DeleteMapping
-    public void deleteOrderOfTable(@RequestBody @Valid OrderOfTable orderOfTable) {
-        orderOfTableService.deleteOrderOfTable(orderOfTable);
+    @DeleteMapping("/{orderoftableid}")
+    public void deleteOrderOfTable(@PathVariable("orderoftableid") Long id) {
+        orderOfTableService.deleteOrderOfTable(id);
     }
 
     @GetMapping("/{orderid}")
@@ -43,10 +46,9 @@ public class OrderOfTableController {
     }
 
     @GetMapping("/dates/{startDate}/{endDate}")
-    public List<OrderOfTable> getOrdersOfTablesByDates(
-            @PathVariable("startDate") String startDate,
-            @PathVariable("endDate") String endDate) {
-        return OrderOfTableService.getOrdersOfTablesByDates(startDate, endDate);
+    public List<OrderOfTable> getOrdersOfTablesByDates(@PathVariable("startDate") String startDate,
+                                                       @PathVariable("endDate") String endDate) {
+        return orderOfTableService.getOrdersOfTablesByDates(startDate, endDate);
     }
 
     @GetMapping("/status/{status}")
@@ -54,7 +56,4 @@ public class OrderOfTableController {
             @PathVariable("status") OrderStatus status) {
         return orderOfTableService.getOrdersOfTablesByStatus(status);
     }
-
-
-
 }

@@ -1,9 +1,8 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.ItemInOrder;
-import com.restaurant.smartfood.entities.Member;
-import com.restaurant.smartfood.entities.Order;
-import com.restaurant.smartfood.entities.OrderStatus;
+import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.repostitory.DiscountRepository;
+import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,17 @@ public class OrderService {
 
     @Autowired
     private ItemInOrderService itemInOrderService;
+
+    @Autowired
+    private DiscountService discountService;
+
+    @Autowired
+    private DiscountRepository discountRepository;
+
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Value("${timezone.name}")
     private String timezone;
@@ -107,6 +117,7 @@ public class OrderService {
 
     public Order applyMemberDiscount(Long orderId, Member member) {
         var order = getOrder(orderId);
+        memberService.getMemberByPhoneNumber(member.getPhoneNumber());
         order.setTotalPrice(order.getTotalPrice() * (float) 0.9);
         return orderRepository.save(order);
     }
@@ -151,5 +162,28 @@ public class OrderService {
 
     public void deleteItemFromOrder(Long itemId) {
         itemInOrderService.deleteItemFromOrder(itemId);
+    }
+
+    private Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {
+        var order = getOrder(orderId);
+        boolean isMember = false;
+        if (phoneNumber != null)
+            isMember = memberRepository.findByPhoneNumber(phoneNumber).isPresent();
+
+        List<Discount> discounts = discountRepository.findByStartDateIsBetweenAndStartHourIsLessThanEqualAndEndHourIsGreaterThanEqual
+                (order.getDate(), order.getDate(), order.getHour(), order.getHour());
+
+        for (var d: discounts)
+            if (!d.getDays().contains(LocalDate.now().getDayOfWeek()))
+                discounts.remove(d);
+        if (!isMember)
+            for (var d : discounts)
+                if (d.getForMembersOnly())
+                    discounts.remove(d);
+
+        //TODO: cont step 3 from notepad
+
+
+            return order;
     }
 }

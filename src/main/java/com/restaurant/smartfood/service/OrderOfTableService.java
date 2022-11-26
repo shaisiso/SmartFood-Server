@@ -1,9 +1,11 @@
 package com.restaurant.smartfood.service;
 
+import com.restaurant.smartfood.entities.Delivery;
 import com.restaurant.smartfood.entities.OrderOfTable;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -14,10 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class OrderOfTableService {
 
     @Autowired
@@ -48,22 +52,39 @@ public class OrderOfTableService {
                 orderOfTable.getTable().getTableId(), orderOfTable.getId());
         return orderOfTable;
     }
-    // TODO: cont orderOfTable
-//
-//    public void deleteOrderOfTable(OrderOfTable orderOfTable) {
-//    }
-//
-//    public OrderOfTable getOrderOfTableByOrderId(Long orderId) {
-//    }
-//
-//    public List<OrderOfTable> getActiveOrdersOfTables() {
-//    }
-//
-//    public static List<OrderOfTable> getOrdersOfTablesByDates(String startDate, String endDate) {
-//    }
-//
-//    public List<OrderOfTable> getOrdersOfTablesByStatus(OrderStatus status) {
-//    }
+
+    public void deleteOrderOfTable(Long id) {
+        var o = orderOfTableRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "There is no order of table with the id " + id));
+        orderOfTableRepository.delete(o);
+    }
+
+    public OrderOfTable getOrderOfTableByOrderId(Long orderId) {
+        return orderOfTableRepository.findById(orderId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "There is no order of table with the id: " + orderId)
+        );
+    }
+
+    public List<OrderOfTable> getActiveOrdersOfTables() {
+        return orderOfTableRepository.findByStatusIsNot(OrderStatus.CLOSED);
+    }
+
+    public List<OrderOfTable> getOrdersOfTablesByDates(String startDate, String endDate) {
+        try {
+            LocalDate localStartDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate localEndDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            return orderOfTableRepository.findByDateIsBetween(localStartDate, localEndDate);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+        }
+    }
+
+    public List<OrderOfTable> getOrdersOfTablesByStatus(OrderStatus status) {
+        return orderOfTableRepository.findByStatus(status);
+    }
 
     private OrderOfTable initOrderOfTable(OrderOfTable orderOfTable) {
         orderOfTable.setDate(LocalDate.now(ZoneId.of(timezone)));

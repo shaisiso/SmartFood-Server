@@ -40,12 +40,6 @@ public class RegisteredUserPrincipalService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        Employee employee = employeeRepository.findByPhoneNumber(username).orElseThrow(() -> {
-            log.error("User not found in the database");
-            throw new UsernameNotFoundException("This username is not existed : " + username);
-        });
-//
         RegisteredUserPrincipal registeredUserPrincipal;
         var employeeOp = employeeRepository.findByPhoneNumber(username);
         if (employeeOp.isPresent())

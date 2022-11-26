@@ -6,6 +6,7 @@ import com.restaurant.smartfood.repostitory.PersonRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,12 +23,14 @@ public class MemberService {
     private PersonService personService;
     @Autowired
     private PersonRepository personRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Member updateMember(Member member) {
         memberRepository.findById(member.getId()).ifPresentOrElse(
                 memberDB -> {
                     personService.updatePerson(member);
-                    memberRepository.updateMember(member.getId(), member.getPassword());
+                    memberRepository.updateMember(member.getId(),passwordEncoder.encode(member.getPassword()));
                 },
                 () -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + member.getId());
@@ -47,7 +50,7 @@ public class MemberService {
                     memberRepository.findById(member.getId()).ifPresent((p) -> {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Member id existed");
                     });
-                    memberRepository.insertMember(personFromDB.getId(), member.getPassword());
+                    memberRepository.insertMember(personFromDB.getId(),passwordEncoder.encode(member.getPassword()) );
                 },
                 // person is NOT in DB -> save new member
                 () -> {

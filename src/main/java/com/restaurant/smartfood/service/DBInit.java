@@ -5,6 +5,7 @@ import com.restaurant.smartfood.repostitory.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -28,6 +29,8 @@ public class DBInit implements CommandLineRunner {
     private final DeliveryRepository deliveryRepository;
     private final WaitingListRepository waitingListRepository;
     private final DiscountRepository discountRepository;
+
+    private final PasswordEncoder passwordEncoder;
     @Override
     public void run(String... args)  {
         tableReservationRepository.deleteAll();
@@ -298,7 +301,7 @@ public class DBInit implements CommandLineRunner {
                         .houseNumber(8)
                         .build())
                 .phoneNumber("0588888881")
-                .password("123456")
+                .password(passwordEncoder.encode("123456") )
                 .role(EmployeeRole.DELIVERY_GUY)
                 .build();
         employeeRepository.saveAll(Arrays.asList(employee1));
@@ -368,7 +371,7 @@ public class DBInit implements CommandLineRunner {
                         .houseNumber(8)
                         .build())
                 .phoneNumber("0521234567")
-                .password("123456")
+                .password(passwordEncoder.encode("123456") )
                 .build();
         memberRepository.saveAll(Arrays.asList(member));
     }

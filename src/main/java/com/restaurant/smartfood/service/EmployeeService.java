@@ -5,6 +5,7 @@ import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +22,8 @@ public class EmployeeService {
     private PersonService personService;
     @Autowired
     private PersonRepository personRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Employee addEmployee(Employee employee) {
         personRepository.findByPhoneNumber(employee.getPhoneNumber()).ifPresentOrElse(
@@ -33,7 +36,7 @@ public class EmployeeService {
                     employeeRepository.findById(employee.getId()).ifPresent((p) -> {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee id existed");
                     });
-                    employeeRepository.insertEmployee(personFromDB.getId(), employee.getPassword(),employee.getRole().toString());
+                    employeeRepository.insertEmployee(personFromDB.getId(), passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());
                 },
                 // person is NOT in DB -> save new member
                 () -> {
@@ -49,7 +52,7 @@ public class EmployeeService {
         employeeRepository.findById(updatedEmployee.getId()).ifPresentOrElse(
                 employeeDB -> {
                     personService.updatePerson(updatedEmployee);
-                    employeeRepository.updateEmployee(updatedEmployee.getId(), updatedEmployee.getPassword(),updatedEmployee.getRole().toString());
+                    employeeRepository.updateEmployee(updatedEmployee.getId(), passwordEncoder.encode(updatedEmployee.getPassword()), updatedEmployee.getRole().toString());
                 },
                 () -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + updatedEmployee.getId());

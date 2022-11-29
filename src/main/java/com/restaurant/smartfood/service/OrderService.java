@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -167,6 +168,7 @@ public class OrderService {
     private Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {
         var order = getOrder(orderId);
         boolean isMember = false;
+        var category = "";
         if (phoneNumber != null)
             isMember = memberRepository.findByPhoneNumber(phoneNumber).isPresent();
 
@@ -176,14 +178,24 @@ public class OrderService {
         for (var d: discounts)
             if (!d.getDays().contains(LocalDate.now().getDayOfWeek()))
                 discounts.remove(d);
+
         if (!isMember)
             for (var d : discounts)
                 if (d.getForMembersOnly())
                     discounts.remove(d);
 
-        //TODO: cont step 3 from notepad
+        for (var d : discounts) {
 
-
+        }
             return order;
+    }
+
+    private List<ItemInOrder> howManyByCategory(Order order, ItemCategory category) {
+        var items = new ArrayList<ItemInOrder>();
+        for (var i: order.getItems()) {
+            if (i.getItem().getCategory().equals(category))
+                items.add(i);
+        }
+        return items;
     }
 }

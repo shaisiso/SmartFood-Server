@@ -57,5 +57,4 @@ public class DeliveryController {
     public List<Delivery> getActiveDeliveries() {
         return deliveryService.getActiveDeliveries();
     }
-
 }

@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SmarfoodServerApplication {
+public class SmartfoodServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SmarfoodServerApplication.class, args);
+        SpringApplication.run(SmartfoodServerApplication.class, args);
     }
 
 }

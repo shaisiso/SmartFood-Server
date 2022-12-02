@@ -5,6 +5,7 @@ import com.restaurant.smartfood.entities.OrderOfTable;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.service.DeliveryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

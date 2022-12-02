@@ -78,8 +78,8 @@ public class RegisteredUserPrincipalService implements UserDetailsService {
                     .withIssuer(request.getRequestURL().toString()).sign(algorithm);
 
             Map<String, String> tokens = new HashMap<>();
-            tokens.put("access_token", accessToken);
-            tokens.put("refresh_token", refreshToken);
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", refreshToken);
             response.setContentType("application/json");
             new ObjectMapper().writeValue(response.getOutputStream(), tokens);
         } catch (SignatureVerificationException e) { // token was changed

@@ -3,9 +3,11 @@ package com.restaurant.smartfood.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.restaurant.smartfood.exception.ErrorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -100,14 +102,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .sign(algorithm);
 
 
-        // Add token in response -- no refresh token
-        // response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX +  accessToken);
-
-        //set header with access and refres tokens
-
-//        response.setHeader("access_token", accessToken);
-//        response.setHeader("refresh_token", refreshToken);
-
         Map<String,String> tokens=new HashMap<>();
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
@@ -115,4 +109,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         new ObjectMapper().writeValue(response.getOutputStream(), tokens);
 
     }
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        log.warn("Bad credentials");
+        //super.unsuccessfulAuthentication(request, response, failed);
+        ErrorMessage message = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED,
+                "Bad credentials", request.getRequestURL().toString());
+        response.setStatus(401);
+        response.setContentType(APPLICATION_JSON_VALUE);
+        new ObjectMapper().writeValue(response.getOutputStream(),message);
+    }
+
 }

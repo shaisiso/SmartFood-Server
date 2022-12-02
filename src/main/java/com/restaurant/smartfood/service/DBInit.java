@@ -43,7 +43,7 @@ public class DBInit implements CommandLineRunner {
         addItemsToMenu();
         createTables();
         addTableReservation();
-        addEmployee();
+        addEmployees();
         addOrder();
         addMember();
         addWaitingList();
@@ -291,7 +291,7 @@ public class DBInit implements CommandLineRunner {
         restaurantTableRepository.saveAll(Arrays.asList(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11));
     }
 
-    private void addEmployee() {
+    private void addEmployees() {
         Employee employee1 = Employee.builder()
                 .name("Dolev Haziza")
                 .email("Haziza@gmail.com")
@@ -304,7 +304,21 @@ public class DBInit implements CommandLineRunner {
                 .password(passwordEncoder.encode("123456") )
                 .role(EmployeeRole.DELIVERY_GUY)
                 .build();
-        employeeRepository.saveAll(Arrays.asList(employee1));
+
+        Employee manager = Employee.builder()
+                .name("Barak Bachar")
+                .email("bb@gmail.com")
+                .address(Address.builder()
+                        .city("Haifa")
+                        .streetName("Sami Offer")
+                        .houseNumber(10)
+                        .build())
+                .phoneNumber("0523213400")
+                .password(passwordEncoder.encode("123456") )
+                .role(EmployeeRole.MANAGER)
+                .build();
+
+        employeeRepository.saveAll(Arrays.asList(employee1,manager));
     }
 
     private void addTableReservation() {
@@ -381,7 +395,7 @@ public class DBInit implements CommandLineRunner {
                 .date(LocalDate.now())
                 .numberOfDiners(4)
                 .time(LocalTime.of(20,00))
-                .member(memberRepository.findById((long)1003).get())
+                .member(memberRepository.findAll().get(0))
                 .build();
         waitingListRepository.save(w);
     }
@@ -391,7 +405,7 @@ public class DBInit implements CommandLineRunner {
                 .hour(LocalTime.now())
                 .personDetails(personRepository.findByPhoneNumber("0521234567").get())
                 .date(LocalDate.now())
-                .totalPrice(itemRepository.findById((long)1).get().getPrice())
+                .totalPrice(itemRepository.findAll().get(0).getPrice())
                 .status(OrderStatus.ACCEPTED)
                 .alreadyPaid((float)0)
                 .build();
@@ -399,8 +413,8 @@ public class DBInit implements CommandLineRunner {
 
         var i = ItemInOrder.builder()
                 .order(newDelivery)
-                .item(itemRepository.findById((long)1).get())
-                .price(itemRepository.findById((long)1).get().getPrice())
+                .item(itemRepository.findAll().get(0))
+                .price(itemRepository.findAll().get(0).getPrice())
                 .build();
         itemInOrderRepository.save(i);
         newDelivery.setItems(Arrays.asList(i));

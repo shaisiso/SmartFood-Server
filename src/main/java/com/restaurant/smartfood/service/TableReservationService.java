@@ -28,7 +28,10 @@ public class TableReservationService {
         personService.savePerson(reservation.getPerson());
         return tableReservationRepository.save(reservation);
         //TODO: check hours availability
-    }
+        // יש בTABLE RESERVATION רשימה של הזמנות, דרך הרשימה נוציא את השולחנות שיהיה תפוסים בטווח שעות
+        // יש לנו רשימה של כל השולנות במסעדה, נמחק ממנה את השולחנות שמופיעים הרשימה הראשונה
+        // אם נותרו שולחנות פנויים - יופי, אם לא - לרשימת המתנה
+            }
 
     public void deleteTableReservation(TableReservation reservation) {
         tableReservationRepository.findById(reservation.getReservationId()).

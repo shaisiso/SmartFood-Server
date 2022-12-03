@@ -89,7 +89,6 @@ public class DeliveryService {
     }
 
     public List<Delivery> getActiveDeliveries() {
-
         return deliveryRepository.findByStatusIsNot(OrderStatus.CLOSED);
     }
 }

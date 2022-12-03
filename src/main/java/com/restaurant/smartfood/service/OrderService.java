@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.DiscountRepository;
+import com.restaurant.smartfood.repostitory.ItemInOrderRepository;
 import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -29,6 +31,9 @@ public class OrderService {
 
     @Autowired
     private ItemInOrderService itemInOrderService;
+
+    @Autowired
+    private ItemInOrderRepository itemInOrderRepository;
 
     @Autowired
     private DiscountService discountService;
@@ -113,7 +118,6 @@ public class OrderService {
                     "discount percent invalid.");
         order.setTotalPrice(order.getTotalPrice() * ((100 - percent) / (float) 100));
         return orderRepository.save(order);
-
     }
 
     public Order applyMemberDiscount(Long orderId, Member member) {
@@ -169,6 +173,9 @@ public class OrderService {
         var order = getOrder(orderId);
         boolean isMember = false;
         var category = "";
+        var numberOfItems = 0;
+        var oldPrice = 0.0;
+        List<ItemInOrder> items;
         if (phoneNumber != null)
             isMember = memberRepository.findByPhoneNumber(phoneNumber).isPresent();
 
@@ -184,10 +191,15 @@ public class OrderService {
                 if (d.getForMembersOnly())
                     discounts.remove(d);
 
-        for (var d : discounts) {
-
+        for (var discount : discounts) {
+            for (var c : discount.getCategories()) {
+                items = howManyByCategory(order, c);
+                numberOfItems = (discount.getIfYouOrder()+discount.getYouGetDiscountFor())/items.size(); // the number of items that get discount
+                for (int i = 0; i < numberOfItems; i++)
+                    applyItemInOrderDiscount(itemInOrderRepository.findById(items.get(i).getId()).get(), discount.getPercent());
+            }
         }
-            return order;
+        return order;
     }
 
     private List<ItemInOrder> howManyByCategory(Order order, ItemCategory category) {
@@ -196,6 +208,12 @@ public class OrderService {
             if (i.getItem().getCategory().equals(category))
                 items.add(i);
         }
+        items.sort(Comparator.comparing(ItemInOrder::getPrice));
         return items;
+    }
+
+    public ItemInOrder applyItemInOrderDiscount(ItemInOrder itemInOrder, int percent) {
+        itemInOrder.setPrice(itemInOrder.getPrice() * ((100 - percent) / (float) 100));
+        return itemInOrder;
     }
 }

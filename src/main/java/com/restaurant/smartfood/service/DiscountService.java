@@ -82,4 +82,8 @@ public class DiscountService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
     }
+//    private boolean checkDiscountOverLap(Discount discount) {
+//        var discounts = getDiscountsByDatesAndHours(discount.getStartDate().toString(), discount.getEndDate().toString(),
+//                            discount.getStartHour().toString(), discount.getEndHour().toString());
+//    }
 }

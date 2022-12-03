@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.DeliveryRepository;
+import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -27,20 +26,26 @@ public class DeliveryService {
     private ItemInOrderService itemInOrderService;
 
     @Autowired
+    private WebSocketService webSocketService;
+
+    @Autowired
     private OrderService orderService;
 
     @Value("${timezone.name}")
     private String timezone;
 
     public Delivery addDelivery(Delivery newDelivery) {
-        var d =(Delivery) orderService.initOrder(newDelivery) ;
+        var d = (Delivery) orderService.initOrder(newDelivery);
         var deliveryInDB = deliveryRepository.save(d);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
             itemInOrderService.addItemToOrder(i);
         });
         deliveryInDB.setTotalPrice(orderService.calculateTotalPrice(deliveryInDB));
-        return deliveryRepository.save(deliveryInDB);
+
+        newDelivery = deliveryRepository.save(deliveryInDB);
+        webSocketService.notifyNewDelivery(newDelivery);
+        return newDelivery;
     }
 
     public Delivery updateDelivery(Delivery delivery) { //only updates delivery guy and person details

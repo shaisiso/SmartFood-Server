@@ -7,8 +7,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
+//import org.springframework.security.access.AccessDeniedException;
+//import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -83,30 +83,30 @@ public class RestResponseEntityExceptionHandler
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(message);
     }
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorMessage> accessDeniedException
-    		(AccessDeniedException exception, WebRequest request){
-        log.warn("AccessDeniedException");
-
-        ErrorMessage message;
-    	String header = request.getHeader(JwtProperties.HEADER_STRING);
-    	if (header !=null && header.startsWith(JwtProperties.TOKEN_PREFIX))
-    		message = new ErrorMessage(HttpStatus.FORBIDDEN.value(),HttpStatus.FORBIDDEN,
-	    			exception.getMessage(),request.getDescription(false));
-    	else
-	    	message = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(),HttpStatus.UNAUTHORIZED,
-	    			exception.getMessage(),request.getDescription(false));
-
-    	return ResponseEntity.status(message.getStatus()).body(message);
-    }
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorMessage> badCredentialsException(BadCredentialsException exception, WebRequest request){
-        log.warn("BadCredentials");
-        ErrorMessage message = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED,
-                "exception.getMessage()", request.getDescription(false));
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(message);
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<ErrorMessage> accessDeniedException
+//    		(AccessDeniedException exception, WebRequest request){
+//        log.warn("AccessDeniedException");
+//
+//        ErrorMessage message;
+//    	String header = request.getHeader(JwtProperties.HEADER_STRING);
+//    	if (header !=null && header.startsWith(JwtProperties.TOKEN_PREFIX))
+//    		message = new ErrorMessage(HttpStatus.FORBIDDEN.value(),HttpStatus.FORBIDDEN,
+//	    			exception.getMessage(),request.getDescription(false));
+//    	else
+//	    	message = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(),HttpStatus.UNAUTHORIZED,
+//	    			exception.getMessage(),request.getDescription(false));
+//
+//    	return ResponseEntity.status(message.getStatus()).body(message);
+//    }
+//    @ExceptionHandler(BadCredentialsException.class)
+//    public ResponseEntity<ErrorMessage> badCredentialsException(BadCredentialsException exception, WebRequest request){
+//        log.warn("BadCredentials");
+//        ErrorMessage message = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED,
+//                "exception.getMessage()", request.getDescription(false));
+//
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                .body(message);
+//    }
 
 }

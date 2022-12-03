@@ -29,7 +29,7 @@ spring:
     show-sql: true
 logging:
   level:
-    com.restaurant.smartfood: trace
+    com.restaurant.smartfood: debug
 server:
   error:
     include-stacktrace: never

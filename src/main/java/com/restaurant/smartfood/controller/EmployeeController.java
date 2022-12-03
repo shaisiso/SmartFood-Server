@@ -1,11 +1,12 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Employee;
-import com.restaurant.smartfood.security.PreAuthorizeGeneralManager;
-import com.restaurant.smartfood.security.PreAuthorizeManagers;
-import com.restaurant.smartfood.security.PreAuthorizeMember;
+//import com.restaurant.smartfood.security.PreAuthorizeGeneralManager;
+//import com.restaurant.smartfood.security.PreAuthorizeManagers;
+//import com.restaurant.smartfood.security.PreAuthorizeMember;
 import com.restaurant.smartfood.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -39,7 +40,6 @@ public class EmployeeController {
     }
 
     @GetMapping
-    @PreAuthorizeManagers
     public List<Employee> getAllEmployees() {
         return employeeService.getAllEmployees();
     }

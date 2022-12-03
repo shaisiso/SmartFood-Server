@@ -3,8 +3,11 @@ package com.restaurant.smartfood.service;
 import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
+import com.restaurant.smartfood.security.LoginAuthenticationRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +17,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -22,6 +26,7 @@ public class EmployeeService {
     private PersonService personService;
     @Autowired
     private PersonRepository personRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -36,7 +41,8 @@ public class EmployeeService {
                     employeeRepository.findById(employee.getId()).ifPresent((p) -> {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee id existed");
                     });
-                    employeeRepository.insertEmployee(personFromDB.getId(), passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());
+                    employeeRepository.insertEmployee(personFromDB.getId(),
+                            passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());
                 },
                 // person is NOT in DB -> save new member
                 () -> {
@@ -52,7 +58,8 @@ public class EmployeeService {
         employeeRepository.findById(updatedEmployee.getId()).ifPresentOrElse(
                 employeeDB -> {
                     personService.updatePerson(updatedEmployee);
-                    employeeRepository.updateEmployee(updatedEmployee.getId(), passwordEncoder.encode(updatedEmployee.getPassword()), updatedEmployee.getRole().toString());
+                    employeeRepository.updateEmployee(updatedEmployee.getId(),
+                            passwordEncoder.encode(updatedEmployee.getPassword()), updatedEmployee.getRole().toString());
                 },
                 () -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + updatedEmployee.getId());
@@ -85,4 +92,6 @@ public class EmployeeService {
         return employeeRepository.findById(employeeID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with employeeID: " + employeeID));
     }
+
+
 }

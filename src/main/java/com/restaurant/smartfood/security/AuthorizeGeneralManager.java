@@ -7,8 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@PreAuthorize("hasRole('ROLE_SHIFT_MANAGER') or  hasRole('ROLE_DELIVERY_MANAGER') or hasRole('ROLE_MANAGER')")
-public  @interface PreAuthorizeManagers {
+public @interface AuthorizeGeneralManager {
 }

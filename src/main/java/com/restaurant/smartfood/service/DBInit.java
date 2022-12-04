@@ -318,7 +318,20 @@ public class DBInit implements CommandLineRunner {
                 .role(EmployeeRole.MANAGER)
                 .build();
 
-        employeeRepository.saveAll(Arrays.asList(employee1,manager));
+        Employee shiftManager = Employee.builder()
+                .name("Yaniv Katan")
+                .email("yk20@gmail.com")
+                .address(Address.builder()
+                        .city("Kiryat Ata")
+                        .streetName("Pol Gogen")
+                        .houseNumber(20)
+                        .build())
+                .phoneNumber("0520202020")
+                .password(passwordEncoder.encode("123456") )
+                .role(EmployeeRole.SHIFT_MANAGER)
+                .build();
+
+        employeeRepository.saveAll(Arrays.asList(employee1,manager,shiftManager));
     }
 
     private void addTableReservation() {

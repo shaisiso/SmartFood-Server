@@ -4,9 +4,11 @@ import com.restaurant.smartfood.entities.Employee;
 //import com.restaurant.smartfood.security.PreAuthorizeGeneralManager;
 //import com.restaurant.smartfood.security.PreAuthorizeManagers;
 //import com.restaurant.smartfood.security.PreAuthorizeMember;
+import com.restaurant.smartfood.security.Authorize;
+import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.EmployeeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RestController()
 @CrossOrigin
+@Slf4j
 @RequestMapping("/api/employee")
 public class EmployeeController {
     @Autowired
@@ -40,7 +43,11 @@ public class EmployeeController {
     }
 
     @GetMapping
+    //@Authorize(roles = {"ROLE_MANAGER","ROLE_SHIFT_MANAGER"})
+    @AuthorizeManagers
     public List<Employee> getAllEmployees() {
+
+        log.debug("controller");
         return employeeService.getAllEmployees();
     }
 

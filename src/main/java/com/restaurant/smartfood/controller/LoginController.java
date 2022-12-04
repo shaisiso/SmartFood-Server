@@ -1,10 +1,10 @@
 package com.restaurant.smartfood.controller;
 
-import com.restaurant.smartfood.entities.Employee;
+import com.restaurant.smartfood.security.AuthorizationTokens;
 import com.restaurant.smartfood.security.LoginAuthenticationRequest;
-import com.restaurant.smartfood.service.EmployeeService;
-import com.restaurant.smartfood.service.RegisteredUserService;
+import com.restaurant.smartfood.security.RegisteredUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController()
@@ -15,7 +15,7 @@ public class LoginController {
     private RegisteredUserService registeredUserService;
 
     @PostMapping
-    public Employee employeeLogin(@RequestBody LoginAuthenticationRequest credentials) throws InterruptedException {
-        return registeredUserService.employeeLogin(credentials);
+    public ResponseEntity<AuthorizationTokens> employeeLogin(@RequestBody LoginAuthenticationRequest credentials) throws InterruptedException {
+        return registeredUserService.login(credentials);
     }
 }

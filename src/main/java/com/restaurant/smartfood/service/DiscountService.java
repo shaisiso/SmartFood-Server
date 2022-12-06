@@ -28,7 +28,10 @@ public class DiscountService {
     @Value("${timezone.name}")
     private String timezone;
     public Discount addDiscount(Discount discount) {
-        return discountRepository.save(discount);
+        if (checkDiscountOverLap(discount))
+            return discountRepository.save(discount);
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "There is a discount overlap");
     }
 
     public Discount updateDiscount(Discount discount) {
@@ -38,7 +41,10 @@ public class DiscountService {
         discountRepository.findById(discount.getDiscountId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no discount with the id " + discount.getDiscountId()));
-        return discountRepository.save(discount);
+        if (checkDiscountOverLap(discount))
+            return discountRepository.save(discount);
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "There is a discount overlap");
     }
 
     public void deleteDiscount(Long id) {
@@ -82,8 +88,18 @@ public class DiscountService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
     }
-//    private boolean checkDiscountOverLap(Discount discount) {
-//        var discounts = getDiscountsByDatesAndHours(discount.getStartDate().toString(), discount.getEndDate().toString(),
-//                            discount.getStartHour().toString(), discount.getEndHour().toString());
-//    }
+    private boolean checkDiscountOverLap(Discount discount) {
+        var discounts = getDiscountsByDatesAndHours(discount.getStartDate().toString(), discount.getEndDate().toString(),
+                            discount.getStartHour().toString(), discount.getEndHour().toString());
+        for (var d: discounts)
+            if (!d.getDays().contains(LocalDate.now().getDayOfWeek()))
+                discounts.remove(d);
+        for (var d : discounts) {
+            for (var c : d.getCategories()) {
+                if (discount.getCategories().contains(c))
+                    return false;
+            }
+        }
+        return true;
+    }
 }

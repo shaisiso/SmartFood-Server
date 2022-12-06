@@ -194,9 +194,9 @@ public class OrderService {
         for (var discount : discounts) {
             for (var c : discount.getCategories()) {
                 items = howManyByCategory(order, c);
-                numberOfItems = (discount.getIfYouOrder()+discount.getYouGetDiscountFor())/items.size(); // the number of items that get discount
+                numberOfItems = items.size()/(discount.getIfYouOrder()+discount.getYouGetDiscountFor()); // the number of items that get discount
                 for (int i = 0; i < numberOfItems; i++)
-                    applyItemInOrderDiscount(itemInOrderRepository.findById(items.get(i).getId()).get(), discount.getPercent());
+                    applyItemInOrderDiscount(items.get(i), discount.getPercent());
             }
         }
         return order;

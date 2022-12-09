@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import java.util.Date;
 
@@ -21,10 +22,8 @@ public class JwtAuthentication {
     /*
      * After Server validated credentials, this method will create a JWT that will be sent to Client
      */
-    public ResponseEntity<AuthorizationTokens> createTokens(RegisteredUserPrincipal principal)  {
-
+    public ResponseEntity<AuthorizationTokens> createTokens(UserDetails principal)  {
         Algorithm algorithm = Algorithm.HMAC512(JwtProperties.SECRET.getBytes());
-
         // Create JWT Token
         String accessToken;
         accessToken = JWT.create()

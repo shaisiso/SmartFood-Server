@@ -50,7 +50,7 @@ public class JwtAuthorization {
         }
     }
 
-    private DecodedJWT verifyToken(HttpServletRequest request) {
+    public DecodedJWT verifyToken(HttpServletRequest request) {
         String token = request.getHeader(JwtProperties.HEADER_STRING)
                 .replace(JwtProperties.TOKEN_PREFIX, "");
         Algorithm algorithm = Algorithm.HMAC512(JwtProperties.SECRET.getBytes());

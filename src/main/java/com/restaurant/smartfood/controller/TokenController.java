@@ -1,6 +1,7 @@
 //package com.restaurant.smartfood.controller;
 //
-//import com.restaurant.smartfood.security.RegisteredUserPrincipalService;
+//import com.restaurant.smartfood.security.AuthorizationTokens;
+//import com.restaurant.smartfood.security.RegisteredUserService;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.web.bind.annotation.CrossOrigin;
 //import org.springframework.web.bind.annotation.PostMapping;
@@ -16,11 +17,11 @@
 //@RequestMapping("/api/token")
 //public class TokenController {
 //    @Autowired
-//    private RegisteredUserPrincipalService registeredUserPrincipalService;
+//    private RegisteredUserService registeredUserService;
 //
 //
 //    @PostMapping("/refresh")
-//    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        registeredUserPrincipalService.refreshToken(request, response);
+//    public AuthorizationTokens refreshToken(HttpServletRequest request) throws IOException {
+//       return registeredUserService.refreshToken(request);
 //    }
 //}

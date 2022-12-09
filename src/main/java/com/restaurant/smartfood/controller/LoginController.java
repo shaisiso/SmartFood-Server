@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+
 @RestController()
 @CrossOrigin
 @RequestMapping("/api/login")
@@ -17,5 +20,9 @@ public class LoginController {
     @PostMapping
     public ResponseEntity<AuthorizationTokens> employeeLogin(@RequestBody LoginAuthenticationRequest credentials) throws InterruptedException {
         return registeredUserService.login(credentials);
+    }
+    @PostMapping("/refresh-token")
+    public ResponseEntity<AuthorizationTokens>  refreshToken(HttpServletRequest request) throws IOException {
+        return registeredUserService.refreshToken(request);
     }
 }

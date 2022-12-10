@@ -23,7 +23,7 @@ public enum EmployeeRole {
         name = s;
     }
 
-    public String toString() {
+    public String toReadString() {
         return this.name;
     }
 
@@ -33,7 +33,7 @@ public enum EmployeeRole {
 
     public static List<String> getRolesNames() {
         return EmployeeRole.stream().
-                map(role -> role.toString())
+                map(role -> role.toReadString())
                 .collect(Collectors.toList());
     }
 }

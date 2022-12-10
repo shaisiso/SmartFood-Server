@@ -51,7 +51,7 @@ public class PersonService {
         personRepository.findByPhoneNumber(person.getPhoneNumber())
                 .ifPresent(p -> {
                     throw new ResponseStatusException
-                            (HttpStatus.CONFLICT, p.getName() + " has this phone number.");
+                            (HttpStatus.CONFLICT, p.getName() + " has this phone number: "+person.getPhoneNumber());
                 });
     }
 
@@ -60,7 +60,7 @@ public class PersonService {
             personRepository.findByEmail(person.getEmail())
                     .ifPresent(p -> {
                         throw new ResponseStatusException
-                                (HttpStatus.CONFLICT, p.getName() + " has this email.");
+                                (HttpStatus.CONFLICT, p.getName() + " has this email: "+person.getEmail());
                     });
         }
     }

@@ -39,7 +39,7 @@ public class EmployeeService {
                     employee.setId(personFromDB.getId());
                     // validate that was not saved already
                     employeeRepository.findById(employee.getId()).ifPresent((p) -> {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee is existed");
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee with this phone is existed: " + employee.getPhoneNumber());
                     });
                     employeeRepository.insertEmployee(personFromDB.getId(),
                             passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());

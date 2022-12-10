@@ -1,10 +1,7 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Employee;
-//import com.restaurant.smartfood.security.PreAuthorizeGeneralManager;
-//import com.restaurant.smartfood.security.PreAuthorizeManagers;
-//import com.restaurant.smartfood.security.PreAuthorizeMember;
-import com.restaurant.smartfood.security.Authorize;
+import com.restaurant.smartfood.entities.EmployeeRole;
 import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +19,10 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
+    @GetMapping("/roles")
+    public List<String> getRole() {
+        return EmployeeRole.getRolesNames();
+    }
     @PostMapping
     public Employee addEmployee(@Valid @RequestBody Employee newEmployee) {
         return employeeService.addEmployee(newEmployee);
@@ -43,14 +44,10 @@ public class EmployeeController {
     }
 
     @GetMapping
-    //@Authorize(roles = {"ROLE_MANAGER","ROLE_SHIFT_MANAGER"})
     @AuthorizeManagers
     public List<Employee> getAllEmployees() {
-
-        log.debug("controller");
         return employeeService.getAllEmployees();
     }
-
     @GetMapping("/{id}")
     public Employee getEmployeeByID(@PathVariable("id") Long employeeID) {
         return employeeService.getEmployeeByID(employeeID);

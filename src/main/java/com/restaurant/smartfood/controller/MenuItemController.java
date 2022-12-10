@@ -39,7 +39,6 @@ public class MenuItemController {
     @GetMapping("/categories")
     public List<String> getCategories() {
         return ItemCategory.getCategoriesNames();
-
     }
 
     @GetMapping

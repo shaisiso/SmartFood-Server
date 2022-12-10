@@ -39,14 +39,15 @@ public class EmployeeService {
                     employee.setId(personFromDB.getId());
                     // validate that was not saved already
                     employeeRepository.findById(employee.getId()).ifPresent((p) -> {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee id existed");
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee is existed");
                     });
                     employeeRepository.insertEmployee(personFromDB.getId(),
                             passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());
                 },
-                // person is NOT in DB -> save new member
+                // person is NOT in DB -> save new employee
                 () -> {
                     personService.validateFields(employee);
+                    employee.setPassword(passwordEncoder.encode(employee.getPassword()));
                     var employeeDB = employeeRepository.save(employee);
                     employee.setId(employeeDB.getId());
                 }

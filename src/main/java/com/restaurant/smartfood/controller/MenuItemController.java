@@ -3,6 +3,7 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.ItemCategory;
 import com.restaurant.smartfood.entities.MenuItem;
+import com.restaurant.smartfood.security.AuthorizeGeneralManager;
 import com.restaurant.smartfood.service.MenuItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ public class MenuItemController {
     }
 
     @DeleteMapping("/{itemId}")
+    @AuthorizeGeneralManager
     public void deleteItem(@PathVariable("itemId") Long itemId) {
         menuItemService.deleteMenuItem(itemId);
     }

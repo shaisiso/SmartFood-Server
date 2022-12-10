@@ -66,14 +66,14 @@ public class RegisteredUserService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials");
     }
 
-    public ResponseEntity<AuthorizationTokens>  refreshToken(HttpServletRequest request) throws IOException {
-        String header = request.getHeader(JwtProperties.HEADER_STRING);
-        if (header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
+    public ResponseEntity<AuthorizationTokens>  refreshToken(AuthorizationTokens tokens) throws IOException {
+        String refreshToken = tokens.getRefreshToken();
+        if (refreshToken == null || refreshToken.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token is missing");
         }
         try {
             // verify token
-            var decodedJWT = jwtAuthorization.verifyToken(request);
+            var decodedJWT = jwtAuthorization.verifyToken(refreshToken);
             String userPhone = decodedJWT.getSubject();
             // generate new access and refresh tokens
             UserDetails principal = loadUser(userPhone);

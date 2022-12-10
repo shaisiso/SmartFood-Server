@@ -30,7 +30,7 @@ public class MenuItemService {
 
     public MenuItem findItemById(Long id) throws ResponseStatusException {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item with item id" + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item with item id:" + id));
     }
 
     public List<MenuItem> getMenu() {

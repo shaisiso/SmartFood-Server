@@ -22,7 +22,7 @@ public class LoginController {
         return registeredUserService.login(credentials);
     }
     @PostMapping("/refresh-token")
-    public ResponseEntity<AuthorizationTokens>  refreshToken(HttpServletRequest request) throws IOException {
-        return registeredUserService.refreshToken(request);
+    public ResponseEntity<AuthorizationTokens>  refreshToken( @RequestBody AuthorizationTokens tokens) throws IOException {
+        return registeredUserService.refreshToken(tokens);
     }
 }

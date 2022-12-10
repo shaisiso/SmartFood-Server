@@ -49,17 +49,18 @@ public class JwtAuthorization {
             }
         }
     }
-
-    public DecodedJWT verifyToken(HttpServletRequest request) {
-        String token = request.getHeader(JwtProperties.HEADER_STRING)
-                .replace(JwtProperties.TOKEN_PREFIX, "");
+    public DecodedJWT verifyToken(String token) {
         Algorithm algorithm = Algorithm.HMAC512(JwtProperties.SECRET.getBytes());
-
         // parse the token and validate it
         DecodedJWT decodedJWT = JWT.require(algorithm)
                 .build()
                 .verify(token);
         return decodedJWT;
+    }
+    public DecodedJWT verifyToken(HttpServletRequest request) {
+        String token = request.getHeader(JwtProperties.HEADER_STRING)
+                .replace(JwtProperties.TOKEN_PREFIX, "");
+        return verifyToken(token);
     }
 
     private void verifyPermission(DecodedJWT decodedJWT, String[] requestedAuthorities) {
@@ -69,7 +70,7 @@ public class JwtAuthorization {
         AtomicBoolean hasPermission = new AtomicBoolean(false);
         Stream.of(requestedAuthorities).forEach(requestedAuthority -> {
             if (roles.contains(requestedAuthority)) {
-                log.debug("contain");
+               // log.debug("contain");
                 hasPermission.set(true);
                 return;
             }

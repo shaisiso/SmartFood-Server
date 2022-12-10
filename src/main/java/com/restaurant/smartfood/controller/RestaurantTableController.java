@@ -24,4 +24,8 @@ public class RestaurantTableController {
     public RestaurantTable getTableById(@PathVariable("id") Integer tableId){
         return tableService.getTableById(tableId);
     }
+    @PutMapping
+    public RestaurantTable updateTable( @RequestBody RestaurantTable table) {
+        return tableService.updateRestaurantTable(table);
+    }
 }

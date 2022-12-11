@@ -27,6 +27,7 @@ public class Address {
     @NotNull
     private Integer houseNumber;
 
+
     private Character entrance;
 
     private Integer apartmentNumber;

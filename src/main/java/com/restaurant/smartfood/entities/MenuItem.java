@@ -24,18 +24,18 @@ public class MenuItem {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "menu_sequence")
     private Long itemId;
 
-    @NotBlank
+    @NotBlank(message = "Name must not be blank")
     @Column(length = 30,nullable = false)
     private String name;
 
-    @NotNull
+    @NotNull(message = "Category must not be null")
     @Enumerated(EnumType.STRING)
     @Column(length = 20,nullable = false)
     private ItemCategory category;
 
     private String description;
 
-    @NotNull
+    @NotNull(message = "Price must not be null")
     @Column(nullable = false)
     @DecimalMin(value = "0",inclusive = false)
     private Float price;

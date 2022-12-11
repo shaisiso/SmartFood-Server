@@ -60,9 +60,12 @@ public class EmployeeService {
     public Employee updateEmployee(Employee updatedEmployee) {
         employeeRepository.findById(updatedEmployee.getId()).ifPresentOrElse(
                 employeeDB -> {
+                    // if password was changed need to encrypt it, otherwise it will be encrypted
+                    var password = updatedEmployee.getPassword().equals(employeeDB.getPassword()) ?
+                            employeeDB.getPassword() :  passwordEncoder.encode(updatedEmployee.getPassword());
                     personService.updatePerson(updatedEmployee);
                     employeeRepository.updateEmployee(updatedEmployee.getId(),
-                            passwordEncoder.encode(updatedEmployee.getPassword()), updatedEmployee.getRole().toString());
+                            password  , updatedEmployee.getRole().toString());
                 },
                 () -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + updatedEmployee.getId());
@@ -80,15 +83,15 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    public void deleteEmployee(Employee employee) {
-        employeeRepository.findById(employee.getId())
+    public void deleteEmployee(Long employeeId) {
+        employeeRepository.findById(employeeId)
                 .ifPresentOrElse(e -> {
-                            onDeleteDeliveryGuySetNull(employee);
-                            employeeRepository.delete(employee);
+                            onDeleteDeliveryGuySetNull(e);
+                            employeeRepository.delete(e);
                         },
                         () -> {
                             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "There is no employee with phone number: " + employee.getPhoneNumber());
+                                    "There is no employee with id: " + employeeId);
                         });
     }
 

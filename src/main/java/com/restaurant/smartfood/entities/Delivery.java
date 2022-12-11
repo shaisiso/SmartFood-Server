@@ -19,8 +19,8 @@ import javax.validation.constraints.NotNull;
 public class Delivery extends Order {
 
 
-    @ManyToOne()
-    @JoinColumn()
+    @ManyToOne
+    @JoinColumn
     private Employee deliveryGuy;
 
     @NotNull

@@ -25,7 +25,7 @@ public class Shift {
     @Column(name = "shift_id")
     private Long shiftID;
 
-    @NotNull
+    @NotNull(message = "Employee must not be null")
     @ManyToOne
     @JoinColumn
     @OnDelete(action = OnDeleteAction.CASCADE)

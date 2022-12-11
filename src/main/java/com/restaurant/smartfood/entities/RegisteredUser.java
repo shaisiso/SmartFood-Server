@@ -19,6 +19,6 @@ import javax.validation.constraints.Size;
 public class RegisteredUser extends Person {
     @NotBlank
     @Column(nullable = false)
-    @Size(min = 6,message = "Password needs to be at least 8 characters")
+    @Size(min = 6,message = "Password needs to be at least 6 characters")
     private String password;
 }

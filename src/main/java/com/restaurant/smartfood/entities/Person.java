@@ -6,6 +6,7 @@ import org.hibernate.annotations.Polymorphism;
 import org.hibernate.annotations.PolymorphismType;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -40,6 +41,7 @@ public class Person {
     @Email
     private String email;
 
+    @Valid
     @Embedded
     private Address address;
 

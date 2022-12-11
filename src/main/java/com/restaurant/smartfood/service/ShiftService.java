@@ -1,5 +1,6 @@
 package com.restaurant.smartfood.service;
 
+import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.Shift;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
@@ -32,16 +33,29 @@ public class ShiftService {
     public Shift saveShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)
             newShift.setShiftEntrance(LocalDateTime.now(ZoneId.of(timezone)));
-        var employee =employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
+        var employee = employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no employee with phone number: " + newShift.getEmployee().getPhoneNumber()));
+        validateFirstShiftStart(employee);
         newShift.setEmployee(employee);
         return shiftRepository.save(newShift);
     }
 
+    private void validateFirstShiftStart(Employee employee) {
+        var dateStart = LocalDate.now(ZoneId.of(timezone)).atStartOfDay();
+        var dateEnd = LocalDate.now(ZoneId.of(timezone)).atTime(23, 59);
+        shiftRepository.findByEmployeePhoneNumberAndShiftEntranceIsBetween(employee.getPhoneNumber(), dateStart, dateEnd)
+                .stream().filter(shift -> shift.getShiftExit() == null)
+                .findFirst()
+                .ifPresent(shift -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "You already started a shift");
+                });
+    }
+
     public Shift exitShift(Shift shift) {
-        var shiftFound = shiftRepository.findById(shift.getShiftID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found"));
+        var shiftId = shift.getShiftID() != null ? shift.getShiftID() : -1;
+        var shiftFound = shiftRepository.findById(shiftId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shift was not found"));
         if (shiftFound.getShiftExit() == null)
             shiftFound.setShiftExit(LocalDateTime.now(ZoneId.of(timezone)));
         return shiftRepository.save(shiftFound);

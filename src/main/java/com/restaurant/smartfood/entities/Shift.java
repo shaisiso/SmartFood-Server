@@ -31,10 +31,12 @@ public class Shift {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Employee employee;
 
-    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     @Column(nullable = false)
     private LocalDateTime shiftEntrance;
 
-    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime shiftExit;
+
+    private Boolean isApproved = false;
 }

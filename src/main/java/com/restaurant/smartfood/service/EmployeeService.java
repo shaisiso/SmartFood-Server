@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Employee;
+import com.restaurant.smartfood.entities.EmployeeRole;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import com.restaurant.smartfood.security.LoginAuthenticationRequest;
@@ -26,7 +27,8 @@ public class EmployeeService {
     private PersonService personService;
     @Autowired
     private PersonRepository personRepository;
-
+    @Autowired
+    private  DeliveryService deliveryService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -81,12 +83,22 @@ public class EmployeeService {
     public void deleteEmployee(Employee employee) {
         employeeRepository.findById(employee.getId())
                 .ifPresentOrElse(e -> {
+                            onDeleteDeliveryGuySetNull(employee);
                             employeeRepository.delete(employee);
                         },
                         () -> {
                             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                                     "There is no employee with phone number: " + employee.getPhoneNumber());
                         });
+    }
+
+    private void onDeleteDeliveryGuySetNull(Employee employee) {
+        if (employee.getRole().equals(EmployeeRole.DELIVERY_GUY)){
+            var deliveries = deliveryService.getDeliveriesByDeliveryGuy(employee.getId());
+            deliveries.forEach(d-> d.setDeliveryGuy(null));
+            deliveryService.saveAll(deliveries);
+        }
+
     }
 
     public Employee getEmployeeByID(Long employeeID) {

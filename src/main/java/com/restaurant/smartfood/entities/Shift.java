@@ -2,6 +2,8 @@ package com.restaurant.smartfood.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.FutureOrPresent;
@@ -24,8 +26,9 @@ public class Shift {
     private Long shiftID;
 
     @NotNull
-    @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
+    @ManyToOne
+    @JoinColumn
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Employee employee;
 
     @JsonFormat(pattern="dd-MM-yyyy HH:mm")

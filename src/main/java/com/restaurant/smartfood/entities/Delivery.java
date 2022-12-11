@@ -20,8 +20,7 @@ public class Delivery extends Order {
 
 
     @ManyToOne()
-    @JoinColumn(foreignKey = @ForeignKey(name = "fk_delivery_guy_id",
-            foreignKeyDefinition = " /*FOREIGN KEY in sql that sets ON DELETE SET NULL*/"))
+    @JoinColumn()
     private Employee deliveryGuy;
 
     @NotNull

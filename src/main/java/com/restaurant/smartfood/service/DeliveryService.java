@@ -85,6 +85,7 @@ public class DeliveryService {
     }
 
     public List<Delivery> getDeliveriesByStatus(OrderStatus status) {
+
         return deliveryRepository.findByStatus(status);
     }
 

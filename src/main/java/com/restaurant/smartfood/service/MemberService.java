@@ -74,3 +74,4 @@ public class MemberService {
         return memberRepository.findAll();
     }
 }
+

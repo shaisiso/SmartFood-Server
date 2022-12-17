@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.restaurant.smartfood.entities.ItemInOrder;
+import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.repostitory.ItemInOrderRepository;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.beans.factory.annotation.Autowired;

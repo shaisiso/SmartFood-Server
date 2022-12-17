@@ -1,9 +1,9 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.ItemInOrder;
-import com.restaurant.smartfood.entities.Member;
-import com.restaurant.smartfood.entities.Order;
-import com.restaurant.smartfood.entities.OrderStatus;
+import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.repostitory.DiscountRepository;
+import com.restaurant.smartfood.repostitory.ItemInOrderRepository;
+import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -30,6 +32,9 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ItemInOrderService itemInOrderService;
     private final MemberService memberService;
+
+    private final DiscountRepository discountRepository;
+    private final MemberRepository memberRepository;
 
     @Value("${timezone.name}")
     private String timezone;
@@ -67,8 +72,11 @@ public class OrderService {
     }
 
     public float calculateTotalPrice(Order order) {
-        return order.getItems().stream().map(ItemInOrder::getPrice)
+
+        var price = order.getItems().stream().map(i -> i.getPrice())
                 .reduce((float) 0, Float::sum);
+        order.setNewTotalPrice(price);
+        return price;
     }
 
     public Order payment(Long orderId, Float amount) {
@@ -92,18 +100,8 @@ public class OrderService {
         if (amount > order.getTotalPrice())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The amount is bigger than the total price");
-        order.setTotalPrice(order.getTotalPrice() - amount);
+        order.setNewTotalPrice(order.getTotalPrice() - amount);
         return orderRepository.save(order);
-    }
-
-    public Order applyDiscount(Long orderId, Integer percent) {
-        var order = getOrder(orderId);
-        if (percent < 0 || percent > 100)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "discount percent invalid.");
-        order.setTotalPrice(order.getTotalPrice() * ((100 - percent) / (float) 100));
-        return orderRepository.save(order);
-
     }
 
     public Order applyMemberDiscount(Long orderId, Member member) {
@@ -153,5 +151,54 @@ public class OrderService {
 
     public void deleteItemFromOrder(Long itemId) {
         itemInOrderService.deleteItemFromOrder(itemId);
+    }
+
+    public Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {
+        var order = getOrder(orderId);
+        boolean isMember = false;
+        var category = "";
+        var numberOfItems = 0;
+        var oldPrice = 0.0;
+        List<ItemInOrder> items;
+
+        if (phoneNumber != null)
+            isMember = memberRepository.findByPhoneNumber(phoneNumber).isPresent();
+
+        List<Discount> discounts = discountRepository.findByStartDateIsBetweenAndStartHourIsLessThanEqualAndEndHourIsGreaterThanEqual
+                (order.getDate(), order.getDate(), order.getHour(), order.getHour());
+
+        for (var d: discounts)
+            if (!d.getDays().contains(LocalDate.now().getDayOfWeek()))
+                discounts.remove(d);
+
+        if (!isMember)
+            for (var d : discounts)
+                if (d.getForMembersOnly())
+                    discounts.remove(d);
+
+        for (var discount : discounts) {
+            for (var c : discount.getCategories()) {
+                items = howManyByCategory(order, c);
+                numberOfItems = items.size()/(discount.getIfYouOrder()+discount.getYouGetDiscountFor()); // the number of items that get discount
+                for (int i = 0; i < numberOfItems; i++)
+                    applyItemInOrderDiscount(items.get(i), discount.getPercent());
+            }
+        }
+        return orderRepository.save(order);
+    }
+
+    private List<ItemInOrder> howManyByCategory(Order order, ItemCategory category) {
+        var items = new ArrayList<ItemInOrder>();
+        for (var i: order.getItems()) {
+            if (i.getItem().getCategory().equals(category) && i.getPrice() > 0)
+                items.add(i);
+        }
+        items.sort(Comparator.comparing(ItemInOrder::getPrice));
+        return items;
+    }
+
+    public ItemInOrder applyItemInOrderDiscount(ItemInOrder itemInOrder, int percent) {
+        itemInOrder.setPrice(itemInOrder.getPrice() * ((100 - percent) / (float) 100));
+        return itemInOrder;
     }
 }

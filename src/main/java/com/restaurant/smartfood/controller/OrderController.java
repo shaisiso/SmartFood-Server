@@ -4,9 +4,12 @@ import com.restaurant.smartfood.entities.ItemInOrder;
 import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.entities.OrderStatus;
+import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -57,13 +60,7 @@ public class OrderController {
         return orderService.updateTotalPrice(orderId, amount);
     }
 
-    @PutMapping("/price/percent/{orderId}/{percent}")
-    public Order applyDiscount(@PathVariable("orderId") Long orderId,
-                               @PathVariable("percent") Integer percent) {
-        return orderService.applyDiscount(orderId, percent);
-    }
-
-    @PutMapping("/price/member/{orderId}") //TODO: check if member and check in postman
+    @PutMapping("/price/member/{orderId}")
     public Order applyMemberDiscount(@PathVariable("orderId") Long orderId,
                                      @RequestBody Member member) {
         return orderService.applyMemberDiscount(orderId, member);
@@ -102,5 +99,11 @@ public class OrderController {
     public List<Order> getOrdersByDates(@PathVariable("startDate") String startDate,
                                                 @PathVariable("endDate") String endDate) {
         return orderService.getOrdersByDates(startDate, endDate);
+    }
+
+    @PutMapping("/bill/{orderId}/{phonenumber}")
+    public Order checkIfEntitledToDiscount(@PathVariable("orderId") Long orderId,
+                                           @PathVariable (name="phonenumber", required = false) String phoneNumber) {
+        return orderService.checkIfEntitledToDiscount(orderId, phoneNumber);
     }
 }

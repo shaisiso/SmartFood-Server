@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -16,4 +17,6 @@ public interface TableReservationRepository extends JpaRepository<TableReservati
     List<TableReservation> findByDateIsBetween(LocalDate startDate, LocalDate endDate);
 
     List<TableReservation> findByPersonPhoneNumber(String phoneNumber);
+
+    List<TableReservation> findByDateIsAndHourIsBetween(LocalDate date, LocalTime startHour, LocalTime endHour);
 }

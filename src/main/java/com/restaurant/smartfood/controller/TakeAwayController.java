@@ -1,9 +1,7 @@
 package com.restaurant.smartfood.controller;
 
-import com.restaurant.smartfood.entities.Delivery;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.TakeAway;
-import com.restaurant.smartfood.service.DeliveryService;
 import com.restaurant.smartfood.service.TakeAwayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +12,7 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/takeaway")
-public class TakeAwayController {
+public class TakeAwayController { //TODO shahar: check in post man
 
     @Autowired
     private TakeAwayService takeAwayService;

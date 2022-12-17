@@ -57,6 +57,10 @@ public class Order {
     private Float totalPrice;
 
     @Column(nullable = false)
+    @DecimalMin(value = "0", inclusive = false)
+    private Float newTotalPrice;
+
+    @Column(nullable = false)
     @DecimalMin(value = "0")
     private Float alreadyPaid;
 

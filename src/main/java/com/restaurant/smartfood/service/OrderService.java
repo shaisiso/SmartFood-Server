@@ -33,12 +33,6 @@ public class OrderService {
     private ItemInOrderService itemInOrderService;
 
     @Autowired
-    private ItemInOrderRepository itemInOrderRepository;
-
-    @Autowired
-    private DiscountService discountService;
-
-    @Autowired
     private DiscountRepository discountRepository;
 
     @Autowired
@@ -82,8 +76,10 @@ public class OrderService {
     }
 
     public float calculateTotalPrice(Order order) {
-        return order.getItems().stream().map(i -> i.getPrice())
+        var price = order.getItems().stream().map(i -> i.getPrice())
                 .reduce((float) 0, Float::sum);
+        order.setNewTotalPrice(price);
+        return price;
     }
 
     public Order payment(Long orderId, Float amount) {
@@ -107,16 +103,7 @@ public class OrderService {
         if (amount > order.getTotalPrice())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The amount is bigger than the total price");
-        order.setTotalPrice(order.getTotalPrice() - amount);
-        return orderRepository.save(order);
-    }
-
-    public Order applyDiscount(Long orderId, Integer percent) {
-        var order = getOrder(orderId);
-        if (percent < 0 || percent > 100)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "discount percent invalid.");
-        order.setTotalPrice(order.getTotalPrice() * ((100 - percent) / (float) 100));
+        order.setNewTotalPrice(order.getTotalPrice() - amount);
         return orderRepository.save(order);
     }
 
@@ -169,13 +156,14 @@ public class OrderService {
         itemInOrderService.deleteItemFromOrder(itemId);
     }
 
-    private Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {
+    public Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {
         var order = getOrder(orderId);
         boolean isMember = false;
         var category = "";
         var numberOfItems = 0;
         var oldPrice = 0.0;
         List<ItemInOrder> items;
+
         if (phoneNumber != null)
             isMember = memberRepository.findByPhoneNumber(phoneNumber).isPresent();
 
@@ -199,13 +187,13 @@ public class OrderService {
                     applyItemInOrderDiscount(items.get(i), discount.getPercent());
             }
         }
-        return order;
+        return orderRepository.save(order);
     }
 
     private List<ItemInOrder> howManyByCategory(Order order, ItemCategory category) {
         var items = new ArrayList<ItemInOrder>();
         for (var i: order.getItems()) {
-            if (i.getItem().getCategory().equals(category))
+            if (i.getItem().getCategory().equals(category) && i.getPrice() > 0)
                 items.add(i);
         }
         items.sort(Comparator.comparing(ItemInOrder::getPrice));

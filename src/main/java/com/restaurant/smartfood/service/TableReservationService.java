@@ -1,7 +1,10 @@
 package com.restaurant.smartfood.service;
 
 
+import com.restaurant.smartfood.entities.ItemInOrder;
+import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.entities.TableReservation;
+import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -22,16 +27,18 @@ public class TableReservationService {
     @Autowired
     private PersonService personService;
 
-
+    @Autowired
+    private RestaurantTableRepository restaurantTableRepository;
 
     public TableReservation saveTableReservation(TableReservation reservation) {
+        var freeTables = findSuitableTable(reservation);
+        if (freeTables.isEmpty())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is now suitable table for your reservation request.");
+
         personService.savePerson(reservation.getPerson());
+        reservation.setTable(freeTables.get(0));
         return tableReservationRepository.save(reservation);
-        //TODO: check hours availability
-        // יש בTABLE RESERVATION רשימה של הזמנות, דרך הרשימה נוציא את השולחנות שיהיה תפוסים בטווח שעות
-        // יש לנו רשימה של כל השולנות במסעדה, נמחק ממנה את השולחנות שמופיעים הרשימה הראשונה
-        // אם נותרו שולחנות פנויים - יופי, אם לא - לרשימת המתנה
-            }
+    }
 
     public void deleteTableReservation(TableReservation reservation) {
         tableReservationRepository.findById(reservation.getReservationId()).
@@ -57,4 +64,29 @@ public class TableReservationService {
     public List<TableReservation> findAll() {
         return tableReservationRepository.findAll();
     }
+
+    private List<RestaurantTable> findSuitableTable(TableReservation reservation) {
+        // res = all table reservations in relevant date and hours
+        var res = tableReservationRepository.
+                findByDateIsAndHourIsBetween(reservation.getDate(), reservation.getHour().minusHours(1),
+                        reservation.getHour().plusHours(1));
+
+        // remove irrelevant tables (size wise)
+        res.removeIf(t -> res.contains(t.getNumberOfDiners() < reservation.getNumberOfDiners()));
+
+        // busyTables = the busy tables from the reservations
+        List<RestaurantTable> busyTables = res.stream()
+                .map(TableReservation::getTable)
+                .collect(Collectors.toList());
+
+        // freeTables = the free tables in the relevant hours
+        var freeTables = restaurantTableRepository.findAll();
+        freeTables.removeIf(t -> busyTables.contains(t.getTableId()));
+
+        freeTables.sort(Comparator.comparing(RestaurantTable::getNumberOfSeats));
+        return freeTables;
+
+
+    }
+
 }

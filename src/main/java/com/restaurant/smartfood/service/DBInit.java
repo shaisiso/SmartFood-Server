@@ -29,7 +29,6 @@ public class DBInit implements CommandLineRunner {
     private final DeliveryRepository deliveryRepository;
     private final WaitingListRepository waitingListRepository;
     private final DiscountRepository discountRepository;
-
     private final PasswordEncoder passwordEncoder;
     @Override
     public void run(String... args)  {

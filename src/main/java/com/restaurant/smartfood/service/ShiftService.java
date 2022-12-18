@@ -1,9 +1,13 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Employee;
+import com.restaurant.smartfood.entities.EmployeeRole;
 import com.restaurant.smartfood.entities.Shift;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
+import com.restaurant.smartfood.websocket.WebSocketService;
+import com.restaurant.smartfood.websocket.WebSocketTextController;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,16 +25,17 @@ import java.util.List;
 @Service
 @Transactional
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ShiftService {
 
-    @Autowired
-    private ShiftRepository shiftRepository;
-    @Autowired
-    private EmployeeRepository employeeRepository;
+
+    private final ShiftRepository shiftRepository;
+    private final EmployeeRepository employeeRepository;
+    private final WebSocketService webSocketService;
     @Value("${timezone.name}")
     private String timezone;
 
-    public Shift saveShift(Shift newShift) {
+    public Shift startShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)
             newShift.setShiftEntrance(LocalDateTime.now(ZoneId.of(timezone)));
         var employee = employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
@@ -38,7 +43,19 @@ public class ShiftService {
                         "There is no employee with phone number: " + newShift.getEmployee().getPhoneNumber()));
         validateFirstShiftStart(employee);
         newShift.setEmployee(employee);
-        return shiftRepository.save(newShift);
+        if (isManagers(employee)) {
+            newShift.setIsApproved(true);
+            return shiftRepository.save(newShift);
+        } else { // notify shift manager
+            var shift = shiftRepository.save(newShift);
+            webSocketService.notifyNewShiftEntrance(shift);
+            return shift;
+        }
+    }
+
+    private boolean isManagers(Employee employee) {
+        return List.of(EmployeeRole.MANAGER, EmployeeRole.SHIFT_MANAGER, EmployeeRole.DELIVERY_MANAGER, EmployeeRole.KITCHEN_MANAGER, EmployeeRole.BAR_MANAGER)
+                .contains(employee.getRole());
     }
 
     private void validateFirstShiftStart(Employee employee) {
@@ -58,12 +75,22 @@ public class ShiftService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shift was not found"));
         if (shiftFound.getShiftExit() == null)
             shiftFound.setShiftExit(LocalDateTime.now(ZoneId.of(timezone)));
+        if (!isManagers(shift.getEmployee())) {
+            var updatedShift = shiftRepository.save(shiftFound);
+            webSocketService.notifyNewShiftEntrance(updatedShift);
+            return updatedShift;
+        }
         return shiftRepository.save(shiftFound);
     }
 
     public Shift updateShift(Shift shift) {
         shiftRepository.findById(shift.getShiftID())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found"));
+        if (!isManagers(shift.getEmployee())) {
+            var updatedShift = shiftRepository.save(shift);
+            webSocketService.notifyNewShiftEntrance(updatedShift);
+            return updatedShift;
+        }
         return shiftRepository.save(shift);
     }
 
@@ -98,5 +125,9 @@ public class ShiftService {
             log.error(exception.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
+    }
+
+    public List<Shift> getAllShiftsToApprove() {
+        return shiftRepository.findByIsApproved(false);
     }
 }

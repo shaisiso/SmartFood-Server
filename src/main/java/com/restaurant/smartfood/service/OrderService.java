@@ -49,6 +49,7 @@ public class OrderService {
         order.setStatus(OrderStatus.ACCEPTED);
         order.setAlreadyPaid((float) 0);
         order.setTotalPrice((float) 0);
+        order.setNewTotalPrice((float)0.0);
         return order;
     }
     public Order addOrder(Order order) {
@@ -58,7 +59,9 @@ public class OrderService {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        orderInDB.setTotalPrice(calculateTotalPrice(orderInDB));
+        var totalPrice = calculateTotalPrice(orderInDB);
+        orderInDB.setTotalPrice(totalPrice);
+        orderInDB.setNewTotalPrice(totalPrice);
         return orderRepository.save(orderInDB);
     }
 

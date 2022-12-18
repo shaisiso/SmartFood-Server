@@ -41,11 +41,12 @@ public class DeliveryService {
             i.setOrder(deliveryInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        deliveryInDB.setTotalPrice(orderService.calculateTotalPrice(deliveryInDB));
-
-        newDelivery = deliveryRepository.save(deliveryInDB);
-        webSocketService.notifyNewDelivery(newDelivery);
-        return newDelivery;
+        var totalPrice = orderService.calculateTotalPrice(deliveryInDB);
+        deliveryInDB.setTotalPrice(totalPrice);
+        deliveryInDB.setNewTotalPrice(totalPrice);
+        var dToReturn = deliveryRepository.save(deliveryInDB);
+        webSocketService.notifyNewDelivery(dToReturn);
+        return dToReturn;
     }
 
     public Delivery updateDelivery(Delivery delivery) { //only updates delivery guy and person details

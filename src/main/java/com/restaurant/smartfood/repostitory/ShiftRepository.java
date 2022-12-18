@@ -15,4 +15,6 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
     List<Shift> findByEmployeePhoneNumberAndShiftEntranceIsBetween(String phoneNumber,LocalDateTime start, LocalDateTime end);
 
     List<Shift> findByShiftEntranceIsBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Shift> findByIsApproved(Boolean isApproved);
 }

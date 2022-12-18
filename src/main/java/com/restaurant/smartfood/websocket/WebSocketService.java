@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.websocket;
 
 import com.restaurant.smartfood.entities.Delivery;
+import com.restaurant.smartfood.entities.Shift;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,10 @@ public class WebSocketService {
       //  notificationService.sendTaskNotification();
         messagingTemplate.convertAndSend("/topic/task", delivery);
     }
+    public void notifyNewShiftEntrance(Shift shift){
+        messagingTemplate.convertAndSend("/topic/shift",shift);
+    }
+
     public void notifyFrontend(TextMessageDTO message) {
         TextMessageDTO  response =  TextMessageDTO.builder()
                 .date(message.getDate()).message(message.getMessage())

@@ -44,7 +44,9 @@ public class TakeAwayService {
             i.setOrder(takeAwayInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        takeAwayInDB.setTotalPrice(orderService.calculateTotalPrice(takeAwayInDB));
+        var totalPrice = orderService.calculateTotalPrice(takeAwayInDB);
+        takeAwayInDB.setTotalPrice(totalPrice);
+        takeAwayInDB.setNewTotalPrice(totalPrice);
         return takeAwayRepository.save(takeAwayInDB);
     }
 

@@ -30,12 +30,15 @@ public class DeliveryService {
 
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private PersonService personService;
 
     @Value("${timezone.name}")
     private String timezone;
 
     public Delivery addDelivery(Delivery newDelivery) {
         var d = (Delivery) orderService.initOrder(newDelivery);
+        d= connectPersonToDelivery(d);
         var deliveryInDB = deliveryRepository.save(d);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
@@ -45,7 +48,7 @@ public class DeliveryService {
         deliveryInDB.setTotalPrice(totalPrice);
         deliveryInDB.setNewTotalPrice(totalPrice);
         var dToReturn = deliveryRepository.save(deliveryInDB);
-        webSocketService.notifyNewDelivery(dToReturn);
+        webSocketService.notifyExternalOrders(dToReturn);
         return dToReturn;
     }
 
@@ -53,9 +56,26 @@ public class DeliveryService {
         deliveryRepository.findById(delivery.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + delivery.getId())
         );
-        deliveryRepository.updateDelivery(delivery.getDeliveryGuy().getId(),
-                delivery.getPersonDetails().getId(), delivery.getId());
+        var d = connectPersonToDelivery(delivery);
+        var deliveryGuyId = d.getDeliveryGuy() != null ? d.getDeliveryGuy().getId() : null;
+        deliveryRepository.updateDelivery(deliveryGuyId,  d.getPersonDetails().getId(), d.getId());
+        return delivery;
+    }
 
+    private Delivery connectPersonToDelivery(Delivery delivery) {
+        if (delivery.getPersonDetails().getId() == null) {
+            personService.getOptionalPersonByPhone(delivery.getPersonDetails().getPhoneNumber())
+                    .ifPresentOrElse(p -> {
+                                var person = delivery.getPersonDetails();
+                                person.setId(p.getId());
+                                personService.savePerson(person);
+                                delivery.setPersonDetails(person);
+                            },
+                            () -> {
+                                var p = personService.savePerson(delivery.getPersonDetails());
+                                delivery.setPersonDetails(p);
+                            });
+        }
         return delivery;
     }
 

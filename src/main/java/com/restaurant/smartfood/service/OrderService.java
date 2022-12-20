@@ -5,6 +5,7 @@ import com.restaurant.smartfood.repostitory.DiscountRepository;
 import com.restaurant.smartfood.repostitory.ItemInOrderRepository;
 import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.OrderRepository;
+import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class OrderService {
 
     private final DiscountRepository discountRepository;
     private final MemberRepository memberRepository;
+    private final WebSocketService webSocketService;
 
     @Value("${timezone.name}")
     private String timezone;
@@ -136,7 +138,9 @@ public class OrderService {
     public Order updateStatus(Long orderId, OrderStatus status) {
         var order = getOrder(orderId);
         order.setStatus(status);
-        return orderRepository.save(order);
+        order = orderRepository.save(order);
+        webSocketService.notifyExternalOrders(order);
+        return order;
     }
 
     public void deleteOrder(Long orderId) {

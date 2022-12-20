@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 @Service
 public class PersonService {
     @Autowired
@@ -43,6 +45,9 @@ public class PersonService {
     public Person getPersonByPhone(String phoneNumber) {
         return personRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"There is no person with phone number: "+phoneNumber));
+    }
+    public Optional<Person>getOptionalPersonByPhone(String phoneNumber){
+        return personRepository.findByPhoneNumber(phoneNumber);
     }
     public void deletePerson(Person person){
         personRepository.delete(person);

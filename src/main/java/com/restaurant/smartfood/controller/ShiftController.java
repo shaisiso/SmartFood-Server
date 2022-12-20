@@ -33,10 +33,10 @@ public class ShiftController {
         return shiftService.updateShift(shift);
     }
 
-    @DeleteMapping
     @AuthorizeManagers
-    public void deleteShift(@Valid @RequestBody Shift shift) {
-        shiftService.deleteShift(shift);
+    @DeleteMapping("/{shiftId}")
+    public void deleteShift(@PathVariable("shiftId") Long shiftId) {
+        shiftService.deleteShift(shiftId);
     }
 
     @GetMapping("/{phoneNumber}/{startDate}/{endDate}")

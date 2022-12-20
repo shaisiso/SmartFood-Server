@@ -6,7 +6,6 @@ import com.restaurant.smartfood.entities.Shift;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
 import com.restaurant.smartfood.websocket.WebSocketService;
-import com.restaurant.smartfood.websocket.WebSocketTextController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ public class ShiftService {
             return shiftRepository.save(newShift);
         } else { // notify shift manager
             var shift = shiftRepository.save(newShift);
-            webSocketService.notifyNewShiftEntrance(shift);
+            webSocketService.notifyShiftsChange(shift);
             return shift;
         }
     }
@@ -77,7 +76,7 @@ public class ShiftService {
             shiftFound.setShiftExit(LocalDateTime.now(ZoneId.of(timezone)));
         if (!isManagers(shift.getEmployee())) {
             var updatedShift = shiftRepository.save(shiftFound);
-            webSocketService.notifyNewShiftEntrance(updatedShift);
+            webSocketService.notifyShiftsChange(updatedShift);
             return updatedShift;
         }
         return shiftRepository.save(shiftFound);
@@ -88,15 +87,16 @@ public class ShiftService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found"));
         if (!isManagers(shift.getEmployee())) {
             var updatedShift = shiftRepository.save(shift);
-            webSocketService.notifyNewShiftEntrance(updatedShift);
+            webSocketService.notifyShiftsChange(updatedShift);
             return updatedShift;
         }
         return shiftRepository.save(shift);
     }
 
-    public void deleteShift(Shift shift) {
-        shiftRepository.findById(shift.getShiftID()).ifPresentOrElse(s -> {
-            shiftRepository.delete(shift);
+    public void deleteShift(Long shiftId) {
+        shiftRepository.findById(shiftId).ifPresentOrElse(s -> {
+            shiftRepository.delete(s);
+            webSocketService.notifyShiftsChange(s);
         }, () -> {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found");
         });

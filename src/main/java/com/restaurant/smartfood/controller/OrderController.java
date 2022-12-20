@@ -106,4 +106,8 @@ public class OrderController {
                                            @PathVariable (name="phonenumber", required = false) String phoneNumber) {
         return orderService.checkIfEntitledToDiscount(orderId, phoneNumber);
     }
+    @GetMapping("/statuses")
+    public List<String> getAllStatuses(){
+        return OrderStatus.getStatusNames();
+    }
 }

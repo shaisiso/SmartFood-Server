@@ -30,15 +30,13 @@ public class TakeAwayService {
 
     @Autowired
     private OrderService orderService;
-
+    @Autowired
+    private PersonService personService;
     @Value("${timezone.name}")
     private String timezone;
     public TakeAway addTakeAway(TakeAway newTakeAway) {
-        newTakeAway.setDate(LocalDate.now(ZoneId.of(timezone)));
-        newTakeAway.setHour(LocalTime.now(ZoneId.of(timezone)));
-        newTakeAway.setStatus(OrderStatus.ACCEPTED);
-        newTakeAway.setAlreadyPaid((float) 0);
-        newTakeAway.setTotalPrice((float) 0);
+        newTakeAway = (TakeAway)orderService.initOrder(newTakeAway);
+        newTakeAway = connectPersonToTA(newTakeAway);
         var takeAwayInDB = takeAwayRepository.save(newTakeAway);
         takeAwayInDB.getItems().forEach(i -> {
             i.setOrder(takeAwayInDB);
@@ -49,12 +47,27 @@ public class TakeAwayService {
         takeAwayInDB.setNewTotalPrice(totalPrice);
         return takeAwayRepository.save(takeAwayInDB);
     }
-
+    private TakeAway connectPersonToTA(TakeAway takeAway) {
+        if (takeAway.getPersonDetails().getId() == null) {
+            personService.getOptionalPersonByPhone(takeAway.getPersonDetails().getPhoneNumber())
+                    .ifPresentOrElse(p -> {
+                                var person = takeAway.getPersonDetails();
+                                person.setId(p.getId());
+                                personService.savePerson(person);
+                                takeAway.setPersonDetails(person);
+                            },
+                            () -> {
+                                var p = personService.savePerson(takeAway.getPersonDetails());
+                                takeAway.setPersonDetails(p);
+                            });
+        }
+        return takeAway;
+    }
     public TakeAway updateTakeAway(TakeAway takeAway) {
         takeAwayRepository.findById(takeAway.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + takeAway.getId())
         );
-        takeAwayRepository.updateTakeAway(takeAway.getPerson().getId(), takeAway.getId());
+        takeAwayRepository.updateTakeAway(takeAway.getPersonDetails().getId(), takeAway.getId());
         return takeAway;
     }
 

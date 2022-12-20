@@ -58,23 +58,26 @@ public class DeliveryService {
         );
         var d = connectPersonToDelivery(delivery);
         var deliveryGuyId = d.getDeliveryGuy() != null ? d.getDeliveryGuy().getId() : null;
-        deliveryRepository.updateDelivery(deliveryGuyId,  d.getPersonDetails().getId(), d.getId());
+        deliveryRepository.updateDelivery(deliveryGuyId,  d.getPerson().getId(), d.getId());
+        webSocketService.notifyExternalOrders(delivery);
         return delivery;
     }
 
     private Delivery connectPersonToDelivery(Delivery delivery) {
-        if (delivery.getPersonDetails().getId() == null) {
-            personService.getOptionalPersonByPhone(delivery.getPersonDetails().getPhoneNumber())
+        if (delivery.getPerson().getId() == null) {
+            personService.getOptionalPersonByPhone(delivery.getPerson().getPhoneNumber())
                     .ifPresentOrElse(p -> {
-                                var person = delivery.getPersonDetails();
+                                var person = delivery.getPerson();
                                 person.setId(p.getId());
-                                personService.savePerson(person);
-                                delivery.setPersonDetails(person);
+                                delivery.setPerson(personService.savePerson(person));
                             },
                             () -> {
-                                var p = personService.savePerson(delivery.getPersonDetails());
-                                delivery.setPersonDetails(p);
+                                var p = personService.savePerson(delivery.getPerson());
+                                delivery.setPerson(p);
                             });
+        }else{
+            var p = personService.updatePerson(delivery.getPerson());
+            delivery.setPerson(p);
         }
         return delivery;
     }
@@ -98,7 +101,7 @@ public class DeliveryService {
     }
 
     public List<Delivery> getDeliveriesByMember(Long memberId) {
-        return deliveryRepository.findByPersonDetailsId(memberId);
+        return deliveryRepository.findByPersonId(memberId);
     }
 
     public List<Delivery> getDeliveriesByDeliveryGuy(Long id) {

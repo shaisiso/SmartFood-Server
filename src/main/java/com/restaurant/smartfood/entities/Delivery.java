@@ -2,8 +2,6 @@ package com.restaurant.smartfood.entities;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -26,5 +24,5 @@ public class Delivery extends Order {
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
-    private Person personDetails;
+    private Person person;
 }

@@ -12,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -48,17 +46,17 @@ public class TakeAwayService {
         return takeAwayRepository.save(takeAwayInDB);
     }
     private TakeAway connectPersonToTA(TakeAway takeAway) {
-        if (takeAway.getPersonDetails().getId() == null) {
-            personService.getOptionalPersonByPhone(takeAway.getPersonDetails().getPhoneNumber())
+        if (takeAway.getPerson().getId() == null) {
+            personService.getOptionalPersonByPhone(takeAway.getPerson().getPhoneNumber())
                     .ifPresentOrElse(p -> {
-                                var person = takeAway.getPersonDetails();
+                                var person = takeAway.getPerson();
                                 person.setId(p.getId());
                                 personService.savePerson(person);
-                                takeAway.setPersonDetails(person);
+                                takeAway.setPerson(person);
                             },
                             () -> {
-                                var p = personService.savePerson(takeAway.getPersonDetails());
-                                takeAway.setPersonDetails(p);
+                                var p = personService.savePerson(takeAway.getPerson());
+                                takeAway.setPerson(p);
                             });
         }
         return takeAway;
@@ -67,7 +65,7 @@ public class TakeAwayService {
         takeAwayRepository.findById(takeAway.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + takeAway.getId())
         );
-        takeAwayRepository.updateTakeAway(takeAway.getPersonDetails().getId(), takeAway.getId());
+        takeAwayRepository.updateTakeAway(takeAway.getPerson().getId(), takeAway.getId());
         return takeAway;
     }
 

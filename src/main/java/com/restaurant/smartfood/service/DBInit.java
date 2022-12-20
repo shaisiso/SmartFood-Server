@@ -416,7 +416,7 @@ public class DBInit implements CommandLineRunner {
         Delivery d = Delivery.builder()
                 .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
                 .hour(LocalTime.now())
-                .personDetails(personRepository.findByPhoneNumber("0521234567").get())
+                .person(personRepository.findByPhoneNumber("0521234567").get())
                 .date(LocalDate.now())
                 .totalPrice(itemRepository.findAll().get(0).getPrice())
                 .newTotalPrice(itemRepository.findAll().get(0).getPrice())

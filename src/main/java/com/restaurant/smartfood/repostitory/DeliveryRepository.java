@@ -15,13 +15,13 @@ import java.util.List;
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     @Modifying
     @Query(value = "update deliveries set delivery_guy_id=:deliveryGuyId, " +
-            "person_details_id=:personDetailsId where id=:id", nativeQuery = true)
+            "person_id=:personDetailsId where id=:id", nativeQuery = true)
     void updateDelivery(@Param("deliveryGuyId") Long deliveryGuyId,
                         @Param("personDetailsId") Long personDetailsId,
                         @Param("id") Long id);
 
     List<Delivery> findByDateIsBetween(LocalDate startDate, LocalDate endDate);
-    List<Delivery> findByPersonDetailsId(Long id);
+    List<Delivery> findByPersonId(Long id);
     List<Delivery> findByDeliveryGuyId(Long id);
     List<Delivery> findByStatus(OrderStatus status);
     List<Delivery> findByStatusIsNot(OrderStatus status);

@@ -22,9 +22,12 @@ public class ItemInOrderService {
     }
 
     public ItemInOrder updateItemInOrder(ItemInOrder item) {
-        itemInOrderRepository.findById(item.getId()).orElseThrow(() ->
+        var i =itemInOrderRepository.findById(item.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no itemInOrder with this id"+item.getId()));
+        item.setOrder(i.getOrder());
+        if (item.getPrice()==null)
+            item.setPrice(i.getPrice());
         return itemInOrderRepository.save(item);
     }
     public void deleteItemFromOrder(Long itemId) {

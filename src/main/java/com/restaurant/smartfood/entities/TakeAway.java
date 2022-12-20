@@ -22,5 +22,5 @@ public class TakeAway extends Order {
     @ManyToOne(optional = false)
     @NotNull
     @JoinColumn(nullable = false)
-    private Person personDetails;
+    private Person person;
 }

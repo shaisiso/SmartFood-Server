@@ -153,7 +153,9 @@ public class OrderService {
 
     public Order updateItemInOrder(ItemInOrder item) {
         var i = itemInOrderService.updateItemInOrder(item);
-        return getOrder(i.getOrder().getId());
+        var order = getOrder(i.getOrder().getId());
+        order.setTotalPrice(calculateTotalPrice(order));
+        return orderRepository.save(order);
     }
 
     public void deleteItemFromOrder(Long itemId) {

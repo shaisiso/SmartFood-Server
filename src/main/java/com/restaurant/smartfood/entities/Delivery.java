@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @SuperBuilder
@@ -19,10 +20,12 @@ public class Delivery extends Order {
 
     @ManyToOne
     @JoinColumn
+    @Valid
     private Employee deliveryGuy;
 
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
+    @Valid
     private Person person;
 }

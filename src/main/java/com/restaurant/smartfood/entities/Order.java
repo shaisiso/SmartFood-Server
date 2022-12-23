@@ -2,21 +2,16 @@ package com.restaurant.smartfood.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Polymorphism;
 import org.hibernate.annotations.PolymorphismType;
 
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -54,11 +49,11 @@ public class Order {
 
     @Column(nullable = false)
     @DecimalMin(value = "0", inclusive = false)
-    private Float totalPrice;
+    private Float originalTotalPrice;
 
     @Column(nullable = false)
     @DecimalMin(value = "0", inclusive = false)
-    private Float newTotalPrice;
+    private Float totalPriceToPay;
 
     @Column(nullable = false)
     @DecimalMin(value = "0")

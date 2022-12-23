@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -25,10 +26,11 @@ public class Address {
     private String streetName;
 
     @NotNull(message = "House number must not be null")
+    @Min(0)
     private Integer houseNumber;
 
 
     private Character entrance;
-
+    @Min(0)
     private Integer apartmentNumber;
 }

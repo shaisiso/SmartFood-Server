@@ -372,8 +372,8 @@ public class DBInit implements CommandLineRunner {
         var o = Order.builder()
                 .date(LocalDate.now())
                 .hour(LocalTime.now())
-                .totalPrice(itemRepository.findById((long)1).get().getPrice())
-                .newTotalPrice(itemRepository.findById((long)1).get().getPrice())
+                .originalTotalPrice(itemRepository.findById((long)1).get().getPrice())
+                .totalPriceToPay(itemRepository.findById((long)1).get().getPrice())
                 .status(OrderStatus.ACCEPTED)
                 .alreadyPaid((float)0)
                 .build();
@@ -418,9 +418,8 @@ public class DBInit implements CommandLineRunner {
                 .hour(LocalTime.now())
                 .person(personRepository.findByPhoneNumber("0521234567").get())
                 .date(LocalDate.now())
-                .totalPrice(itemRepository.findAll().get(0).getPrice())
-                .newTotalPrice(itemRepository.findAll().get(0).getPrice())
-
+                .originalTotalPrice(itemRepository.findAll().get(0).getPrice())
+                .totalPriceToPay(itemRepository.findAll().get(0).getPrice())
                 .status(OrderStatus.ACCEPTED)
                 .alreadyPaid((float)0)
                 .build();

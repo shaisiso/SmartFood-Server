@@ -2,7 +2,6 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.DiscountRepository;
-import com.restaurant.smartfood.repostitory.ItemInOrderRepository;
 import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.OrderRepository;
 import com.restaurant.smartfood.websocket.WebSocketService;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +48,8 @@ public class OrderService {
         order.setHour(LocalTime.now(ZoneId.of(timezone)));
         order.setStatus(OrderStatus.ACCEPTED);
         order.setAlreadyPaid((float) 0);
-        order.setTotalPrice((float) 0);
-        order.setNewTotalPrice((float)0.0);
+        order.setOriginalTotalPrice((float) 0);
+        order.setTotalPriceToPay((float)0.0);
         return order;
     }
     public Order addOrder(Order order) {
@@ -62,8 +60,8 @@ public class OrderService {
             itemInOrderService.addItemToOrder(i);
         });
         var totalPrice = calculateTotalPrice(orderInDB);
-        orderInDB.setTotalPrice(totalPrice);
-        orderInDB.setNewTotalPrice(totalPrice);
+        orderInDB.setOriginalTotalPrice(totalPrice);
+        orderInDB.setTotalPriceToPay(totalPrice);
         return orderRepository.save(orderInDB);
     }
 
@@ -72,7 +70,7 @@ public class OrderService {
         item.setOrder(order);
         itemInOrderService.addItemToOrder(item);
         order.getItems().add(item);
-        order.setTotalPrice(calculateTotalPrice(order));
+        order.setOriginalTotalPrice(calculateTotalPrice(order));
         return orderRepository.save(order);
     }
 
@@ -80,39 +78,41 @@ public class OrderService {
 
         var price = order.getItems().stream().map(i -> i.getPrice())
                 .reduce((float) 0, Float::sum);
-        order.setNewTotalPrice(price);
+        order.setTotalPriceToPay(price);
         return price;
     }
 
     public Order payment(Long orderId, Float amount) {
         var order = getOrder(orderId);
-        if (order.getTotalPrice() < amount + order.getAlreadyPaid())
+        if (order.getOriginalTotalPrice() < amount + order.getAlreadyPaid())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't pay more then the remaining amount.");
         order.setAlreadyPaid(order.getAlreadyPaid() + amount);
-        if (order.getAlreadyPaid().equals(order.getTotalPrice()))
+        if (order.getAlreadyPaid().equals(order.getOriginalTotalPrice()))
             order.setStatus(OrderStatus.CLOSED);
+        webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
     public Order updateComment(Long orderId, String comment) {
         var order = getOrder(orderId);
         order.setOrderComment(comment);
+        webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
     public Order updateTotalPrice(Long orderId, Float amount) {
         var order = getOrder(orderId);
-        if (amount > order.getTotalPrice())
+        if (amount > order.getOriginalTotalPrice())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The amount is bigger than the total price");
-        order.setNewTotalPrice(order.getTotalPrice() - amount);
+        order.setTotalPriceToPay(order.getOriginalTotalPrice() - amount);
         return orderRepository.save(order);
     }
 
     public Order applyMemberDiscount(Long orderId, Member member) {
         var order = getOrder(orderId);
         memberService.getMemberByPhoneNumber(member.getPhoneNumber());
-        order.setTotalPrice(order.getTotalPrice() * (float) 0.9);
+        order.setOriginalTotalPrice(order.getOriginalTotalPrice() * (float) 0.9);
         return orderRepository.save(order);
     }
 
@@ -154,7 +154,7 @@ public class OrderService {
     public Order updateItemInOrder(ItemInOrder item) {
         var i = itemInOrderService.updateItemInOrder(item);
         var order = getOrder(i.getOrder().getId());
-        order.setTotalPrice(calculateTotalPrice(order));
+        order.setOriginalTotalPrice(calculateTotalPrice(order));
         return orderRepository.save(order);
     }
 

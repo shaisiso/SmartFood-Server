@@ -1,6 +1,5 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.Delivery;
 import com.restaurant.smartfood.entities.OrderOfTable;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.RestaurantTable;
@@ -91,14 +90,14 @@ public class OrderOfTableService {
         orderOfTable.setHour(LocalTime.now(ZoneId.of(timezone)));
         orderOfTable.setStatus(OrderStatus.ACCEPTED);
         orderOfTable.setAlreadyPaid((float) 0);
-        orderOfTable.setTotalPrice((float) 0);
+        orderOfTable.setOriginalTotalPrice((float) 0);
 
         var orderInDB = orderOfTableRepository.save(orderOfTable);
         orderInDB.getItems().forEach(i -> {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        orderInDB.setTotalPrice(orderService.calculateTotalPrice(orderInDB));
+        orderInDB.setOriginalTotalPrice(orderService.calculateTotalPrice(orderInDB));
         return orderInDB;
     }
     private RestaurantTable checkTableAvailability(OrderOfTable orderOfTable)

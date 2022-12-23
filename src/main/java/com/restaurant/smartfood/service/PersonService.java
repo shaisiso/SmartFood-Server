@@ -35,13 +35,21 @@ public class PersonService {
                         validateEmail(person);
                     if (!person.getPhoneNumber().equals(personFromDB.getPhoneNumber()))
                         validatePhoneNumber(person);
-                    personRepository.save(person);
+                    setPersonDetails(person,personFromDB);
+                    personRepository.save(personFromDB);
                 },
                 () -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no one with id : " + person.getId());
                 }
         );
         return person;
+    }
+
+    private void setPersonDetails(Person personFrom, Person personTo) {
+        personTo.setEmail(personFrom.getEmail());
+        personTo.setAddress(personFrom.getAddress());
+        personTo.setName(personFrom.getName());
+        personTo.setPhoneNumber(personFrom.getPhoneNumber());
     }
 
     public Person getPersonByPhone(String phoneNumber) {

@@ -3,6 +3,7 @@ package com.restaurant.smartfood.service;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.TakeAway;
 import com.restaurant.smartfood.repostitory.TakeAwayRepository;
+import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,11 +26,13 @@ public class TakeAwayService {
 
     @Autowired
     private ItemInOrderService itemInOrderService;
-
     @Autowired
     private OrderService orderService;
     @Autowired
     private PersonService personService;
+    @Autowired
+    private WebSocketService webSocketService;
+
     @Value("${timezone.name}")
     private String timezone;
     public TakeAway addTakeAway(TakeAway newTakeAway) {
@@ -43,6 +46,7 @@ public class TakeAwayService {
         var totalPrice = orderService.calculateTotalPrice(takeAwayInDB);
         takeAwayInDB.setOriginalTotalPrice(totalPrice);
         takeAwayInDB.setTotalPriceToPay(totalPrice);
+        webSocketService.notifyExternalOrders(takeAwayInDB);
         return takeAwayRepository.save(takeAwayInDB);
     }
     private TakeAway connectPersonToTA(TakeAway takeAway) {
@@ -51,13 +55,15 @@ public class TakeAwayService {
                     .ifPresentOrElse(p -> {
                                 var person = takeAway.getPerson();
                                 person.setId(p.getId());
-                                personService.savePerson(person);
-                                takeAway.setPerson(person);
+                                takeAway.setPerson(personService.savePerson(person));
                             },
                             () -> {
                                 var p = personService.savePerson(takeAway.getPerson());
                                 takeAway.setPerson(p);
                             });
+        }else{
+            var p = personService.updatePerson(takeAway.getPerson());
+            takeAway.setPerson(p);
         }
         return takeAway;
     }
@@ -65,14 +71,17 @@ public class TakeAwayService {
         takeAwayRepository.findById(takeAway.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + takeAway.getId())
         );
-        takeAwayRepository.updateTakeAway(takeAway.getPerson().getId(), takeAway.getId());
-        return takeAway;
+        var ta = connectPersonToTA(takeAway);
+        takeAwayRepository.updateTakeAway(ta.getPerson().getId(), ta.getId());
+        webSocketService.notifyExternalOrders(ta);
+        return takeAwayRepository.findById(ta.getId()).get();
     }
 
     public void deleteTakeAway(Long orderId) {
         var takeAway = takeAwayRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + orderId)
         );
+        webSocketService.notifyExternalOrders(takeAway);
         takeAwayRepository.delete(takeAway);
     }
 

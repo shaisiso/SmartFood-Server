@@ -68,7 +68,7 @@ public class PersonService {
     public void validatePhoneNumber(Person person) {
         personRepository.findByPhoneNumber(person.getPhoneNumber())
                 .ifPresent(p -> {
-                    if (person.getId() != null && person.getId().equals(p.getId()))
+                    if (person.getId() != null && !person.getId().equals(p.getId()))
                         throw new ResponseStatusException
                                 (HttpStatus.CONFLICT, p.getName() + " has this phone number: " + person.getPhoneNumber());
                 });
@@ -78,7 +78,7 @@ public class PersonService {
         if (person.getEmail() != null) {
             personRepository.findByEmail(person.getEmail())
                     .ifPresent(p -> {
-                        if (person.getId() != null && person.getId().equals(p.getId()))
+                        if (person.getId() != null && !person.getId().equals(p.getId()))
                             throw new ResponseStatusException
                                     (HttpStatus.CONFLICT, p.getName() + " has this email: " + person.getEmail());
                     });

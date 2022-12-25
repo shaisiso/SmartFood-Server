@@ -27,6 +27,7 @@ public class DiscountService {
 
     @Value("${timezone.name}")
     private String timezone;
+
     public Discount addDiscount(Discount discount) {
         if (checkDiscountOverLap(discount))
             return discountRepository.save(discount);
@@ -35,7 +36,7 @@ public class DiscountService {
     }
 
     public Discount updateDiscount(Discount discount) {
-        if (discount.getDiscountId()==null)
+        if (discount.getDiscountId() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "You have to have an id for the discount");
         discountRepository.findById(discount.getDiscountId()).orElseThrow(() ->
@@ -58,7 +59,7 @@ public class DiscountService {
         try {
             LocalDate localStartDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             LocalDate localEndDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            return discountRepository.findByStartDateIsBetween(localStartDate, localEndDate);
+            return discountRepository.findByStartDateIsLessThanEqualAndEndDateIsGreaterThanEqual(localEndDate, localStartDate);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
@@ -81,24 +82,30 @@ public class DiscountService {
             LocalDate localEndDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             LocalTime localStartHour = LocalTime.parse(startHour, DateTimeFormatter.ofPattern("HH-mm"));
             LocalTime localEndHour = LocalTime.parse(endHour, DateTimeFormatter.ofPattern("HH-mm"));
-            return discountRepository.findByStartDateIsBetweenAndStartHourIsLessThanEqualAndEndHourIsGreaterThanEqual
-                    (localStartDate, localEndDate, localStartHour, localEndHour);
+            return getDiscountsByDatesAndHours(localStartDate, localEndDate, localStartHour, localEndHour);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
     }
+
+    public List<Discount> getDiscountsByDatesAndHours(LocalDate localStartDate, LocalDate localEndDate, LocalTime localStartHour, LocalTime localEndHour) {
+        return discountRepository.findByDatesAndHours(localStartDate, localEndDate, localStartHour, localEndHour);
+    }
+
     private boolean checkDiscountOverLap(Discount discount) {
-        var discounts = getDiscountsByDatesAndHours(discount.getStartDate().toString(), discount.getEndDate().toString(),
-                            discount.getStartHour().toString(), discount.getEndHour().toString());
-        for (var d: discounts)
-            if (!d.getDays().contains(LocalDate.now().getDayOfWeek()))
-                discounts.remove(d);
-        for (var d : discounts) {
-            for (var c : d.getCategories()) {
-                if (discount.getCategories().contains(c))
-                    return false;
-            }
+        var overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
+                discount.getStartHour(), discount.getEndHour());
+
+        for (var d : overlappedDiscounts) {
+            var isOverlap = d.getDays()
+                    .stream()
+                    .anyMatch(day -> discount.getDays().contains(day)) &&
+                    d.getCategories()
+                            .stream()
+                            .anyMatch(c -> discount.getCategories().contains(c));
+            if (isOverlap)
+                return false;
         }
         return true;
     }

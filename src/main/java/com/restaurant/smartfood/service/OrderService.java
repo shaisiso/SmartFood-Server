@@ -68,9 +68,26 @@ public class OrderService {
     public Order addItemToOrder(Long orderId, ItemInOrder item) {
         var order = getOrder(orderId);
         item.setOrder(order);
-        itemInOrderService.addItemToOrder(item);
-        order.getItems().add(item);
+       var  itemInOrder =itemInOrderService.addItemToOrder(item);
+        order.getItems().add(itemInOrder);
         order.setOriginalTotalPrice(calculateTotalPrice(order));
+        webSocketService.notifyExternalOrders(order);
+        return orderRepository.save(order);
+    }
+    public Order deleteItemsListFromOrder(List<Long> itemsInOrderId){
+        if (itemsInOrderId== null || itemsInOrderId.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"List of items is missing");
+        itemInOrderService.deleteItemsListFromOrder(itemsInOrderId);
+        var order =getOrder(itemsInOrderId.get(0)) ;
+        webSocketService.notifyExternalOrders(order);
+        return order;
+    }
+    public Order addItemsListToOrder(Long orderId, List<ItemInOrder> items) {
+        var order = getOrder(orderId);
+        var itemsInOrder = itemInOrderService.addListOfItemsToOrder(items,order);
+        order.getItems().addAll(itemsInOrder);
+        order.setOriginalTotalPrice(calculateTotalPrice(order));
+        webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
@@ -106,6 +123,7 @@ public class OrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The amount is bigger than the total price");
         order.setTotalPriceToPay(order.getOriginalTotalPrice() - amount);
+        webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
@@ -113,6 +131,7 @@ public class OrderService {
         var order = getOrder(orderId);
         memberService.getMemberByPhoneNumber(member.getPhoneNumber());
         order.setOriginalTotalPrice(order.getOriginalTotalPrice() * (float) 0.9);
+
         return orderRepository.save(order);
     }
 
@@ -144,7 +163,9 @@ public class OrderService {
     }
 
     public void deleteOrder(Long orderId) {
-        orderRepository.delete(getOrder(orderId));
+        var order =getOrder(orderId);
+        orderRepository.delete(order);
+        webSocketService.notifyExternalOrders(order);
     }
 
     public List<Order> getOrdersByDates(String startDate, String endDate) {
@@ -155,6 +176,7 @@ public class OrderService {
         var i = itemInOrderService.updateItemInOrder(item);
         var order = getOrder(i.getOrder().getId());
         order.setOriginalTotalPrice(calculateTotalPrice(order));
+        webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
@@ -206,8 +228,10 @@ public class OrderService {
         return items;
     }
 
-    public ItemInOrder applyItemInOrderDiscount(ItemInOrder itemInOrder, int percent) {
+    private ItemInOrder applyItemInOrderDiscount(ItemInOrder itemInOrder, int percent) {
         itemInOrder.setPrice(itemInOrder.getPrice() * ((100 - percent) / (float) 100));
         return itemInOrder;
     }
+
+
 }

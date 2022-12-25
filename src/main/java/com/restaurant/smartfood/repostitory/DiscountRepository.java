@@ -15,17 +15,20 @@ import java.util.List;
 @Repository
 public interface DiscountRepository extends JpaRepository<Discount, Long> {
 
-    List<Discount> findByStartDateIsBetween(LocalDate startDate, LocalDate endDate);
+   // List<Discount> findByStartDateIsBetween(LocalDate startDate, LocalDate endDate);
 
     List<Discount> findByStartDateIsBetweenAndStartHourIsLessThanEqualAndEndHourIsGreaterThanEqual
             (LocalDate startDate, LocalDate endDate, LocalTime hour1, LocalTime hour2);
 
-
-    //    @Query(value = "select * from discounts,discount_categories " +
-//            "where discounts.discount_id=discount_categories.discount_discount_id and " +
-//            "discount_categories.categories=:category", nativeQuery = true)
     List<Discount> findByCategories(ItemCategory category);
 
-    List<Discount> findByStartDateIsLessThanEqualAndEndDateIsGreaterThanEqual(
-            LocalDate startDate, LocalDate endDate);
+    List<Discount> findByStartDateIsLessThanEqualAndEndDateIsGreaterThanEqual(LocalDate startDate, LocalDate endDate);
+
+    @Query(value = "SELECT * FROM discounts d " +
+            "where d.start_date<=:endDate AND d.end_date>=:startDate AND d.start_hour<=:endHour AND d.end_hour>=:startHour"
+    ,nativeQuery = true)
+    List<Discount>  findByDatesAndHours(@Param("startDate") LocalDate startDate,
+                                        @Param("endDate") LocalDate endDate,
+                                        @Param("startHour") LocalTime startHour,
+                                        @Param("endHour") LocalTime endHour);
 }

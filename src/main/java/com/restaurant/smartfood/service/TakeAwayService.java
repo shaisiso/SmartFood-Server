@@ -81,8 +81,8 @@ public class TakeAwayService {
         var takeAway = takeAwayRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + orderId)
         );
-        webSocketService.notifyExternalOrders(takeAway);
         takeAwayRepository.delete(takeAway);
+        webSocketService.notifyExternalOrders(takeAway);
     }
 
     public List<TakeAway> getTakeAwaysByDates(String startDate, String endDate) {

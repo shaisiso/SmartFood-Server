@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -46,7 +43,7 @@ public class Discount {
     private LocalDate endDate;
 
     @ElementCollection
-    @NotNull
+    @NotEmpty(message = "Days must not be empty")
     @Column(nullable = false)
     private Set<DayOfWeek> days;
 
@@ -78,7 +75,7 @@ public class Discount {
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    @NotNull
+    @NotEmpty(message = "Categories must not be empty")
     @Column(nullable = false)
     private List<ItemCategory> categories;
 

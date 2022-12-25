@@ -38,6 +38,12 @@ public class OrderController {
         return orderService.addItemToOrder(orderId, item);
     }
 
+    @PostMapping("/item/list/{orderId}")
+    public Order addItemsListToOrder(@PathVariable("orderId") Long orderId,
+                                     @Valid @RequestBody List<ItemInOrder> items) {
+        return orderService.addItemsListToOrder(orderId, items);
+    }
+
     @PutMapping("/item")
     public Order updateItemInOrder(@RequestBody @Valid ItemInOrder item) {
         return orderService.updateItemInOrder(item);
@@ -46,6 +52,11 @@ public class OrderController {
     @DeleteMapping("/item/{itemid}")
     public void deleteItemFromOrder(@PathVariable("itemid") Long itemId) {
         orderService.deleteItemFromOrder(itemId);
+    }
+
+    @DeleteMapping("/item/list")
+    public Order deleteItemsListFromOrder(@Valid @RequestBody List<Long> itemsId) {
+       return orderService.deleteItemsListFromOrder(itemsId);
     }
 
     @PutMapping("/comment/{orderId}")
@@ -90,24 +101,26 @@ public class OrderController {
 
     @GetMapping("/datetime/{startDate}/{endDate}/{startTime}/{endTime}")
     public List<Order> getOrdersByDatesAndHours(@PathVariable("startDate") String startDate,
-                                        @PathVariable("endDate") String endDate,
-                                        @PathVariable( "startTime") String startTime,
-                                        @PathVariable("endTime") String endTime) {
+                                                @PathVariable("endDate") String endDate,
+                                                @PathVariable("startTime") String startTime,
+                                                @PathVariable("endTime") String endTime) {
         return orderService.getOrdersByDatesAndHours(startDate, endDate, startTime, endTime);
     }
+
     @GetMapping("/date/{startDate}/{endDate}")
     public List<Order> getOrdersByDates(@PathVariable("startDate") String startDate,
-                                                @PathVariable("endDate") String endDate) {
+                                        @PathVariable("endDate") String endDate) {
         return orderService.getOrdersByDates(startDate, endDate);
     }
 
     @PutMapping("/bill/{orderId}/{phonenumber}")
     public Order checkIfEntitledToDiscount(@PathVariable("orderId") Long orderId,
-                                           @PathVariable (name="phonenumber", required = false) String phoneNumber) {
+                                           @PathVariable(name = "phonenumber", required = false) String phoneNumber) {
         return orderService.checkIfEntitledToDiscount(orderId, phoneNumber);
     }
+
     @GetMapping("/statuses")
-    public List<String> getAllStatuses(){
+    public List<String> getAllStatuses() {
         return OrderStatus.getStatusNames();
     }
 }

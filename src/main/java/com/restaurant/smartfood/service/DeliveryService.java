@@ -87,6 +87,7 @@ public class DeliveryService {
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + orderId)
         );
         deliveryRepository.delete(delivery);
+        webSocketService.notifyExternalOrders(delivery);
     }
 
     public List<Delivery> getDeliveriesByDates(String startDate, String endDate) {

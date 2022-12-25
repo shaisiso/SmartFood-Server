@@ -34,15 +34,15 @@ public class DiscountController {
 
     @GetMapping("/dates/{startDate}/{endDate}")
     public List<Discount> getDiscountsByDates(@PathVariable("startDate") String startDate,
-                                              @PathVariable("endDate") String endDate) {
+                                                      @PathVariable("endDate") String endDate) {
         return discountService.getDiscountsByDates(startDate, endDate);
     }
 
     @GetMapping("/dates/{startDate}/{endDate}/{startHour}/{endHour}")
-    public List<Discount> getDiscountsByDates(@PathVariable("startDate") String startDate,
-                                              @PathVariable("endDate") String endDate,
-                                              @PathVariable("startHour") String startHour,
-                                              @PathVariable("endHour") String endHour) {
+    public List<Discount> getDiscountsByDatesAndHours(@PathVariable("startDate") String startDate,
+                                                      @PathVariable("endDate") String endDate,
+                                                      @PathVariable("startHour") String startHour,
+                                                      @PathVariable("endHour") String endHour) {
         return discountService.getDiscountsByDatesAndHours(startDate, endDate, startHour, endHour);
     }
 

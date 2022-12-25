@@ -15,6 +15,8 @@ public class PersonService {
     private PersonRepository personRepository;
 
     public Person savePerson(Person newPerson) {
+        if(newPerson.getEmail() !=null &&newPerson.getEmail().isEmpty())
+            newPerson.setEmail(null);
         personRepository.findByPhoneNumber(newPerson.getPhoneNumber()).ifPresentOrElse(
                 personFromDB -> {
                     if (newPerson.getEmail() != null && !newPerson.getEmail().equals(personFromDB.getEmail())) // email updated
@@ -29,6 +31,8 @@ public class PersonService {
     }
 
     public Person updatePerson(Person person) {
+        if(person.getEmail() !=null &&person.getEmail().isEmpty())
+            person.setEmail(null);
         personRepository.findById(person.getId()).ifPresentOrElse(
                 personFromDB -> {
                     if (person.getEmail() != null && !person.getEmail().equals(personFromDB.getEmail())) // email updated

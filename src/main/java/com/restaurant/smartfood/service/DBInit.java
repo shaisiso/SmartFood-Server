@@ -446,7 +446,7 @@ public class DBInit implements CommandLineRunner {
                 .endHour(LocalTime.of(22,00))
                 .forMembersOnly(false)
                 .percent(20)
-                .ifYouOrder(1)
+                .ifYouOrder(2)
                 .youGetDiscountFor(1)
                 .discountDescription("20% on all the STARTERS!!")
                 .build();

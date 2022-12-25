@@ -37,4 +37,10 @@ public class RestaurantTableService {
         return restaurantTableRepository.findById(tableId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no table with table id : " + tableId));
     }
+
+    public RestaurantTable changeTableBusy(Integer tableId, Boolean isBusy) {
+        var table =getTableById(tableId);
+        table.setIsBusy(isBusy);
+        return restaurantTableRepository.save(table);
+    }
 }

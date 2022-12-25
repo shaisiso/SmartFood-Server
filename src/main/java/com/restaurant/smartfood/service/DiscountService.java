@@ -32,7 +32,7 @@ public class DiscountService {
         if (checkDiscountOverLap(discount))
             return discountRepository.save(discount);
         throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "There is a discount overlap");
+                "There is an overlap with a discount");
     }
 
     public Discount updateDiscount(Discount discount) {
@@ -45,7 +45,7 @@ public class DiscountService {
         if (checkDiscountOverLap(discount))
             return discountRepository.save(discount);
         throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "There is a discount overlap");
+                "There is an overlap with a discount");
     }
 
     public void deleteDiscount(Long id) {

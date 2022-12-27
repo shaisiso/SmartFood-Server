@@ -19,8 +19,12 @@ public class RestaurantTableService {
     private RestaurantTableRepository restaurantTableRepository;
 
     public RestaurantTable updateRestaurantTable(RestaurantTable restaurantTable) {
-        getTable(restaurantTable.getTableId());
-        return restaurantTableRepository.save(restaurantTable);
+        var table = getTable(restaurantTable.getTableId());
+        if (restaurantTable.getNumberOfSeats() != null)
+            table.setNumberOfSeats(restaurantTable.getNumberOfSeats());
+        if (restaurantTable.getIsBusy()!= null)
+            table.setIsBusy(restaurantTable.getIsBusy());
+        return restaurantTableRepository.save(table);
     }
 
     public RestaurantTable getTable(Integer id) {

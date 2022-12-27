@@ -44,7 +44,10 @@ public class OrderOfTableController {
     public List<OrderOfTable> getActiveOrdersOfTables() {
         return orderOfTableService.getActiveOrdersOfTables();
     }
-
+    @GetMapping("/active/{tableId}")
+    public OrderOfTable getActiveOrdersOfTable(@PathVariable("tableId") Integer tableId) {
+        return orderOfTableService.getActiveOrdersOfTable(tableId);
+    }
     @GetMapping("/dates/{startDate}/{endDate}")
     public List<OrderOfTable> getOrdersOfTablesByDates(@PathVariable("startDate") String startDate,
                                                        @PathVariable("endDate") String endDate) {

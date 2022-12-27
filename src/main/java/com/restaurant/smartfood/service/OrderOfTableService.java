@@ -1,5 +1,6 @@
 package com.restaurant.smartfood.service;
 
+import com.restaurant.smartfood.entities.Delivery;
 import com.restaurant.smartfood.entities.OrderOfTable;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.RestaurantTable;
@@ -17,6 +18,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -37,16 +39,35 @@ public class OrderOfTableService {
     private String timezone;
 
     public OrderOfTable addOrderOfTable(OrderOfTable orderOfTable) {
-        var table = checkTableAvailability(orderOfTable);
-        orderOfTable.setTable(table);
+        optionalActiveTableOrder(orderOfTable.getTable().getTableId())
+                .ifPresent(o -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Table number " + o.getTable().getTableId() + " has active order");
+                });
+        prepareOrderToSave(orderOfTable);
         return orderOfTableRepository.save(initOrderOfTable(orderOfTable));
     }
+
+    private void prepareOrderToSave(OrderOfTable orderOfTable) {
+        var o = (OrderOfTable) orderService.initOrder(orderOfTable);
+        var orderInDB = orderOfTableRepository.save(o);
+        orderInDB.getItems().forEach(i -> {
+            i.setOrder(orderInDB);
+            itemInOrderService.addItemToOrder(i);
+        });
+        var totalPrice = orderService.calculateTotalPrice(orderInDB);
+        orderInDB.setOriginalTotalPrice(totalPrice);
+        orderInDB.setTotalPriceToPay(totalPrice);
+        orderOfTable.getTable().setIsBusy(true);
+        restaurantTableService.updateRestaurantTable(orderOfTable.getTable());
+    }
+
     public OrderOfTable updateOrderOfTable(OrderOfTable orderOfTable) {
-        orderOfTableRepository.findById(orderOfTable.getId()).orElseThrow(() ->
+        var originalOrder = orderOfTableRepository.findById(orderOfTable.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id: " + orderOfTable.getId())
         );
-        checkTableAvailability(orderOfTable);
+        if (!originalOrder.getTable().getTableId().equals(orderOfTable.getTable().getTableId()))
+            checkTableAvailability(orderOfTable);
         orderOfTableRepository.updateOrderOfTable(orderOfTable.getNumberOfDiners(),
                 orderOfTable.getTable().getTableId(), orderOfTable.getId());
         return orderOfTable;
@@ -100,13 +121,25 @@ public class OrderOfTableService {
         orderInDB.setOriginalTotalPrice(orderService.calculateTotalPrice(orderInDB));
         return orderInDB;
     }
-    private RestaurantTable checkTableAvailability(OrderOfTable orderOfTable)
-    {
+
+    private RestaurantTable checkTableAvailability(OrderOfTable orderOfTable) {
         var table = restaurantTableService.getTable(
                 orderOfTable.getTable().getTableId());
         if (table.getIsBusy()) throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "Table number "+table.getTableId()+" is busy");
+                "Table number " + table.getTableId() + " is busy");
         table.setIsBusy(true);
         return restaurantTableService.updateRestaurantTable(table);
+    }
+
+    public Optional<OrderOfTable> optionalActiveTableOrder(Integer tableId) {
+        return orderOfTableRepository.findByStatusIsNot(OrderStatus.CLOSED)
+                .stream()
+                .filter(orderOfTable -> orderOfTable.getTable().getTableId().equals(tableId))
+                .findAny();
+    }
+
+    public OrderOfTable getActiveOrdersOfTable(Integer tableId) {
+        return optionalActiveTableOrder(tableId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no active order for this table"));
     }
 }

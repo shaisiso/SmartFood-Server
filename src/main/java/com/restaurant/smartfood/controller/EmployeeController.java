@@ -2,6 +2,8 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.EmployeeRole;
+import com.restaurant.smartfood.security.AuthorizeEmployee;
+import com.restaurant.smartfood.security.AuthorizeGeneralManager;
 import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +26,13 @@ public class EmployeeController {
         return EmployeeRole.getRolesNames();
     }
     @PostMapping
+    @AuthorizeGeneralManager
     public Employee addEmployee(@Valid @RequestBody Employee newEmployee) {
         return employeeService.addEmployee(newEmployee);
     }
 
     @GetMapping("/phone/{phoneNumber}")
+    @AuthorizeEmployee
     public Employee getEmployeeByPhoneNumber(@PathVariable("phoneNumber") String employeePhoneNumber) {
         return employeeService.getEmployeeByPhoneNumber(employeePhoneNumber);
     }
@@ -52,5 +56,6 @@ public class EmployeeController {
     public Employee getEmployeeByID(@PathVariable("id") Long employeeID) {
         return employeeService.getEmployeeByID(employeeID);
     }
+
 
 }

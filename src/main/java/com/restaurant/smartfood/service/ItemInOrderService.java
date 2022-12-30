@@ -37,22 +37,26 @@ public class ItemInOrderService {
     }
 
     public ItemInOrder updateItemInOrder(ItemInOrder item) {
-        var i = itemInOrderRepository.findById(item.getId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no itemInOrder with this id" + item.getId()));
+        var i = getItemInOrderById(item.getId());
         item.setOrder(i.getOrder());
         if (item.getPrice() == null)
             item.setPrice(i.getPrice());
         return itemInOrderRepository.save(item);
     }
 
+    public ItemInOrder getItemInOrderById(Long id) {
+        if (id ==null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item in Order id is missing");
+        return itemInOrderRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item in order with the id" + id));
+    }
+
     public void deleteItemFromOrder(Long itemId) {
-        var i = itemInOrderRepository.findById(itemId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no itemInOrder with the id" + itemId));
+        var i = getItemInOrderById(itemId);
         itemInOrderRepository.delete(i);
         webSocketService.notifyExternalOrders(i.getOrder());
     }
+
 
     public void deleteItemsListFromOrder(List<Long> itemsInOrderId) {
         for (var id : itemsInOrderId) {

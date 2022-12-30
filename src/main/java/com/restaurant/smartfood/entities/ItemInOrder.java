@@ -25,7 +25,7 @@ public class ItemInOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "items_in_orders_seq")
-    @SequenceGenerator(name = "items_in_orders_seq")
+    @SequenceGenerator(name = "items_in_orders_seq", allocationSize = 1, initialValue = 10)
     private Long id;
 
     @ManyToOne(optional = false)

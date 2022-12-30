@@ -1,10 +1,9 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.Delivery;
-import com.restaurant.smartfood.entities.OrderOfTable;
-import com.restaurant.smartfood.entities.OrderStatus;
-import com.restaurant.smartfood.entities.RestaurantTable;
+import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -23,18 +23,13 @@ import java.util.Optional;
 @Service
 @Transactional
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderOfTableService {
-
-    @Autowired
-    private OrderOfTableRepository orderOfTableRepository;
-    @Autowired
-    private OrderService orderService;
-    @Autowired
-    private RestaurantTableService restaurantTableService;
-
-    @Autowired
-    private ItemInOrderService itemInOrderService;
-
+    private final OrderOfTableRepository orderOfTableRepository;
+    private final OrderService orderService;
+    private final RestaurantTableService restaurantTableService;
+    private final ItemInOrderService itemInOrderService;
+    private final CancelItemRequestRepository cancelItemRequestRepository;
     @Value("${timezone.name}")
     private String timezone;
 
@@ -141,5 +136,25 @@ public class OrderOfTableService {
     public OrderOfTable getActiveOrdersOfTable(Integer tableId) {
         return optionalActiveTableOrder(tableId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no active order for this table"));
+    }
+
+    public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
+        var itemInOrder = itemInOrderService.getItemInOrderById(cancelItemRequest.getItemInOrder().getId());
+        cancelItemRequestRepository.findByItemInOrderId(itemInOrder.getId())
+                .ifPresent(r-> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,"This item was already sent for cancel");
+                });
+        var fullRequest = CancelItemRequest.builder()
+                .item(itemInOrder.getItem())
+                .order(itemInOrder.getOrder())
+                .date(LocalDateTime.now(ZoneId.of(timezone)))
+                .itemInOrder(itemInOrder)
+                .reason(cancelItemRequest.getReason())
+                .build();
+        return cancelItemRequestRepository.save(fullRequest);
+    }
+
+    public CancelItemRequest approveRequestForCancelItem(CancelItemRequest cancelItemRequest) {
+        return  null;
     }
 }

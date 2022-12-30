@@ -19,6 +19,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -141,8 +142,8 @@ public class OrderOfTableService {
     public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
         var itemInOrder = itemInOrderService.getItemInOrderById(cancelItemRequest.getItemInOrder().getId());
         cancelItemRequestRepository.findByItemInOrderId(itemInOrder.getId())
-                .ifPresent(r-> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,"This item was already sent for cancel");
+                .ifPresent(r -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "This item was already sent for cancel");
                 });
         var fullRequest = CancelItemRequest.builder()
                 .item(itemInOrder.getItem())
@@ -150,11 +151,23 @@ public class OrderOfTableService {
                 .date(LocalDateTime.now(ZoneId.of(timezone)))
                 .itemInOrder(itemInOrder)
                 .reason(cancelItemRequest.getReason())
+                .isApproved(false)
                 .build();
         return cancelItemRequestRepository.save(fullRequest);
     }
 
     public CancelItemRequest approveRequestForCancelItem(CancelItemRequest cancelItemRequest) {
-        return  null;
+        return null;
+    }
+
+    public List<ItemInOrder> getItemInOrderOfTableForCancel(Integer tableId) {
+        var table = restaurantTableService.getTableById(tableId);
+        if (table.getIsBusy() == false)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The requested table is not busy");
+        var orderOfTable = getActiveOrdersOfTable(tableId);
+        return cancelItemRequestRepository.findByOrderIdAndIsApprovedIsFalse(orderOfTable.getId())
+                .stream()
+                .map(cr -> cr.getItemInOrder())
+                .collect(Collectors.toList());
     }
 }

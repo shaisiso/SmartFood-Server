@@ -31,6 +31,7 @@ public class OrderOfTableController {
     public OrderOfTable updateOrderOfTable(@RequestBody @Valid OrderOfTable orderOfTable) {
         return orderOfTableService.updateOrderOfTable(orderOfTable);
     }
+
     @DeleteMapping("/{orderoftableid}")
     @AuthorizeManagers
     public void deleteOrderOfTable(@PathVariable("orderoftableid") Long id) {
@@ -48,17 +49,20 @@ public class OrderOfTableController {
     public List<OrderOfTable> getActiveOrdersOfTables() {
         return orderOfTableService.getActiveOrdersOfTables();
     }
+
     @GetMapping("/active/{tableId}")
     @AuthorizeEmployee
     public OrderOfTable getActiveOrdersOfTable(@PathVariable("tableId") Integer tableId) {
         return orderOfTableService.getActiveOrdersOfTable(tableId);
     }
+
     @GetMapping("/dates/{startDate}/{endDate}")
     @AuthorizeEmployee
     public List<OrderOfTable> getOrdersOfTablesByDates(@PathVariable("startDate") String startDate,
                                                        @PathVariable("endDate") String endDate) {
         return orderOfTableService.getOrdersOfTablesByDates(startDate, endDate);
     }
+
     @GetMapping("/status/{status}")
     @AuthorizeEmployee
     public List<OrderOfTable> getOrdersOfTablesByStatus(
@@ -66,14 +70,21 @@ public class OrderOfTableController {
         return orderOfTableService.getOrdersOfTablesByStatus(status);
     }
 
-    @PostMapping("/item/cancel")
+    @PostMapping("/cancel/item")
     @AuthorizeEmployee
-    public CancelItemRequest addRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest){
-        return  orderOfTableService.addRequestForCancelItem(cancelItemRequest);
+    public CancelItemRequest addRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest) {
+        return orderOfTableService.addRequestForCancelItem(cancelItemRequest);
     }
-    @PutMapping("/item/cancel")
+
+    @PutMapping("/cancel/item")
     @AuthorizeManagers
-    public CancelItemRequest approveRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest){
-        return  orderOfTableService.approveRequestForCancelItem(cancelItemRequest);
+    public CancelItemRequest approveRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest) {
+        return orderOfTableService.approveRequestForCancelItem(cancelItemRequest);
+    }
+
+    @GetMapping("/cancel/item/{tableId}")
+    @AuthorizeEmployee
+    public List<ItemInOrder> getItemInOrderOfTableForCancel(@PathVariable("tableId") Integer tableId) {
+        return orderOfTableService.getItemInOrderOfTableForCancel(tableId);
     }
 }

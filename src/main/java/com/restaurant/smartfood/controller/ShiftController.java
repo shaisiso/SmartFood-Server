@@ -1,5 +1,6 @@
 package com.restaurant.smartfood.controller;
 
+import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.Shift;
 import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.ShiftService;
@@ -55,5 +56,10 @@ public class ShiftController {
     @GetMapping("/approve")
     public List<Shift> getAllShiftsToApprove(){
         return shiftService.getAllShiftsToApprove();
+    }
+
+    @GetMapping("/active/delivery")
+    public List<Employee> findAllDeliveryGuyInShift(){
+        return shiftService.findAllDeliveryGuyInShift();
     }
 }

@@ -1,5 +1,6 @@
 package com.restaurant.smartfood.repostitory;
 
+import com.restaurant.smartfood.entities.EmployeeRole;
 import com.restaurant.smartfood.entities.Shift;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,8 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
     List<Shift> findByShiftEntranceIsBetween(LocalDateTime start, LocalDateTime end);
 
     List<Shift> findByIsApproved(Boolean isApproved);
+
+    List<Shift> findByShiftEntranceBetweenAndShiftExitIsNullAndEmployeeRoleIs(LocalDateTime entranceStart,
+                                                                              LocalDateTime entranceEnd,
+                                                                              EmployeeRole role);
 }

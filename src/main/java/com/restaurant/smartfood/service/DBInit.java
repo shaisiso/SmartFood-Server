@@ -291,7 +291,7 @@ public class DBInit implements CommandLineRunner {
     }
 
     private void addEmployees() {
-        Employee employee1 = Employee.builder()
+        Employee deliveryGuy1 = Employee.builder()
                 .name("Dolev Haziza")
                 .email("Haziza@gmail.com")
                 .address(Address.builder()
@@ -303,7 +303,18 @@ public class DBInit implements CommandLineRunner {
                 .password(passwordEncoder.encode("123456") )
                 .role(EmployeeRole.DELIVERY_GUY)
                 .build();
-
+        Employee deliveryGuy2 = Employee.builder()
+                .name("Sun Menachem")
+                .email("sunm@gmail.com")
+                .address(Address.builder()
+                        .city("Haifa")
+                        .streetName("Horev")
+                        .houseNumber(12)
+                        .build())
+                .phoneNumber("0588888882")
+                .password(passwordEncoder.encode("123456") )
+                .role(EmployeeRole.DELIVERY_GUY)
+                .build();
         Employee manager = Employee.builder()
                 .name("Barak Bachar")
                 .email("bb@gmail.com")
@@ -330,7 +341,7 @@ public class DBInit implements CommandLineRunner {
                 .role(EmployeeRole.SHIFT_MANAGER)
                 .build();
 
-        employeeRepository.saveAll(Arrays.asList(employee1,manager,shiftManager));
+        employeeRepository.saveAll(Arrays.asList(deliveryGuy1,deliveryGuy2,manager,shiftManager));
     }
 
     private void addTableReservation() {

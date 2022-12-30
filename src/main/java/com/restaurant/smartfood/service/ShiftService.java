@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -129,5 +130,15 @@ public class ShiftService {
 
     public List<Shift> getAllShiftsToApprove() {
         return shiftRepository.findByIsApproved(false);
+    }
+
+    public List<Employee> findAllDeliveryGuyInShift() {
+        LocalDateTime start = LocalDate.now(ZoneId.of(timezone)).atStartOfDay();
+        LocalDateTime end = LocalDate.now(ZoneId.of(timezone)).atTime(23,59);
+
+        return  shiftRepository.findByShiftEntranceBetweenAndShiftExitIsNullAndEmployeeRoleIs(start,end,EmployeeRole.DELIVERY_GUY)
+                .stream()
+                .map(s->s.getEmployee())
+                .collect(Collectors.toList());
     }
 }

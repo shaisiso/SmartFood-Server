@@ -26,6 +26,6 @@ public class Employee extends RegisteredUser {
 
 
     @Enumerated(EnumType.STRING)
-    @NotNull
+    @NotNull(message = "Role must not be null")
     private EmployeeRole role;
 }

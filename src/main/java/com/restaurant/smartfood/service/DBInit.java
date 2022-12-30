@@ -32,22 +32,22 @@ public class DBInit implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     @Override
     public void run(String... args)  {
-        tableReservationRepository.deleteAll();
-        employeeRepository.deleteAll();
-        personRepository.deleteAll();
-        itemRepository.deleteAll();
-        restaurantTableRepository.deleteAll();
-
-
-        addItemsToMenu();
-        createTables();
-        addTableReservation();
-        addEmployees();
-        addOrder();
-        addMember();
-        addWaitingList();
-        addDelivery();
-        addDiscount();
+//        tableReservationRepository.deleteAll();
+//        employeeRepository.deleteAll();
+//        personRepository.deleteAll();
+//        itemRepository.deleteAll();
+//        restaurantTableRepository.deleteAll();
+//
+//
+//        addItemsToMenu();
+//        createTables();
+//        addTableReservation();
+//        addEmployees();
+//        addOrder();
+//        addMember();
+//        addWaitingList();
+//        addDelivery();
+//        addDiscount();
     }
 
     private void addItemsToMenu() {

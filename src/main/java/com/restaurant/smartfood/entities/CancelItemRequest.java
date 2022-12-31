@@ -26,17 +26,17 @@ public class CancelItemRequest {
     @Column(nullable = false)
     private LocalDateTime date;
 
-    @ManyToOne
-    @NotNull(message = "item must not be null")
+    @ManyToOne(cascade={CascadeType.MERGE})
+    @JoinColumn
     private ItemInOrder itemInOrder;
 
     @ManyToOne(optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(nullable = false)
-    private MenuItem item;
+    private MenuItem menuItem;
 
     @ManyToOne(optional = false)
-    private Order order;
+    private OrderOfTable orderOfTable;
 
     private String reason;
 

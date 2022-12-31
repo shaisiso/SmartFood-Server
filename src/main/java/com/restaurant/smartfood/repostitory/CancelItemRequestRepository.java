@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface CancelItemRequestRepository extends JpaRepository<CancelItemRequest, Long> {
-    Optional<CancelItemRequest> findByItemInOrderId(Long itemInOrderId);
-    List<CancelItemRequest> findByOrderIdAndIsApprovedIsFalse(Long orderId);
+    Optional<CancelItemRequest> findByItemInOrderIdAndIsApprovedIsFalse(Long itemInOrderId);
+    List<CancelItemRequest> findByOrderOfTableIdAndIsApprovedIsFalse(Long orderId);
+    List<CancelItemRequest> findByIsApprovedIsFalse();
 }

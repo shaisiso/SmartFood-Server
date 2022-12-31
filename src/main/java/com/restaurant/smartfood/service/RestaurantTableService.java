@@ -2,7 +2,10 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +16,15 @@ import java.util.List;
 
 @Service
 @Transactional
+@Getter
 public class RestaurantTableService {
-
+    private final RestaurantTableRepository restaurantTableRepository;
+    private final  OrderOfTableService orderOfTableService;
     @Autowired
-    private RestaurantTableRepository restaurantTableRepository;
+    public RestaurantTableService(@Lazy OrderOfTableService orderOfTableService, RestaurantTableRepository restaurantTableRepository){
+        this.orderOfTableService=orderOfTableService;
+        this.restaurantTableRepository = restaurantTableRepository;
+    }
 
     public RestaurantTable updateRestaurantTable(RestaurantTable restaurantTable) {
         var table = getTable(restaurantTable.getTableId());
@@ -44,6 +52,8 @@ public class RestaurantTableService {
 
     public RestaurantTable changeTableBusy(Integer tableId, Boolean isBusy) {
         var table =getTableById(tableId);
+        if (isBusy==false && orderOfTableService.optionalActiveTableOrder(tableId).isPresent())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Table " +tableId+" has active order, please close the order before");
         table.setIsBusy(isBusy);
         return restaurantTableRepository.save(table);
     }

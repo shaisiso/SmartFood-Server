@@ -3,6 +3,8 @@ package com.restaurant.smartfood.service;
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
+import com.restaurant.smartfood.utils.ItemInOrderResponse;
+import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ public class OrderOfTableService {
     private final RestaurantTableService restaurantTableService;
     private final ItemInOrderService itemInOrderService;
     private final CancelItemRequestRepository cancelItemRequestRepository;
+    private final WebSocketService webSocketService;
     @Value("${timezone.name}")
     private String timezone;
 
@@ -141,33 +144,52 @@ public class OrderOfTableService {
 
     public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
         var itemInOrder = itemInOrderService.getItemInOrderById(cancelItemRequest.getItemInOrder().getId());
-        cancelItemRequestRepository.findByItemInOrderId(itemInOrder.getId())
+        cancelItemRequestRepository.findByItemInOrderIdAndIsApprovedIsFalse(itemInOrder.getId())
                 .ifPresent(r -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "This item was already sent for cancel");
                 });
+        var orderOfTable =getOrderOfTableByOrderId(itemInOrder.getOrder().getId());
         var fullRequest = CancelItemRequest.builder()
-                .item(itemInOrder.getItem())
-                .order(itemInOrder.getOrder())
+                .menuItem(itemInOrder.getItem())
+                .orderOfTable(orderOfTable)
                 .date(LocalDateTime.now(ZoneId.of(timezone)))
                 .itemInOrder(itemInOrder)
                 .reason(cancelItemRequest.getReason())
                 .isApproved(false)
                 .build();
+        webSocketService.notifyCancelItemRequest(fullRequest);
         return cancelItemRequestRepository.save(fullRequest);
     }
 
-    public CancelItemRequest approveRequestForCancelItem(CancelItemRequest cancelItemRequest) {
-        return null;
+    public void handleRequestForCancelItem(CancelItemRequest cancelItemRequest) {
+        var cancelRequestInDB = getCancelItemRequestById(cancelItemRequest.getId());
+        cancelRequestInDB.setIsApproved(cancelItemRequest.getIsApproved());
+        if (cancelItemRequest.getIsApproved() == true) {
+            itemInOrderService.deleteItemFromOrder(cancelRequestInDB.getItemInOrder().getId());
+            cancelRequestInDB.setItemInOrder(null);
+            cancelItemRequestRepository.save(cancelRequestInDB);
+        } else {
+            cancelItemRequestRepository.delete(cancelRequestInDB);
+        }
+        webSocketService.notifyCancelItemRequest(cancelRequestInDB);
     }
 
-    public List<ItemInOrder> getItemInOrderOfTableForCancel(Integer tableId) {
+    public CancelItemRequest getCancelItemRequestById(Long id) {
+        return cancelItemRequestRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no request with id: " + id));
+    }
+
+    public List<ItemInOrderResponse> getItemsInOrderOfTableForCancel(Integer tableId) {
         var table = restaurantTableService.getTableById(tableId);
         if (table.getIsBusy() == false)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The requested table is not busy");
         var orderOfTable = getActiveOrdersOfTable(tableId);
-        return cancelItemRequestRepository.findByOrderIdAndIsApprovedIsFalse(orderOfTable.getId())
+        return cancelItemRequestRepository.findByOrderOfTableIdAndIsApprovedIsFalse(orderOfTable.getId())
                 .stream()
-                .map(cr -> cr.getItemInOrder())
+                .map(cr -> ItemInOrderResponse.buildItemInOrderResponse(cr.getItemInOrder()) )
                 .collect(Collectors.toList());
+    }
+
+    public List<CancelItemRequest> getAllCancelRequests() {
+        return cancelItemRequestRepository.findByIsApprovedIsFalse();
     }
 }

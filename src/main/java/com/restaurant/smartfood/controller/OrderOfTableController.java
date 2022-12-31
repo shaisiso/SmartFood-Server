@@ -4,8 +4,8 @@ import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.security.AuthorizeEmployee;
 import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.OrderOfTableService;
+import com.restaurant.smartfood.utils.ItemInOrderResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -75,16 +75,23 @@ public class OrderOfTableController {
     public CancelItemRequest addRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest) {
         return orderOfTableService.addRequestForCancelItem(cancelItemRequest);
     }
-
+    /*
+        approve or decline request
+     */
     @PutMapping("/cancel/item")
     @AuthorizeManagers
-    public CancelItemRequest approveRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest) {
-        return orderOfTableService.approveRequestForCancelItem(cancelItemRequest);
+    public void handleRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest) {
+         orderOfTableService.handleRequestForCancelItem(cancelItemRequest);
     }
-
     @GetMapping("/cancel/item/{tableId}")
     @AuthorizeEmployee
-    public List<ItemInOrder> getItemInOrderOfTableForCancel(@PathVariable("tableId") Integer tableId) {
-        return orderOfTableService.getItemInOrderOfTableForCancel(tableId);
+    public List<ItemInOrderResponse> getItemsInOrderOfTableForCancel(@PathVariable("tableId") Integer tableId) {
+        return orderOfTableService.getItemsInOrderOfTableForCancel(tableId);
     }
+    @GetMapping("/cancel")
+    @AuthorizeEmployee
+    public List<CancelItemRequest> getAllCancelRequests() {
+        return orderOfTableService.getAllCancelRequests();
+    }
+
 }

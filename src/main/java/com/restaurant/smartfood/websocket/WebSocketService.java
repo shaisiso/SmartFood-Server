@@ -1,5 +1,6 @@
 package com.restaurant.smartfood.websocket;
 
+import com.restaurant.smartfood.entities.CancelItemRequest;
 import com.restaurant.smartfood.entities.Delivery;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.entities.Shift;
@@ -20,6 +21,9 @@ public class WebSocketService {
     public void notifyExternalOrders(Order order){
       //  notificationService.sendTaskNotification();
         messagingTemplate.convertAndSend("/topic/external-orders", order);
+    }
+    public void notifyCancelItemRequest(CancelItemRequest request){
+        messagingTemplate.convertAndSend("/topic/cancel-item-requests", request);
     }
     public void notifyShiftsChange(Shift shift){
         messagingTemplate.convertAndSend("/topic/shift",shift);

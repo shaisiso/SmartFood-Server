@@ -29,25 +29,27 @@ public class DBInit implements CommandLineRunner {
     private final DeliveryRepository deliveryRepository;
     private final WaitingListRepository waitingListRepository;
     private final DiscountRepository discountRepository;
+    private final CancelItemRequestRepository cancelItemRequestRepository;
     private final PasswordEncoder passwordEncoder;
     @Override
     public void run(String... args)  {
-//        tableReservationRepository.deleteAll();
-//        employeeRepository.deleteAll();
-//        personRepository.deleteAll();
-//        itemRepository.deleteAll();
-//        restaurantTableRepository.deleteAll();
-//
-//
-//        addItemsToMenu();
-//        createTables();
-//        addTableReservation();
-//        addEmployees();
-//        addOrder();
-//        addMember();
-//        addWaitingList();
-//        addDelivery();
-//        addDiscount();
+        tableReservationRepository.deleteAll();
+        employeeRepository.deleteAll();
+        personRepository.deleteAll();
+        cancelItemRequestRepository.deleteAll();
+        itemRepository.deleteAll();
+        restaurantTableRepository.deleteAll();
+
+
+        addItemsToMenu();
+        createTables();
+        addTableReservation();
+        addEmployees();
+        addOrder();
+        addMember();
+        addWaitingList();
+        addDelivery();
+        addDiscount();
     }
 
     private void addItemsToMenu() {

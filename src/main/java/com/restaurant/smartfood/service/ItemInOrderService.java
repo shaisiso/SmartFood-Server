@@ -48,7 +48,7 @@ public class ItemInOrderService {
         if (id ==null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item in Order id is missing");
         return itemInOrderRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item in order with the id" + id));
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no item in order with the id " + id));
     }
 
     public void deleteItemFromOrder(Long itemId) {
@@ -60,11 +60,12 @@ public class ItemInOrderService {
 
     public void deleteItemsListFromOrder(List<Long> itemsInOrderId) {
         for (var id : itemsInOrderId) {
-            itemInOrderRepository.findById(id).orElseThrow(() ->
+           var itemInOrder = itemInOrderRepository.findById(id).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "There is no itemInOrder with the id" + id));
         }
         itemInOrderRepository.deleteAllById(itemsInOrderId);
         itemInOrderRepository.flush();
+
     }
 }

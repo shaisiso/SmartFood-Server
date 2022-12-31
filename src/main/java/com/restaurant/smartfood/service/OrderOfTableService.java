@@ -143,22 +143,33 @@ public class OrderOfTableService {
     }
 
     public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
+        var fullRequest = buildFullRequest(cancelItemRequest, false);
+        webSocketService.notifyCancelItemRequest(fullRequest);
+        return cancelItemRequestRepository.save(fullRequest);
+    }
+
+    public CancelItemRequest addCancelItemRequestAndDeleteItem(CancelItemRequest cancelItemRequest) {
+        var fullRequest = buildFullRequest(cancelItemRequest, true);
+        itemInOrderService.deleteItemFromOrder(fullRequest.getItemInOrder().getId());
+        fullRequest.setItemInOrder(null);
+        return cancelItemRequestRepository.save(fullRequest);
+    }
+
+    private CancelItemRequest buildFullRequest(CancelItemRequest cancelItemRequest, Boolean isApproved) {
         var itemInOrder = itemInOrderService.getItemInOrderById(cancelItemRequest.getItemInOrder().getId());
         cancelItemRequestRepository.findByItemInOrderIdAndIsApprovedIsFalse(itemInOrder.getId())
                 .ifPresent(r -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "This item was already sent for cancel");
                 });
-        var orderOfTable =getOrderOfTableByOrderId(itemInOrder.getOrder().getId());
-        var fullRequest = CancelItemRequest.builder()
+        var orderOfTable = getOrderOfTableByOrderId(itemInOrder.getOrder().getId());
+        return CancelItemRequest.builder()
                 .menuItem(itemInOrder.getItem())
                 .orderOfTable(orderOfTable)
                 .date(LocalDateTime.now(ZoneId.of(timezone)))
                 .itemInOrder(itemInOrder)
                 .reason(cancelItemRequest.getReason())
-                .isApproved(false)
+                .isApproved(isApproved)
                 .build();
-        webSocketService.notifyCancelItemRequest(fullRequest);
-        return cancelItemRequestRepository.save(fullRequest);
     }
 
     public void handleRequestForCancelItem(CancelItemRequest cancelItemRequest) {
@@ -185,11 +196,13 @@ public class OrderOfTableService {
         var orderOfTable = getActiveOrdersOfTable(tableId);
         return cancelItemRequestRepository.findByOrderOfTableIdAndIsApprovedIsFalse(orderOfTable.getId())
                 .stream()
-                .map(cr -> ItemInOrderResponse.buildItemInOrderResponse(cr.getItemInOrder()) )
+                .map(cr -> ItemInOrderResponse.buildItemInOrderResponse(cr.getItemInOrder()))
                 .collect(Collectors.toList());
     }
 
     public List<CancelItemRequest> getAllCancelRequests() {
         return cancelItemRequestRepository.findByIsApprovedIsFalse();
     }
+
+
 }

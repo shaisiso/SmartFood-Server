@@ -1,5 +1,6 @@
 package com.restaurant.smartfood.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -24,6 +25,7 @@ public class CancelItemRequest {
     private Long id;
 
     @Column(nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime date;
 
     @ManyToOne(cascade={CascadeType.MERGE})

@@ -75,6 +75,11 @@ public class OrderOfTableController {
     public CancelItemRequest addRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest) {
         return orderOfTableService.addRequestForCancelItem(cancelItemRequest);
     }
+    @PostMapping("/cancel/item/delete")
+    @AuthorizeManagers
+    public CancelItemRequest addCancelItemRequestAndDeleteItem(@Valid @RequestBody CancelItemRequest cancelItemRequest){
+        return orderOfTableService.addCancelItemRequestAndDeleteItem(cancelItemRequest);
+    }
     /*
         approve or decline request
      */

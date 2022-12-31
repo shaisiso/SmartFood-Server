@@ -78,7 +78,8 @@ public class OrderService {
         if (itemsInOrderId== null || itemsInOrderId.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"List of items is missing");
         itemInOrderService.deleteItemsListFromOrder(itemsInOrderId);
-        var order =getOrder(itemsInOrderId.get(0)) ;
+        var order =getOrder(itemsInOrderId.get(0)); // TODO : CHANGE THIS IS NOT THE REAL ORDER !!!!
+        calculateTotalPrice(order);
         webSocketService.notifyExternalOrders(order);
         return order;
     }
@@ -92,10 +93,10 @@ public class OrderService {
     }
 
     public float calculateTotalPrice(Order order) {
-
         var price = order.getItems().stream().map(i -> i.getPrice())
                 .reduce((float) 0, Float::sum);
         order.setTotalPriceToPay(price);
+        order.setOriginalTotalPrice(price);
         return price;
     }
 
@@ -182,6 +183,7 @@ public class OrderService {
 
     public void deleteItemFromOrder(Long itemId) {
         itemInOrderService.deleteItemFromOrder(itemId);
+      //  TODO : Need to calculate total price and update order !!
     }
 
     public Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {

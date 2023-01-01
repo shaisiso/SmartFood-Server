@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderOfTableService {
     private final OrderOfTableRepository orderOfTableRepository;
     private final OrderService orderService;
@@ -36,6 +36,17 @@ public class OrderOfTableService {
     private final WebSocketService webSocketService;
     @Value("${timezone.name}")
     private String timezone;
+
+    @Autowired
+    public OrderOfTableService(OrderOfTableRepository orderOfTableRepository, @Lazy OrderService orderService, RestaurantTableService restaurantTableService, ItemInOrderService itemInOrderService, CancelItemRequestRepository cancelItemRequestRepository, WebSocketService webSocketService) {
+        this.orderOfTableRepository = orderOfTableRepository;
+        this.orderService = orderService;
+        this.restaurantTableService = restaurantTableService;
+        this.itemInOrderService = itemInOrderService;
+        this.cancelItemRequestRepository = cancelItemRequestRepository;
+        this.webSocketService = webSocketService;
+    }
+
 
     public OrderOfTable addOrderOfTable(OrderOfTable orderOfTable) {
         optionalActiveTableOrder(orderOfTable.getTable().getTableId())
@@ -210,4 +221,10 @@ public class OrderOfTableService {
     }
 
 
+    public void onCloseOrder(Order order) {
+        orderOfTableRepository.findById(order.getId())
+                .ifPresent(oot->{
+                    restaurantTableService.changeTableBusy(oot.getTable().getTableId(),false);
+                });
+    }
 }

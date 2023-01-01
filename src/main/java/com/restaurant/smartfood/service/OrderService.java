@@ -31,11 +31,10 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ItemInOrderService itemInOrderService;
     private final MemberService memberService;
-
     private final DiscountRepository discountRepository;
     private final MemberRepository memberRepository;
     private final WebSocketService webSocketService;
-
+    private final OrderOfTableService orderOfTableService;
     @Value("${timezone.name}")
     private String timezone;
 
@@ -105,8 +104,11 @@ public class OrderService {
         if (order.getOriginalTotalPrice() < amount + order.getAlreadyPaid())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't pay more then the remaining amount.");
         order.setAlreadyPaid(order.getAlreadyPaid() + amount);
-        if (order.getAlreadyPaid().equals(order.getOriginalTotalPrice()))
+        if (order.getAlreadyPaid().equals(order.getOriginalTotalPrice())){
             order.setStatus(OrderStatus.CLOSED);
+            orderOfTableService.onCloseOrder(order);
+        }
+
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }

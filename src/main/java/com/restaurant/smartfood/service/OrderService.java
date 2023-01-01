@@ -48,9 +48,10 @@ public class OrderService {
         order.setStatus(OrderStatus.ACCEPTED);
         order.setAlreadyPaid((float) 0);
         order.setOriginalTotalPrice((float) 0);
-        order.setTotalPriceToPay((float)0.0);
+        order.setTotalPriceToPay((float) 0.0);
         return order;
     }
+
     public Order addOrder(Order order) {
         var o = initOrder(order);
         var orderInDB = orderRepository.save(o);
@@ -67,24 +68,26 @@ public class OrderService {
     public Order addItemToOrder(Long orderId, ItemInOrder item) {
         var order = getOrder(orderId);
         item.setOrder(order);
-       var  itemInOrder =itemInOrderService.addItemToOrder(item);
+        var itemInOrder = itemInOrderService.addItemToOrder(item);
         order.getItems().add(itemInOrder);
         order.setOriginalTotalPrice(calculateTotalPrice(order));
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
-    public Order deleteItemsListFromOrder(List<Long> itemsInOrderId){
-        if (itemsInOrderId== null || itemsInOrderId.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"List of items is missing");
+
+    public Order deleteItemsListFromOrder(List<Long> itemsInOrderId) {
+        if (itemsInOrderId == null || itemsInOrderId.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "List of items is missing");
         itemInOrderService.deleteItemsListFromOrder(itemsInOrderId);
-        var order =getOrder(itemsInOrderId.get(0)); // TODO : CHANGE THIS IS NOT THE REAL ORDER !!!!
+        var order = getOrder(itemsInOrderId.get(0)); // TODO : CHANGE THIS IS NOT THE REAL ORDER !!!!
         calculateTotalPrice(order);
         webSocketService.notifyExternalOrders(order);
         return order;
     }
+
     public Order addItemsListToOrder(Long orderId, List<ItemInOrder> items) {
         var order = getOrder(orderId);
-        var itemsInOrder = itemInOrderService.addListOfItemsToOrder(items,order);
+        var itemsInOrder = itemInOrderService.addListOfItemsToOrder(items, order);
         order.getItems().addAll(itemsInOrder);
         order.setOriginalTotalPrice(calculateTotalPrice(order));
         webSocketService.notifyExternalOrders(order);
@@ -104,11 +107,9 @@ public class OrderService {
         if (order.getOriginalTotalPrice() < amount + order.getAlreadyPaid())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't pay more then the remaining amount.");
         order.setAlreadyPaid(order.getAlreadyPaid() + amount);
-        if (order.getAlreadyPaid().equals(order.getOriginalTotalPrice())){
-            order.setStatus(OrderStatus.CLOSED);
-            orderOfTableService.onCloseOrder(order);
+        if (order.getAlreadyPaid().equals(order.getOriginalTotalPrice())) {
+           orderOfTableService.closeIfOrderOfTable(order);
         }
-
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
@@ -166,13 +167,13 @@ public class OrderService {
     }
 
     public void deleteOrder(Long orderId) {
-        var order =getOrder(orderId);
+        var order = getOrder(orderId);
         orderRepository.delete(order);
         webSocketService.notifyExternalOrders(order);
     }
 
     public List<Order> getOrdersByDates(String startDate, String endDate) {
-       return getOrdersByDatesAndHours(startDate,endDate,"00:00","23:59");
+        return getOrdersByDatesAndHours(startDate, endDate, "00:00", "23:59");
     }
 
     public Order updateItemInOrder(ItemInOrder item) {
@@ -185,7 +186,7 @@ public class OrderService {
 
     public void deleteItemFromOrder(Long itemId) {
         itemInOrderService.deleteItemFromOrder(itemId);
-      //  TODO : Need to calculate total price and update order !!
+        //  TODO : Need to calculate total price and update order !!
     }
 
     public Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {
@@ -202,7 +203,7 @@ public class OrderService {
         List<Discount> discounts = discountRepository.findByStartDateIsBetweenAndStartHourIsLessThanEqualAndEndHourIsGreaterThanEqual
                 (order.getDate(), order.getDate(), order.getHour(), order.getHour());
 
-        for (var d: discounts)
+        for (var d : discounts)
             if (!d.getDays().contains(LocalDate.now().getDayOfWeek()))
                 discounts.remove(d);
 
@@ -214,7 +215,7 @@ public class OrderService {
         for (var discount : discounts) {
             for (var c : discount.getCategories()) {
                 items = howManyByCategory(order, c);
-                numberOfItems = items.size()/(discount.getIfYouOrder()+discount.getYouGetDiscountFor()); // the number of items that get discount
+                numberOfItems = items.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor()); // the number of items that get discount
                 for (int i = 0; i < numberOfItems; i++)
                     applyItemInOrderDiscount(items.get(i), discount.getPercent());
             }
@@ -224,7 +225,7 @@ public class OrderService {
 
     private List<ItemInOrder> howManyByCategory(Order order, ItemCategory category) {
         var items = new ArrayList<ItemInOrder>();
-        for (var i: order.getItems()) {
+        for (var i : order.getItems()) {
             if (i.getItem().getCategory().equals(category) && i.getPrice() > 0)
                 items.add(i);
         }

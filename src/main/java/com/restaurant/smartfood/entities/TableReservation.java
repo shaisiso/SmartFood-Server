@@ -29,18 +29,18 @@ public class TableReservation {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private RestaurantTable table;
 
-    @NotNull
+    @NotNull(message = "Date must not be null")
     @Column(nullable = false)
     @FutureOrPresent
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate date;
 
-    @NotNull
+    @NotNull(message = "Hour must not be null")
     @Column(nullable = false)
     @JsonFormat(pattern = "HH:00")
     private LocalTime hour;
 
-    @NotNull
+    @NotNull(message = "Number of diners must not be null")
     @Column(nullable = false)
     @Min(1)
     @Max(value=15, message = "For more that 15 people, call us")
@@ -51,7 +51,7 @@ public class TableReservation {
 
     @ManyToOne(optional = false,cascade ={ CascadeType.MERGE,CascadeType.REMOVE})
     @JoinColumn(name = "person_id",nullable = false)
-    @NotNull
+    @NotNull(message = "Person details must not be null")
     @Valid
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private Person person;

@@ -21,12 +21,12 @@ import javax.validation.constraints.NotNull;
 @Table(name = "orders_of_table")
 public class OrderOfTable extends Order {
 
-    @NotNull
+    @NotNull(message = "Number of diners must not be null")
     @Min(1)
     private Integer numberOfDiners;
 
     @ManyToOne(optional = false)
-    @NotNull
+    @NotNull(message = "Table must not be null")
     @JoinColumn(nullable = false)
     private RestaurantTable table;
 }

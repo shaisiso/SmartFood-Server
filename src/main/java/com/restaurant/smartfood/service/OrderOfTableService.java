@@ -5,7 +5,6 @@ import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
 import com.restaurant.smartfood.utils.ItemInOrderResponse;
 import com.restaurant.smartfood.websocket.WebSocketService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -220,11 +219,14 @@ public class OrderOfTableService {
         return cancelItemRequestRepository.findByIsApprovedIsFalse();
     }
 
+    // return true - is order of table, false - otherwise
+    public void closeIfOrderOfTable(Order order) {
+      orderOfTableRepository.findById(order.getId())
+              .ifPresent(oot->{
+                  order.setStatus(OrderStatus.CLOSED);
+                  restaurantTableService.changeTableBusy(oot.getTable().getTableId(),false);
+              });
 
-    public void onCloseOrder(Order order) {
-        orderOfTableRepository.findById(order.getId())
-                .ifPresent(oot->{
-                    restaurantTableService.changeTableBusy(oot.getTable().getTableId(),false);
-                });
+
     }
 }

@@ -52,8 +52,15 @@ public class RestaurantTableService {
 
     public RestaurantTable changeTableBusy(Integer tableId, Boolean isBusy) {
         var table =getTableById(tableId);
-        if (isBusy==false && orderOfTableService.optionalActiveTableOrder(tableId).isPresent())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Table " +tableId+" has active order, please close the order before");
+        if (isBusy==false ){
+            orderOfTableService.optionalActiveTableOrder(tableId).ifPresent(to->{
+                if (to.getItems().isEmpty()){
+                    orderOfTableService.deleteOrderOfTable(to.getId());
+                }else{
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Table " +tableId+" has active order, please close the order before");
+                }
+            });
+        }
         table.setIsBusy(isBusy);
         return restaurantTableRepository.save(table);
     }

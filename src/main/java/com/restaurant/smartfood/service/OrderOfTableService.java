@@ -76,6 +76,11 @@ public class OrderOfTableService {
         var o = orderOfTableRepository.findById(id).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id " + id));
+        var cancelRequests = cancelItemRequestRepository.findByOrderOfTableId(o.getId());
+        for (var cancelRequest : cancelRequests ) {
+            cancelRequest.setOrderOfTable(null);
+        }
+        cancelItemRequestRepository.saveAll(cancelRequests);
         orderOfTableRepository.delete(o);
     }
 

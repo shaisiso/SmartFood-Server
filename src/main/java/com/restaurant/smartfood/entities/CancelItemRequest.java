@@ -28,7 +28,7 @@ public class CancelItemRequest {
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime date;
 
-    @ManyToOne(cascade={CascadeType.MERGE})
+    @ManyToOne//(cascade={CascadeType.MERGE})
     @JoinColumn
     private ItemInOrder itemInOrder;
 
@@ -37,7 +37,7 @@ public class CancelItemRequest {
     @JoinColumn(nullable = false)
     private MenuItem menuItem;
 
-    @ManyToOne(optional = false)
+    @ManyToOne//(cascade={CascadeType.MERGE})
     private OrderOfTable orderOfTable;
 
     private String reason;

@@ -12,4 +12,5 @@ public interface CancelItemRequestRepository extends JpaRepository<CancelItemReq
     Optional<CancelItemRequest> findByItemInOrderIdAndIsApprovedIsFalse(Long itemInOrderId);
     List<CancelItemRequest> findByOrderOfTableIdAndIsApprovedIsFalse(Long orderId);
     List<CancelItemRequest> findByIsApprovedIsFalse();
+    List<CancelItemRequest> findByOrderOfTableId(Long orderId);
 }

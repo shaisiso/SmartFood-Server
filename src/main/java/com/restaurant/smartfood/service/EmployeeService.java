@@ -4,7 +4,7 @@ import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.EmployeeRole;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
-import com.restaurant.smartfood.security.LoginAuthenticationRequest;
+import com.restaurant.smartfood.security.ChangePasswordRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,11 +61,12 @@ public class EmployeeService {
         employeeRepository.findById(updatedEmployee.getId()).ifPresentOrElse(
                 employeeDB -> {
                     // if password was changed need to encrypt it, otherwise it will be encrypted
-                    var password = updatedEmployee.getPassword().equals(employeeDB.getPassword()) ?
-                            employeeDB.getPassword() :  passwordEncoder.encode(updatedEmployee.getPassword());
+//                    var password = updatedEmployee.getPassword().equals(employeeDB.getPassword()) ?
+//                            employeeDB.getPassword() :  passwordEncoder.encode(updatedEmployee.getPassword());
+                    //password should change from a different method
                     personService.updatePerson(updatedEmployee);
                     employeeRepository.updateEmployee(updatedEmployee.getId(),
-                            password  , updatedEmployee.getRole().toString());
+                            employeeDB.getPassword()  , updatedEmployee.getRole().toString());
                 },
                 () -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + updatedEmployee.getId());
@@ -73,7 +74,14 @@ public class EmployeeService {
         );
         return updatedEmployee;
     }
-
+    public Employee updatePassword(ChangePasswordRequest changePasswordRequest){
+        var employee = getEmployeeByID(changePasswordRequest.getUserId());
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), employee.getPassword()))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Old password is wrong.");
+        var newEncryptedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        employee.setPassword(newEncryptedPassword);
+        return employeeRepository.save(employee);
+    }
     public Employee getEmployeeByPhoneNumber(String employeePhoneNumber) {
         return employeeRepository.findByPhoneNumber(employeePhoneNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with phone number: " + employeePhoneNumber));

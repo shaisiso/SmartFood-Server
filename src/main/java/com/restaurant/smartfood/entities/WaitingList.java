@@ -2,9 +2,11 @@ package com.restaurant.smartfood.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Polymorphism;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -28,26 +30,32 @@ public class WaitingList {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
+    @NotNull(message = "Date must not be null")
     @FutureOrPresent
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Column(nullable = false)
     private LocalDate date;
 
-    @NotNull
+    @NotNull(message = "Hour must not be null")
     @Column(nullable = false)
-    @JsonFormat(pattern="HH:mm")
-    private LocalTime time;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime hour;
 
-    @NotNull
-    @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
-    private Member member;
+    //    @NotNull
+//    @ManyToOne(optional = false)
+//    @JoinColumn(nullable = false)
+//    private Member member;
+    @ManyToOne(optional = false, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "person_id", nullable = false)
+    @NotNull(message = "Person details must not be null")
+    @Valid
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
+    private Person person;
 
-    @NotNull
+    @NotNull(message = "Number of diners must not be null")
     @Column(nullable = false)
     @Min(1)
-    @Max(value=15, message = "For more that 15 people, call us")
+    @Max(value = 15, message = "For more that 15 people, call us")
     private Integer numberOfDiners;
 
 }

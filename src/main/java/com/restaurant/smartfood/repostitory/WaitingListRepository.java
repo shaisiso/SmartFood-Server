@@ -12,10 +12,10 @@ import java.util.Optional;
 @Repository
 public interface WaitingListRepository extends JpaRepository<WaitingList, Long> {
 
-    Optional<WaitingList> findByMemberIdAndDateAndTime(Long memberId, LocalDate date, LocalTime time);
+    Optional<WaitingList> findByPersonIdAndDateAndHour(Long memberId, LocalDate date, LocalTime time);
 
-    List<WaitingList> findByDateAndTime(LocalDate localDate, LocalTime localHour);
+    List<WaitingList> findByDateAndHour(LocalDate localDate, LocalTime localHour);
 
-    List<WaitingList> findByMemberId(Long memberId);
-    List<WaitingList> findByDateIsAndTimeIsBetween(LocalDate localDate, LocalTime startHour, LocalTime endHour);
+    List<WaitingList> findByPersonId(Long memberId);
+    List<WaitingList> findByDateIsAndHourIsBetween(LocalDate localDate, LocalTime startHour, LocalTime endHour);
 }

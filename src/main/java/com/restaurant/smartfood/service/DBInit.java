@@ -420,8 +420,8 @@ public class DBInit implements CommandLineRunner {
         WaitingList w = WaitingList.builder()
                 .date(LocalDate.now())
                 .numberOfDiners(4)
-                .time(LocalTime.of(20,00))
-                .member(memberRepository.findAll().get(0))
+                .hour(LocalTime.of(20,00))
+                .person(memberRepository.findAll().get(0))
                 .build();
         waitingListRepository.save(w);
     }

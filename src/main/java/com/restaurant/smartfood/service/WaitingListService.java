@@ -33,8 +33,8 @@ public class WaitingListService {
     boolean timePassed = false, customerResponse = false, tableTaken = false;
 
     public WaitingList addToWaitingList(WaitingList waitingList) {
-        waitingListRepository.findByMemberIdAndDateAndTime(waitingList.getMember().getId(),
-                waitingList.getDate(), waitingList.getTime()).ifPresent(w ->
+        waitingListRepository.findByPersonIdAndDateAndHour(waitingList.getPerson().getId(),
+                waitingList.getDate(), waitingList.getHour()).ifPresent(w ->
         {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "There is already waiting list request with those details.");
@@ -48,7 +48,7 @@ public class WaitingListService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "There is no waiting list request with those details.");
         });
-        if (waitingList.getDate().equals(w.getDate()) && waitingList.getTime().equals(w.getTime())) {
+        if (waitingList.getDate().equals(w.getDate()) && waitingList.getHour().equals(w.getHour())) {
             w.setNumberOfDiners(waitingList.getNumberOfDiners());
             return waitingListRepository.save(w);
         }
@@ -69,7 +69,7 @@ public class WaitingListService {
         try {
             LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             LocalTime localHour = LocalTime.parse(hour, DateTimeFormatter.ofPattern("HH:mm"));
-            return waitingListRepository.findByDateAndTime(localDate, localHour);
+            return waitingListRepository.findByDateAndHour(localDate, localHour);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
@@ -77,13 +77,13 @@ public class WaitingListService {
     }
 
     public List<WaitingList> getWaitingListByMember(Long memberId) {
-        return waitingListRepository.findByMemberId(memberId);
+        return waitingListRepository.findByPersonId(memberId);
     }
 
 
     public void checkWaitingLists(LocalDate date, LocalTime hour, RestaurantTable table) {
         var waitingListCustomers =
-                waitingListRepository.findByDateIsAndTimeIsBetween
+                waitingListRepository.findByDateIsAndHourIsBetween
                         (date, hour.minusHours(1), hour.plusHours(1));
         if (waitingListCustomers.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -105,7 +105,7 @@ public class WaitingListService {
                             table(table)
                             .hour(hour)
                             .date(date)
-                            .person(waitingList.getMember())
+                            .person(waitingList.getPerson())
                             .numberOfDiners(waitingList.getNumberOfDiners())
                             .build();
                     tableReservationRepository.saveAll(Arrays.asList(t));

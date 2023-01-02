@@ -19,7 +19,7 @@ import java.time.LocalTime;
 @ToString
 @Entity
 @Table(name = "table_reservations")
-public class TableReservation {
+public class TableReservation implements Comparable<TableReservation>{
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reservation_seq")
     @SequenceGenerator(name = "reservation_seq")
@@ -55,4 +55,13 @@ public class TableReservation {
     @Valid
     @Cascade(org.hibernate.annotations.CascadeType.DELETE)
     private Person person;
+
+
+
+    @Override
+    public int compareTo(TableReservation otherReservation) {
+        if (this.getDate().compareTo(otherReservation.getDate())==0) // equals date
+            return this.getHour().compareTo(otherReservation.getHour());
+        return this.getDate().compareTo(otherReservation.getDate());
+    }
 }

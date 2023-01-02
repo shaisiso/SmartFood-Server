@@ -77,26 +77,26 @@ public class RestaurantTableService {
     }
 
 
-
-
-    public List<RestaurantTable> findSuitableTableForNow()
-    {
-        // res = all table reservations for the next 2 hours
-        var res = tableReservationRepository.
-                findByDateIsAndHourIsBetween(LocalDate
-                                .now(ZoneId.of(timezone)),
-                        LocalTime.now(ZoneId.of(timezone)).minusMinutes(15),
-                        LocalTime.now(ZoneId.of(timezone)).plusHours(2));
-
-        // busyTables = the busy tables from the reservations
-        List<RestaurantTable> busyTables = res.stream()
-                .map(TableReservation::getTable)
-                .collect(Collectors.toList());
-
-        // freeTables = the free tables in the relevant hours
-        var freeTables = restaurantTableRepository.findAll();
-        freeTables.removeIf(t -> busyTables.contains(t.getTableId()));
-
-        return freeTables; // green and yellow tables
-    }
+//
+//
+//    public List<RestaurantTable> findSuitableTableForNow()
+//    {
+//        // res = all table reservations for the next 2 hours
+//        var res = tableReservationRepository.
+//                findByDateIsAndHourIsBetween(LocalDate
+//                                .now(ZoneId.of(timezone)),
+//                        LocalTime.now(ZoneId.of(timezone)).minusMinutes(15),
+//                        LocalTime.now(ZoneId.of(timezone)).plusHours(2));
+//
+//        // busyTables = the busy tables from the reservations
+//        List<RestaurantTable> busyTables = res.stream()
+//                .map(TableReservation::getTable)
+//                .collect(Collectors.toList());
+//
+//        // freeTables = the free tables in the relevant hours
+//        var freeTables = restaurantTableRepository.findAll();
+//        freeTables.removeIf(t -> busyTables.contains(t.getTableId()));
+//
+//        return freeTables; // green and yellow tables
+//    }
 }

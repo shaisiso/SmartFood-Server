@@ -39,9 +39,9 @@ public class TableReservationController {
     }
 
     @GetMapping("/date/{startDate}/{endDate}") // TODO: CHECK LocalDate POSTMAN
-    public List<TableReservation> getTableReservationsByDates(@PathVariable("startDate") LocalDate startDate,
+    public List<TableReservation> getTableReservationsByDates(@PathVariable("startDate") String startDate,
                                                               @PathVariable(required = false,
-                                                                      name = "endDate") LocalDate endDate) {
+                                                                      name = "endDate") String endDate) {
         return tableReservationService.getTableReservationsByDates(startDate, endDate);
     }
 
@@ -49,4 +49,9 @@ public class TableReservationController {
     public List<TableReservation> getTableReservationsByCustomer(@PathVariable("phoneNumber") String phoneNumber) {
         return tableReservationService.getTableReservationsByCustomer(phoneNumber);
     }
+    @GetMapping("/current")
+    public List<TableReservation> getCurrentReservations(){
+        return tableReservationService.findCurrentReservations();
+    }
+
 }

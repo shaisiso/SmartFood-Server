@@ -371,11 +371,11 @@ public class DBInit implements CommandLineRunner {
                         .build())
                 .build();
         TableReservation t = TableReservation.builder().
-                table(restaurantTableRepository.findById(10).get())
+                table(restaurantTableRepository.findById(11).get())
                 .hour(LocalTime.now())
                 .date(LocalDate.now())
                 .person(personRepository.save(p))
-                .numberOfDiners(4)
+                .numberOfDiners(2)
                 .build();
         tableReservationRepository.saveAll(Arrays.asList(t));
     }

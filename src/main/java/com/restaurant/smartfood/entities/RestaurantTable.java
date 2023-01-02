@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "restaurant_tables")
 @OnDelete(action = OnDeleteAction.CASCADE)

@@ -78,9 +78,9 @@ public class OrderOfTableService {
         if (!originalOrder.getTable().getTableId().equals(orderOfTable.getTable().getTableId())) {
             checkTableAvailability(orderOfTable);
             // TODO: Test New Change
-            if (restaurantTableService.findSuitableTableForNow().contains(orderOfTable.getTable()))
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Table number " + orderOfTable.getTable().getTableId() + " is not available.");
+//            if (restaurantTableService.findSuitableTableForNow().contains(orderOfTable.getTable()))
+//                throw new ResponseStatusException(HttpStatus.CONFLICT,
+//                        "Table number " + orderOfTable.getTable().getTableId() + " is not available.");
         }
 
         orderOfTableRepository.updateOrderOfTable(orderOfTable.getNumberOfDiners(),

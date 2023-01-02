@@ -60,10 +60,6 @@ public class EmployeeService {
     public Employee updateEmployee(Employee updatedEmployee) {
         employeeRepository.findById(updatedEmployee.getId()).ifPresentOrElse(
                 employeeDB -> {
-                    // if password was changed need to encrypt it, otherwise it will be encrypted
-//                    var password = updatedEmployee.getPassword().equals(employeeDB.getPassword()) ?
-//                            employeeDB.getPassword() :  passwordEncoder.encode(updatedEmployee.getPassword());
-                    //password should change from a different method
                     personService.updatePerson(updatedEmployee);
                     employeeRepository.updateEmployee(updatedEmployee.getId(),
                             employeeDB.getPassword()  , updatedEmployee.getRole().toString());

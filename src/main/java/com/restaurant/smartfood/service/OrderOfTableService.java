@@ -75,8 +75,14 @@ public class OrderOfTableService {
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id: " + orderOfTable.getId())
         );
-        if (!originalOrder.getTable().getTableId().equals(orderOfTable.getTable().getTableId()))
+        if (!originalOrder.getTable().getTableId().equals(orderOfTable.getTable().getTableId())) {
             checkTableAvailability(orderOfTable);
+            // TODO: Test New Change
+            if (restaurantTableService.findSuitableTableForNow().contains(orderOfTable.getTable()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Table number " + orderOfTable.getTable().getTableId() + " is not available.");
+        }
+
         orderOfTableRepository.updateOrderOfTable(orderOfTable.getNumberOfDiners(),
                 orderOfTable.getTable().getTableId(), orderOfTable.getId());
         return orderOfTable;
@@ -87,7 +93,7 @@ public class OrderOfTableService {
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id " + id));
         var cancelRequests = cancelItemRequestRepository.findByOrderOfTableId(o.getId());
-        for (var cancelRequest : cancelRequests ) {
+        for (var cancelRequest : cancelRequests) {
             cancelRequest.setOrderOfTable(null);
         }
         cancelItemRequestRepository.saveAll(cancelRequests);
@@ -221,11 +227,11 @@ public class OrderOfTableService {
 
     // return true - is order of table, false - otherwise
     public void closeIfOrderOfTable(Order order) {
-      orderOfTableRepository.findById(order.getId())
-              .ifPresent(oot->{
-                  order.setStatus(OrderStatus.CLOSED);
-                  restaurantTableService.changeTableBusy(oot.getTable().getTableId(),false);
-              });
+        orderOfTableRepository.findById(order.getId())
+                .ifPresent(oot -> {
+                    order.setStatus(OrderStatus.CLOSED);
+                    restaurantTableService.changeTableBusy(oot.getTable().getTableId(), false);
+                });
 
 
     }

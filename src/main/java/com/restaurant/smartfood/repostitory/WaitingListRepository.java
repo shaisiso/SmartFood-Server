@@ -17,4 +17,5 @@ public interface WaitingListRepository extends JpaRepository<WaitingList, Long> 
     List<WaitingList> findByDateAndTime(LocalDate localDate, LocalTime localHour);
 
     List<WaitingList> findByMemberId(Long memberId);
+    List<WaitingList> findByDateIsAndTimeIsBetween(LocalDate localDate, LocalTime startHour, LocalTime endHour);
 }

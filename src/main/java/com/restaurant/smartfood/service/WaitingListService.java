@@ -1,6 +1,9 @@
 package com.restaurant.smartfood.service;
 
+import com.restaurant.smartfood.entities.RestaurantTable;
+import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.entities.WaitingList;
+import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import com.restaurant.smartfood.repostitory.WaitingListRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +15,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Service
 @Slf4j
@@ -21,6 +27,10 @@ public class WaitingListService {
 
     @Autowired
     private WaitingListRepository waitingListRepository;
+    @Autowired
+    private TableReservationRepository tableReservationRepository;
+    Timer timer = new Timer();
+    boolean timePassed = false, customerResponse = false, tableTaken = false;
 
     public WaitingList addToWaitingList(WaitingList waitingList) {
         waitingListRepository.findByMemberIdAndDateAndTime(waitingList.getMember().getId(),
@@ -68,5 +78,39 @@ public class WaitingListService {
 
     public List<WaitingList> getWaitingListByMember(Long memberId) {
         return waitingListRepository.findByMemberId(memberId);
+    }
+
+
+    public void checkWaitingLists(LocalDate date, LocalTime hour, RestaurantTable table) {
+        var waitingListCustomers =
+                waitingListRepository.findByDateIsAndTimeIsBetween
+                        (date, hour.minusHours(1), hour.plusHours(1));
+        if (waitingListCustomers.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "There is no customer that should be notified");
+        while (!tableTaken || !waitingListCustomers.isEmpty()) {
+            var waitingList = waitingListCustomers.remove(0);
+            //send SMS to waitingList.member.phoneNumber
+            while (!timePassed) {
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        timePassed = true;
+                    }
+                }, 2 * 60 * 1000); // 2 minutes
+
+                if (customerResponse) {
+                    tableTaken = true;
+                    TableReservation t = TableReservation.builder().
+                            table(table)
+                            .hour(hour)
+                            .date(date)
+                            .person(waitingList.getMember())
+                            .numberOfDiners(waitingList.getNumberOfDiners())
+                            .build();
+                    tableReservationRepository.saveAll(Arrays.asList(t));
+                }
+            }
+        }
     }
 }

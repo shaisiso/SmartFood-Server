@@ -37,7 +37,7 @@ public class TableReservation {
 
     @NotNull(message = "Hour must not be null")
     @Column(nullable = false)
-    @JsonFormat(pattern = "HH:00")
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime hour;
 
     @NotNull(message = "Number of diners must not be null")

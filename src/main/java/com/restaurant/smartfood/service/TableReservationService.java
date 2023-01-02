@@ -26,6 +26,8 @@ public class TableReservationService {
 
     @Autowired
     private PersonService personService;
+    @Autowired
+    private WaitingListService waitingListService;
 
     @Autowired
     private RestaurantTableRepository restaurantTableRepository;
@@ -47,7 +49,10 @@ public class TableReservationService {
                             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                                     "There is no reservation with ID: " + reservation.getReservationId());
                         });
-        ;
+
+        //
+        waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour(), reservation.getTable());
+
     }
 
     public List<TableReservation> getTableReservationsByDates(LocalDate startDate, LocalDate endDate) {

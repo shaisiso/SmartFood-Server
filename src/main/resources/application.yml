@@ -5,6 +5,14 @@ timezone:
   name: Asia/Jerusalem
 
 ---
+twilio:
+#  account_sid: AC1b315bccc304f1b4381e74bca8cf552a
+#  auth_token: c5aee135f49e7656db691f53c1379c0e
+#  trial_number: +19706485971
+  account_sid: AC1b315bccc304f1b4381e74bca8cf552a
+  auth_token: 70f2a4a95fb7dbb3a4ad65b8119cca1b
+  trial_number: +18123894306
+  phone-number-to: +972524453933
 -spring:
   devtools:
     restart:

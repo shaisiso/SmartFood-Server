@@ -46,7 +46,7 @@ public class TableReservationService {
     public TableReservation saveTableReservation(TableReservation reservation) {
         var freeTables = findSuitableTablesForReservation(reservation);
         if (freeTables.isEmpty())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is now suitable table for your reservation request.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
         log.warn("duration: " + durationForReservation);
         personService.savePerson(reservation.getPerson());
         reservation.setTable(freeTables.get(0));
@@ -102,8 +102,7 @@ public class TableReservationService {
             hourTo = LocalTime.of(23, 59);
         log.info("from :" + hourFrom + ". to: " + hourTo + ". date: " + reservation.getDate());
         var res = tableReservationRepository.
-                findByDateIsAndHourIsBetween(reservation.getDate(), hourFrom, hourTo
-                );
+                findByDateIsAndHourIsBetween(reservation.getDate(), hourFrom, hourTo );
         var res2 = tableReservationRepository.findByDate(reservation.getDate());
         log.info(res.toString());
         log.info("res2" + res2.toString());
@@ -131,7 +130,7 @@ public class TableReservationService {
     }
 
 
-    public  List<String> getAvailableHoursByDateAndDiners(String dateSt, Integer numberOfDiners) {
+    public List<String> getAvailableHoursByDateAndDiners(String dateSt, Integer numberOfDiners) {
         try {
             var date = LocalDate.parse(dateSt, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             var reservationsInDate = tableReservationRepository.findByDate(date);
@@ -154,7 +153,10 @@ public class TableReservationService {
                 for (int minute = 0; minute <= 30; minute += 30) {
                     var time = LocalTime.of(hour, minute);
                     for (var suitableTable : suitableTables) {
-                        if (!tableReservedTimeMap.containsKey(suitableTable) || !tableReservedTimeMap.get(suitableTable).contains(time)){
+                        if (!tableReservedTimeMap.containsKey(suitableTable) || tableReservedTimeMap.get(suitableTable).stream()
+                                .allMatch(reservedTime -> time.compareTo(hourPlusDurationForReservation(reservedTime)) > 0
+                                        || time.compareTo(reservedTime.minusHours(durationForReservation)) < 0)
+                        ) {
                             availableHours.add(time.format(DateTimeFormatter.ofPattern("HH:mm")));
                             break;
                         }
@@ -164,9 +166,15 @@ public class TableReservationService {
             return availableHours;
         } catch (Exception e) {
             log.error(e.getMessage());
-            log.error( e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw e;
-           // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
+            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
         }
+    }
+    private LocalTime hourPlusDurationForReservation(LocalTime hour){
+        var hourPlus = hour.plusHours(durationForReservation);
+        if (hourPlus.compareTo(hour) <=0) //passed 00:00
+            hourPlus = LocalTime.of(23, 59);
+        return hourPlus;
     }
 }

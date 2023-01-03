@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController()
@@ -54,4 +55,8 @@ public class TableReservationController {
         return tableReservationService.findCurrentReservations();
     }
 
+    @GetMapping("/hours/{date}/{numberOfDiners}")
+    public List<String> getAvailableHoursByDateAndDiners(@PathVariable("date") String dateSt, @PathVariable("numberOfDiners") Integer numberOfDiners){
+        return tableReservationService.getAvailableHoursByDateAndDiners(dateSt,numberOfDiners);
+    }
 }

@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
@@ -13,12 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,7 +84,8 @@ public class TableReservationService {
     public List<TableReservation> getTableReservationsByCustomer(String phoneNumber) {
         return sortedReservation(tableReservationRepository.findByPersonPhoneNumber(phoneNumber));
     }
-    private  List<TableReservation> sortedReservation(List<TableReservation> reservationsList){
+
+    private List<TableReservation> sortedReservation(List<TableReservation> reservationsList) {
         reservationsList.sort(TableReservation::compareTo);
         return reservationsList;
     }
@@ -127,4 +130,43 @@ public class TableReservationService {
                         LocalTime.now(ZoneId.of(timezone)).plusHours(durationForReservation));
     }
 
+
+    public  List<String> getAvailableHoursByDateAndDiners(String dateSt, Integer numberOfDiners) {
+        try {
+            var date = LocalDate.parse(dateSt, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            var reservationsInDate = tableReservationRepository.findByDate(date);
+            var reservedTables = reservationsInDate.stream()
+                    .map(TableReservation::getTable)
+                    .filter(t -> t.getNumberOfSeats() >= numberOfDiners)
+                    .collect(Collectors.toSet());
+            Map<RestaurantTable, Set<LocalTime>> tableReservedTimeMap = new HashMap<>();
+            reservedTables.forEach(reservedTable -> {
+                tableReservedTimeMap.put(reservedTable, reservationsInDate.stream()
+                        .filter(r -> r.getTable().getTableId().equals(reservedTable.getTableId()))
+                        .map(reservationOfTable -> reservationOfTable.getHour())
+                        .collect(Collectors.toSet()));
+            });
+            List<String> availableHours = new ArrayList<>();
+            var suitableTables = restaurantTableRepository.findByNumberOfSeatsGreaterThanEqual(numberOfDiners);
+            log.warn(tableReservedTimeMap.toString());
+            log.warn(suitableTables.toString());
+            for (int hour = 12; hour < 23; hour++) {
+                for (int minute = 0; minute <= 30; minute += 30) {
+                    var time = LocalTime.of(hour, minute);
+                    for (var suitableTable : suitableTables) {
+                        if (!tableReservedTimeMap.containsKey(suitableTable) || !tableReservedTimeMap.get(suitableTable).contains(time)){
+                            availableHours.add(time.format(DateTimeFormatter.ofPattern("HH:mm")));
+                            break;
+                        }
+                    }
+                }
+            }
+            return availableHours;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            log.error( e.getLocalizedMessage());
+            throw e;
+           // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
+        }
+    }
 }

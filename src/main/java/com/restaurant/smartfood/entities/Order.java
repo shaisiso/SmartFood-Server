@@ -48,11 +48,11 @@ public class Order {
     private String orderComment;
 
     @Column(nullable = false)
-    @DecimalMin(value = "0", inclusive = false)
+    @DecimalMin(value = "0")
     private Float originalTotalPrice;
 
     @Column(nullable = false)
-    @DecimalMin(value = "0", inclusive = false)
+    @DecimalMin(value = "0")
     private Float totalPriceToPay;
 
     @Column(nullable = false)

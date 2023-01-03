@@ -198,8 +198,9 @@ public class OrderOfTableService {
         var cancelRequestInDB = getCancelItemRequestById(cancelItemRequest.getId());
         cancelRequestInDB.setIsApproved(cancelItemRequest.getIsApproved());
         if (cancelItemRequest.getIsApproved() == true) {
-            orderService.deleteItemFromOrder(cancelRequestInDB.getItemInOrder().getId());
+            var itemInOrder = cancelRequestInDB.getItemInOrder();
             cancelRequestInDB.setItemInOrder(null);
+            orderService.deleteItemFromOrder(itemInOrder.getId());
             cancelItemRequestRepository.save(cancelRequestInDB);
         } else {
             cancelItemRequestRepository.delete(cancelRequestInDB);

@@ -78,8 +78,9 @@ public class OrderService {
     public Order deleteItemsListFromOrder(List<Long> itemsInOrderId) {
         if (itemsInOrderId == null || itemsInOrderId.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "List of items is missing");
+        var order = itemInOrderService.getItemInOrderById(itemsInOrderId.get(0)).getOrder();
         itemInOrderService.deleteItemsListFromOrder(itemsInOrderId);
-        var order = getOrder(itemsInOrderId.get(0)); // TODO : CHANGE THIS IS NOT THE REAL ORDER !!!!
+        // TODO : CHANGE THIS IS NOT THE REAL ORDER !!!!
         calculateTotalPrice(order);
         webSocketService.notifyExternalOrders(order);
         return order;
@@ -108,7 +109,7 @@ public class OrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't pay more then the remaining amount.");
         order.setAlreadyPaid(order.getAlreadyPaid() + amount);
         if (order.getAlreadyPaid().equals(order.getOriginalTotalPrice())) {
-           orderOfTableService.closeIfOrderOfTable(order);
+            orderOfTableService.closeIfOrderOfTable(order);
         }
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
@@ -185,8 +186,15 @@ public class OrderService {
     }
 
     public void deleteItemFromOrder(Long itemId) {
+        var itemInOrder = itemInOrderService.getItemInOrderById(itemId);
+        var order = itemInOrder.getOrder();
         itemInOrderService.deleteItemFromOrder(itemId);
-        //  TODO : Need to calculate total price and update order !!
+        calculateTotalPrice(order);
+        webSocketService.notifyExternalOrders(order);
+//        order.getItems().add(itemInOrder);
+//        order.setOriginalTotalPrice(calculateTotalPrice(order));
+//        webSocketService.notifyExternalOrders(order);
+        orderRepository.save(order);
     }
 
     public Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {

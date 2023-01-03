@@ -19,8 +19,7 @@ import java.util.List;
 public class ItemInOrderService {
     @Autowired
     private ItemInOrderRepository itemInOrderRepository;
-    @Autowired
-    private WebSocketService webSocketService;
+
 
     public ItemInOrder addItemToOrder(ItemInOrder itemInOrder) {
         itemInOrder.setPrice(itemInOrder.getItem().getPrice());
@@ -54,7 +53,8 @@ public class ItemInOrderService {
     public void deleteItemFromOrder(Long itemId) {
         var i = getItemInOrderById(itemId);
         itemInOrderRepository.delete(i);
-        webSocketService.notifyExternalOrders(i.getOrder());
+        itemInOrderRepository.flush();
+
     }
 
 

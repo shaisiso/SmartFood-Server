@@ -171,7 +171,8 @@ public class OrderOfTableService {
 
     public CancelItemRequest addCancelItemRequestAndDeleteItem(CancelItemRequest cancelItemRequest) {
         var fullRequest = buildFullRequest(cancelItemRequest, true);
-        itemInOrderService.deleteItemFromOrder(fullRequest.getItemInOrder().getId());
+        orderService.deleteItemFromOrder(fullRequest.getItemInOrder().getId());
+       // itemInOrderService.deleteItemFromOrder();
         fullRequest.setItemInOrder(null);
         return cancelItemRequestRepository.save(fullRequest);
     }
@@ -197,7 +198,7 @@ public class OrderOfTableService {
         var cancelRequestInDB = getCancelItemRequestById(cancelItemRequest.getId());
         cancelRequestInDB.setIsApproved(cancelItemRequest.getIsApproved());
         if (cancelItemRequest.getIsApproved() == true) {
-            itemInOrderService.deleteItemFromOrder(cancelRequestInDB.getItemInOrder().getId());
+            orderService.deleteItemFromOrder(cancelRequestInDB.getItemInOrder().getId());
             cancelRequestInDB.setItemInOrder(null);
             cancelItemRequestRepository.save(cancelRequestInDB);
         } else {

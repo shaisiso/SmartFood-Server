@@ -9,7 +9,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
+import java.util.SortedSet;
+
 
 @Builder
 @AllArgsConstructor
@@ -43,9 +44,10 @@ public class Discount {
     private LocalDate endDate;
 
     @ElementCollection
+    @OrderBy
     @NotEmpty(message = "Days must not be empty")
     @Column(nullable = false)
-    private Set<DayOfWeek> days;
+    private SortedSet<DayOfWeek> days;
 
     @JsonFormat(pattern = "HH:mm")
     @NotNull(message = "Start hour must not be null")

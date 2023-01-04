@@ -59,6 +59,10 @@ public class DiscountController {
 
     @GetMapping("/today/order/{orderId}")
     public List<Discount> getRelevantDiscountsForCurrentOrder(@PathVariable("orderId") Long orderId){
-        return discountService.getRelevantDiscountsForCurrentOrder(orderId);
+        return discountService.getRelevantDiscountsForCurrentOrder(orderId,false);
+    }
+    @GetMapping("/today/order/member/{orderId}")
+    public List<Discount> getRelevantMemberDiscountsForCurrentOrder(@PathVariable("orderId") Long orderId){
+        return discountService.getRelevantDiscountsForCurrentOrder(orderId,true);
     }
 }

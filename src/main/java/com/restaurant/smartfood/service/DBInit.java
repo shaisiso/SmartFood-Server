@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.TreeSet;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -454,7 +455,7 @@ public class DBInit implements CommandLineRunner {
         var d = Discount.builder()
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.of(2023,11,30))
-                .days(new HashSet<>(Arrays.asList(dayOfWeek)))
+                .days(new TreeSet<>(Arrays.asList(dayOfWeek)))
                 .categories(Arrays.asList(ItemCategory.STARTERS))
                 .startHour(LocalTime.of(13,30))
                 .endHour(LocalTime.of(22,00))

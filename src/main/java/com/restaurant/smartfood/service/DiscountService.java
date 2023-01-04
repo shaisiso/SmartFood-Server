@@ -98,17 +98,20 @@ public class DiscountService {
         return discountRepository.findByDatesAndHours(localStartDate, localEndDate, localStartHour, localEndHour);
     }
 
-    public List<Discount> getRelevantDiscountsForCurrentOrder(Long orderId) {
+    public List<Discount> getRelevantDiscountsForCurrentOrder(Long orderId, boolean isOnlyForMembers) {
         var order = orderService.getOrder(orderId);
-        return getRelevantDiscountsForCurrentOrder(order);
+        return getRelevantDiscountsForCurrentOrder(order, isOnlyForMembers);
     }
 
     public List<Discount> getRelevantDiscountsForCurrentOrder(Order order) {
+        return getRelevantDiscountsForCurrentOrder(order,false);
+    }
+    public List<Discount> getRelevantDiscountsForCurrentOrder(Order order, boolean isOnlyForMembers) {
         var dateNow = LocalDate.now(ZoneId.of(timezone));
         var timeNow = LocalTime.now(ZoneId.of(timezone));
         return discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
                 .stream()
-                .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) && d.getForMembersOnly() == false) // Members discount applied separately
+                .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) && d.getForMembersOnly() == isOnlyForMembers) // Members discount applied separately
                 .collect(Collectors.toList());
     }
 

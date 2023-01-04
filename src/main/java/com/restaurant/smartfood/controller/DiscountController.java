@@ -2,6 +2,7 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Discount;
 import com.restaurant.smartfood.entities.ItemCategory;
+import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.service.DiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -54,5 +55,10 @@ public class DiscountController {
     @GetMapping("/today")
     public List<Discount> getTodayDiscounts() {
         return discountService.getTodayDiscounts();
+    }
+
+    @GetMapping("/today/order/{orderId}")
+    public List<Discount> getRelevantDiscountsForCurrentOrder(@PathVariable("orderId") Long orderId){
+        return discountService.getRelevantDiscountsForCurrentOrder(orderId);
     }
 }

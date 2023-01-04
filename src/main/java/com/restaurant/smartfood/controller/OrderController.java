@@ -113,11 +113,7 @@ public class OrderController {
         return orderService.getOrdersByDates(startDate, endDate);
     }
 
-    @PutMapping("/bill/{orderId}/{phonenumber}")
-    public Order checkIfEntitledToDiscount(@PathVariable("orderId") Long orderId,
-                                           @PathVariable(name = "phonenumber", required = false) String phoneNumber) {
-        return orderService.checkIfEntitledToDiscount(orderId, phoneNumber);
-    }
+
 
     @GetMapping("/statuses")
     public List<String> getAllStatuses() {

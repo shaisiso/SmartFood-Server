@@ -2,10 +2,12 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Discount;
 import com.restaurant.smartfood.entities.ItemCategory;
+import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.repostitory.DiscountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,17 +18,24 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @Slf4j
 public class DiscountService {
 
-    @Autowired
-    private DiscountRepository discountRepository;
+    private final DiscountRepository discountRepository;
+    private final OrderService orderService;
 
     @Value("${timezone.name}")
     private String timezone;
+
+    @Autowired
+    public DiscountService(DiscountRepository discountRepository,@Lazy OrderService orderService) {
+        this.discountRepository = discountRepository;
+        this.orderService = orderService;
+    }
 
     public Discount addDiscount(Discount discount) {
         if (checkDiscountOverLap(discount))
@@ -93,10 +102,22 @@ public class DiscountService {
         return discountRepository.findByDatesAndHours(localStartDate, localEndDate, localStartHour, localEndHour);
     }
 
+    public List<Discount> getRelevantDiscountsForCurrentOrder(Long orderId) {
+        var order = orderService.getOrder(orderId);
+        return getRelevantDiscountsForCurrentOrder(order);
+    }
+    public List<Discount> getRelevantDiscountsForCurrentOrder(Order order) {
+        var dateNow = LocalDate.now(ZoneId.of(timezone));
+        var timeNow = LocalTime.now(ZoneId.of(timezone));
+        return discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
+                .stream()
+                .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) && d.getForMembersOnly() == false) // Members discount applied separately
+                .collect(Collectors.toList());
+    }
+
     private boolean checkDiscountOverLap(Discount discount) {
         var overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
                 discount.getStartHour(), discount.getEndHour());
-
         for (var d : overlappedDiscounts) {
             var isOverlap = d.getDays()
                     .stream()
@@ -109,4 +130,5 @@ public class DiscountService {
         }
         return true;
     }
+
 }

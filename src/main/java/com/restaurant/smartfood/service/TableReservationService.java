@@ -167,8 +167,7 @@ public class TableReservationService {
         } catch (Exception e) {
             log.error(e.getMessage());
             log.error(e.getLocalizedMessage());
-            throw e;
-            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
         }
     }
     private LocalTime hourPlusDurationForReservation(LocalTime hour){

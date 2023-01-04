@@ -49,7 +49,7 @@ public class DBInit implements CommandLineRunner {
         addMember();
         addWaitingList();
         addDelivery();
-        addDiscount();
+        addDiscounts();
     }
 
     private void addItemsToMenu() {
@@ -449,11 +449,12 @@ public class DBInit implements CommandLineRunner {
         deliveryRepository.save(newDelivery);
     }
 
-    private void addDiscount() {
+    private void addDiscounts() {
+        var dayOfWeek =LocalDate.now().getDayOfWeek();
         var d = Discount.builder()
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.of(2023,11,30))
-                .days(new HashSet<>(Arrays.asList(DayOfWeek.SUNDAY)))
+                .days(new HashSet<>(Arrays.asList(dayOfWeek)))
                 .categories(Arrays.asList(ItemCategory.STARTERS))
                 .startHour(LocalTime.of(13,30))
                 .endHour(LocalTime.of(22,00))
@@ -461,7 +462,7 @@ public class DBInit implements CommandLineRunner {
                 .percent(20)
                 .ifYouOrder(2)
                 .youGetDiscountFor(1)
-                .discountDescription("20% on all the STARTERS!!")
+                .discountDescription("20% on the 3rd item from the Starters at every "+dayOfWeek.toString())
                 .build();
         discountRepository.save(d);
     }

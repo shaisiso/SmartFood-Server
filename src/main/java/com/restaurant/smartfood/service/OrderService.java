@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,7 +32,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ItemInOrderService itemInOrderService;
     private final MemberService memberService;
-    private final DiscountRepository discountRepository;
+    private final DiscountService discountService;
+
     private final MemberRepository memberRepository;
     private final WebSocketService webSocketService;
     private final OrderOfTableService orderOfTableService;
@@ -59,9 +61,10 @@ public class OrderService {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        var totalPrice = calculateTotalPrice(orderInDB);
-        orderInDB.setOriginalTotalPrice(totalPrice);
-        orderInDB.setTotalPriceToPay(totalPrice);
+//        var totalPrice = calculateTotalPrice(orderInDB);
+//        orderInDB.setOriginalTotalPrice(totalPrice);
+//        orderInDB.setTotalPriceToPay(totalPrice);
+        calculateTotalPrices(orderInDB);
         return orderRepository.save(orderInDB);
     }
 
@@ -70,7 +73,8 @@ public class OrderService {
         item.setOrder(order);
         var itemInOrder = itemInOrderService.addItemToOrder(item);
         order.getItems().add(itemInOrder);
-        order.setOriginalTotalPrice(calculateTotalPrice(order));
+       // order.setOriginalTotalPrice(calculateTotalPrice(order));
+        calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
@@ -80,8 +84,7 @@ public class OrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "List of items is missing");
         var order = itemInOrderService.getItemInOrderById(itemsInOrderId.get(0)).getOrder();
         itemInOrderService.deleteItemsListFromOrder(itemsInOrderId);
-        // TODO : CHANGE THIS IS NOT THE REAL ORDER !!!!
-        calculateTotalPrice(order);
+        calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
         return order;
     }
@@ -90,17 +93,27 @@ public class OrderService {
         var order = getOrder(orderId);
         var itemsInOrder = itemInOrderService.addListOfItemsToOrder(items, order);
         order.getItems().addAll(itemsInOrder);
-        order.setOriginalTotalPrice(calculateTotalPrice(order));
+      //  order.setOriginalTotalPrice(calculateTotalPrice(order));
+        calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
-    public float calculateTotalPrice(Order order) {
-        var price = order.getItems().stream().map(i -> i.getPrice())
+    public void calculateTotalPrices(Order order) {
+        checkIfEntitledToDiscount(order);
+        var priceToPay = order.getItems()
+                .stream()
+                .map(i -> i.getPrice())
                 .reduce((float) 0, Float::sum);
-        order.setTotalPriceToPay(price);
-        order.setOriginalTotalPrice(price);
-        return price;
+        var originalTotalPrice =
+                order.getItems()
+                        .stream()
+                        .map(i -> i.getItem().getPrice())
+                        .reduce((float) 0, Float::sum);
+        order.setTotalPriceToPay(priceToPay);
+        order.setOriginalTotalPrice(originalTotalPrice);
+
+      //  return price;
     }
 
     public Order payment(Long orderId, Float amount) {
@@ -132,6 +145,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    // TODO: check member discount from DiscountService
     public Order applyMemberDiscount(Long orderId, Member member) {
         var order = getOrder(orderId);
         memberService.getMemberByPhoneNumber(member.getPhoneNumber());
@@ -180,7 +194,8 @@ public class OrderService {
     public Order updateItemInOrder(ItemInOrder item) {
         var i = itemInOrderService.updateItemInOrder(item);
         var order = getOrder(i.getOrder().getId());
-        order.setOriginalTotalPrice(calculateTotalPrice(order));
+        //order.setOriginalTotalPrice(calculateTotalPrice(order));
+        calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
@@ -189,7 +204,7 @@ public class OrderService {
         var itemInOrder = itemInOrderService.getItemInOrderById(itemId);
         var order = itemInOrder.getOrder();
         itemInOrderService.deleteItemFromOrder(itemId);
-        calculateTotalPrice(order);
+        calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
 //        order.getItems().add(itemInOrder);
 //        order.setOriginalTotalPrice(calculateTotalPrice(order));
@@ -197,52 +212,30 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public Order checkIfEntitledToDiscount(Long orderId, String phoneNumber) {
-        var order = getOrder(orderId);
-        boolean isMember = false;
-        var category = "";
-        var numberOfItems = 0;
-        var oldPrice = 0.0;
-        List<ItemInOrder> items;
+    public Order checkIfEntitledToDiscount(Order order) {
+        List<Discount> relevantDiscounts =discountService.getRelevantDiscountsForCurrentOrder(order);
+        relevantDiscounts.forEach(discount -> {
+            discount.getCategories().forEach(category -> {
+                var itemsInCategory = itemsInOrderByCategory(order, category);
+                var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
+                for (int i = 0; i < numberOfItemsForDiscount; i++)
+                    applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
+            });
+        });
 
-        if (phoneNumber != null)
-            isMember = memberRepository.findByPhoneNumber(phoneNumber).isPresent();
-
-        List<Discount> discounts = discountRepository.findByStartDateIsBetweenAndStartHourIsLessThanEqualAndEndHourIsGreaterThanEqual
-                (order.getDate(), order.getDate(), order.getHour(), order.getHour());
-
-        for (var d : discounts)
-            if (!d.getDays().contains(LocalDate.now().getDayOfWeek()))
-                discounts.remove(d);
-
-        if (!isMember)
-            for (var d : discounts)
-                if (d.getForMembersOnly())
-                    discounts.remove(d);
-
-        for (var discount : discounts) {
-            for (var c : discount.getCategories()) {
-                items = howManyByCategory(order, c);
-                numberOfItems = items.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor()); // the number of items that get discount
-                for (int i = 0; i < numberOfItems; i++)
-                    applyItemInOrderDiscount(items.get(i), discount.getPercent());
-            }
-        }
         return orderRepository.save(order);
     }
 
-    private List<ItemInOrder> howManyByCategory(Order order, ItemCategory category) {
-        var items = new ArrayList<ItemInOrder>();
-        for (var i : order.getItems()) {
-            if (i.getItem().getCategory().equals(category) && i.getPrice() > 0)
-                items.add(i);
-        }
-        items.sort(Comparator.comparing(ItemInOrder::getPrice));
-        return items;
+    private List<ItemInOrder> itemsInOrderByCategory(Order order, ItemCategory category) {
+        return order.getItems()
+                .stream()
+                .filter(itemInOrder -> itemInOrder.getItem().getCategory().equals(category) && itemInOrder.getPrice() > 0)
+                .sorted(Comparator.comparing(itemInOrder -> itemInOrder.getItem().getPrice())) // maybe MenuItem getPrice
+                .collect(Collectors.toList());
     }
 
     private ItemInOrder applyItemInOrderDiscount(ItemInOrder itemInOrder, int percent) {
-        itemInOrder.setPrice(itemInOrder.getPrice() * ((100 - percent) / (float) 100));
+        itemInOrder.setPrice(itemInOrder.getItem().getPrice() * ((100 - percent) / (float) 100)); // maybe MenuItem getPrice
         return itemInOrder;
     }
 

@@ -26,19 +26,19 @@ public class Discount {
     @Column(name = "discount_id", nullable = false)
     private Long discountId;
 
-    @NotNull
+    @NotNull(message = "Please choose if to apply the discount only for members")
     @Column(nullable = false)
     private Boolean forMembersOnly;
 
     @FutureOrPresent
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @NotNull
+    @NotNull(message = "Start date must not be null")
     @Column(nullable = false)
     private LocalDate startDate;
 
     @FutureOrPresent
     @JsonFormat(pattern = "dd-MM-yyyy")
-    @NotNull
+    @NotNull(message = "End date must not be null")
     @Column(nullable = false)
     private LocalDate endDate;
 
@@ -48,28 +48,28 @@ public class Discount {
     private Set<DayOfWeek> days;
 
     @JsonFormat(pattern = "HH:mm")
-    @NotNull
+    @NotNull(message = "Start hour must not be null")
     @Column(nullable = false)
     private LocalTime startHour;
 
     @JsonFormat(pattern = "HH:mm")
-    @NotNull
+    @NotNull(message = "End hour must not be null")
     @Column(nullable = false)
     private LocalTime endHour;
 
-    @Min(1)
-    @NotNull
+    @Min(0)
+    @NotNull(message = "Number of items to order - must not be null")
     @Column(nullable = false)
     private Integer ifYouOrder;
 
     @Min(1)
-    @NotNull
+    @NotNull(message = "Number of items for discount - must not be null")
     @Column(nullable = false)
     private Integer youGetDiscountFor;
 
     @Min(0)
     @Max(100)
-    @NotNull
+    @NotNull(message = "Discount percent must not be null")
     @Column(nullable = false)
     private Integer percent;
 
@@ -79,5 +79,7 @@ public class Discount {
     @Column(nullable = false)
     private List<ItemCategory> categories;
 
+    @NotNull(message = "Please provide description for the discount")
+    @Column(nullable = false)
     private String discountDescription;
 }

@@ -16,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -30,6 +29,7 @@ public class OrderOfTableService {
     private final OrderOfTableRepository orderOfTableRepository;
     private final OrderService orderService;
     private final RestaurantTableService restaurantTableService;
+    private final TableReservationService tableReservationService;
     private final ItemInOrderService itemInOrderService;
     private final CancelItemRequestRepository cancelItemRequestRepository;
     private final WebSocketService webSocketService;
@@ -37,10 +37,11 @@ public class OrderOfTableService {
     private String timezone;
 
     @Autowired
-    public OrderOfTableService(OrderOfTableRepository orderOfTableRepository, @Lazy OrderService orderService, RestaurantTableService restaurantTableService, ItemInOrderService itemInOrderService, CancelItemRequestRepository cancelItemRequestRepository, WebSocketService webSocketService) {
+    public OrderOfTableService(OrderOfTableRepository orderOfTableRepository, @Lazy OrderService orderService, RestaurantTableService restaurantTableService, TableReservationService tableReservationService, ItemInOrderService itemInOrderService, CancelItemRequestRepository cancelItemRequestRepository, WebSocketService webSocketService) {
         this.orderOfTableRepository = orderOfTableRepository;
         this.orderService = orderService;
         this.restaurantTableService = restaurantTableService;
+        this.tableReservationService = tableReservationService;
         this.itemInOrderService = itemInOrderService;
         this.cancelItemRequestRepository = cancelItemRequestRepository;
         this.webSocketService = webSocketService;
@@ -52,22 +53,21 @@ public class OrderOfTableService {
                 .ifPresent(o -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Table number " + o.getTable().getTableId() + " has active order");
                 });
-        prepareOrderToSave(orderOfTable);
-        return orderOfTableRepository.save(initOrderOfTable(orderOfTable));
+        return orderOfTableRepository.save(prepareOrderToSave(orderOfTable));
     }
 
-    private void prepareOrderToSave(OrderOfTable orderOfTable) {
-        var o = (OrderOfTable) orderService.initOrder(orderOfTable);
-        var orderInDB = orderOfTableRepository.save(o);
+    private OrderOfTable prepareOrderToSave(OrderOfTable orderOfTable) {
+        orderOfTable = (OrderOfTable) orderService.initOrder(orderOfTable);
+        var orderInDB = orderOfTableRepository.save(orderOfTable);
         orderInDB.getItems().forEach(i -> {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        var totalPrice = orderService.calculateTotalPrice(orderInDB);
-        orderInDB.setOriginalTotalPrice(totalPrice);
-        orderInDB.setTotalPriceToPay(totalPrice);
-        orderOfTable.getTable().setIsBusy(true);
-        restaurantTableService.updateRestaurantTable(orderOfTable.getTable());
+
+        orderService.calculateTotalPrices(orderInDB);
+        orderInDB.getTable().setIsBusy(true);
+        restaurantTableService.updateRestaurantTable(orderInDB.getTable());
+        return orderInDB;
     }
 
     public OrderOfTable updateOrderOfTable(OrderOfTable orderOfTable) {
@@ -76,11 +76,15 @@ public class OrderOfTableService {
                         "There is no order of table with the id: " + orderOfTable.getId())
         );
         if (!originalOrder.getTable().getTableId().equals(orderOfTable.getTable().getTableId())) {
-            checkTableAvailability(orderOfTable);
+            checkTableIsNotBusy(orderOfTable);
             // TODO: Test New Change
-//            if (restaurantTableService.findSuitableTableForNow().contains(orderOfTable.getTable()))
-//                throw new ResponseStatusException(HttpStatus.CONFLICT,
-//                        "Table number " + orderOfTable.getTable().getTableId() + " is not available.");
+            var reservedTables = tableReservationService.findCurrentReservations()
+                    .stream()
+                    .map(r->r.getTable())
+                    .collect(Collectors.toList());
+            if (reservedTables.contains(orderOfTable.getTable()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Table number " + orderOfTable.getTable().getTableId() + " is reserved.");
         }
 
         orderOfTableRepository.updateOrderOfTable(orderOfTable.getNumberOfDiners(),
@@ -101,10 +105,11 @@ public class OrderOfTableService {
     }
 
     public OrderOfTable getOrderOfTableByOrderId(Long orderId) {
-        return orderOfTableRepository.findById(orderId).orElseThrow(() ->
+        var order = orderOfTableRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no order of table with the id: " + orderId)
-        );
+                        "There is no order of table with the id: " + orderId));
+        orderService.calculateTotalPrices(order);
+        return order;
     }
 
     public List<OrderOfTable> getActiveOrdersOfTables() {
@@ -126,27 +131,11 @@ public class OrderOfTableService {
         return orderOfTableRepository.findByStatus(status);
     }
 
-    private OrderOfTable initOrderOfTable(OrderOfTable orderOfTable) {
-        orderOfTable.setDate(LocalDate.now(ZoneId.of(timezone)));
-        orderOfTable.setHour(LocalTime.now(ZoneId.of(timezone)));
-        orderOfTable.setStatus(OrderStatus.ACCEPTED);
-        orderOfTable.setAlreadyPaid((float) 0);
-        orderOfTable.setOriginalTotalPrice((float) 0);
 
-        var orderInDB = orderOfTableRepository.save(orderOfTable);
-        orderInDB.getItems().forEach(i -> {
-            i.setOrder(orderInDB);
-            itemInOrderService.addItemToOrder(i);
-        });
-        orderInDB.setOriginalTotalPrice(orderService.calculateTotalPrice(orderInDB));
-        return orderInDB;
-    }
-
-    private RestaurantTable checkTableAvailability(OrderOfTable orderOfTable) {
-        var table = restaurantTableService.getTable(
-                orderOfTable.getTable().getTableId());
-        if (table.getIsBusy()) throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "Table number " + table.getTableId() + " is busy");
+    private RestaurantTable checkTableIsNotBusy(OrderOfTable orderOfTable) {
+        var table = restaurantTableService.getTable(orderOfTable.getTable().getTableId());
+        if (table.getIsBusy())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Table number " + table.getTableId() + " is busy");
         table.setIsBusy(true);
         return restaurantTableService.updateRestaurantTable(table);
     }
@@ -159,8 +148,10 @@ public class OrderOfTableService {
     }
 
     public OrderOfTable getActiveOrdersOfTable(Integer tableId) {
-        return optionalActiveTableOrder(tableId)
+        var order =optionalActiveTableOrder(tableId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no active order for this table"));
+        orderService.calculateTotalPrices(order);
+        return order;
     }
 
     public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
@@ -172,7 +163,7 @@ public class OrderOfTableService {
     public CancelItemRequest addCancelItemRequestAndDeleteItem(CancelItemRequest cancelItemRequest) {
         var fullRequest = buildFullRequest(cancelItemRequest, true);
         orderService.deleteItemFromOrder(fullRequest.getItemInOrder().getId());
-       // itemInOrderService.deleteItemFromOrder();
+        // itemInOrderService.deleteItemFromOrder();
         fullRequest.setItemInOrder(null);
         return cancelItemRequestRepository.save(fullRequest);
     }

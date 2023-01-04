@@ -44,9 +44,10 @@ public class DeliveryService {
             i.setOrder(deliveryInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        var totalPrice = orderService.calculateTotalPrice(deliveryInDB);
-        deliveryInDB.setOriginalTotalPrice(totalPrice);
-        deliveryInDB.setTotalPriceToPay(totalPrice);
+//        var totalPrice = orderService.calculateTotalPrice(deliveryInDB);
+//        deliveryInDB.setOriginalTotalPrice(totalPrice);
+//        deliveryInDB.setTotalPriceToPay(totalPrice);
+        orderService.calculateTotalPrices(deliveryInDB);
         var dToReturn = deliveryRepository.save(deliveryInDB);
         webSocketService.notifyExternalOrders(dToReturn);
         return dToReturn;

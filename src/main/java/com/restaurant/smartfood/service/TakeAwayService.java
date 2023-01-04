@@ -43,9 +43,10 @@ public class TakeAwayService {
             i.setOrder(takeAwayInDB);
             itemInOrderService.addItemToOrder(i);
         });
-        var totalPrice = orderService.calculateTotalPrice(takeAwayInDB);
-        takeAwayInDB.setOriginalTotalPrice(totalPrice);
-        takeAwayInDB.setTotalPriceToPay(totalPrice);
+//        var totalPrice = orderService.calculateTotalPrice(takeAwayInDB);
+//        takeAwayInDB.setOriginalTotalPrice(totalPrice);
+//        takeAwayInDB.setTotalPriceToPay(totalPrice);
+        orderService.calculateTotalPrices(takeAwayInDB);
         webSocketService.notifyExternalOrders(takeAwayInDB);
         return takeAwayRepository.save(takeAwayInDB);
     }

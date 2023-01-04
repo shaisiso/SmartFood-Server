@@ -32,35 +32,31 @@ public class DiscountService {
     private String timezone;
 
     @Autowired
-    public DiscountService(DiscountRepository discountRepository,@Lazy OrderService orderService) {
+    public DiscountService(DiscountRepository discountRepository, @Lazy OrderService orderService) {
         this.discountRepository = discountRepository;
         this.orderService = orderService;
     }
 
     public Discount addDiscount(Discount discount) {
-        if (checkDiscountOverLap(discount))
-            return discountRepository.save(discount);
-        throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "There is an overlap with a discount");
+        if (isDiscountOverLap(discount))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is an overlap with a discount");
+        return discountRepository.save(discount);
     }
 
     public Discount updateDiscount(Discount discount) {
         if (discount.getDiscountId() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "You have to have an id for the discount");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You have to have an id for the discount");
         discountRepository.findById(discount.getDiscountId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no discount with the id " + discount.getDiscountId()));
-        if (checkDiscountOverLap(discount))
-            return discountRepository.save(discount);
-        throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "There is an overlap with a discount");
+        if (isDiscountOverLap(discount))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is an overlap with a discount");
+        return discountRepository.save(discount);
     }
 
     public void deleteDiscount(Long id) {
         var d = discountRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no discount with the id " + id));
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no discount with the id " + id));
         discountRepository.delete(d);
     }
 
@@ -106,6 +102,7 @@ public class DiscountService {
         var order = orderService.getOrder(orderId);
         return getRelevantDiscountsForCurrentOrder(order);
     }
+
     public List<Discount> getRelevantDiscountsForCurrentOrder(Order order) {
         var dateNow = LocalDate.now(ZoneId.of(timezone));
         var timeNow = LocalTime.now(ZoneId.of(timezone));
@@ -115,20 +112,21 @@ public class DiscountService {
                 .collect(Collectors.toList());
     }
 
-    private boolean checkDiscountOverLap(Discount discount) {
+    private boolean isDiscountOverLap(Discount discount) { // overlap is separate between members and rest
         var overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
                 discount.getStartHour(), discount.getEndHour());
         for (var d : overlappedDiscounts) {
             var isOverlap = d.getDays()
                     .stream()
-                    .anyMatch(day -> discount.getDays().contains(day)) &&
-                    d.getCategories()
-                            .stream()
-                            .anyMatch(c -> discount.getCategories().contains(c));
+                    .anyMatch(day -> discount.getDays().contains(day))
+                    && d.getCategories()
+                    .stream()
+                    .anyMatch(c -> discount.getCategories().contains(c))
+                    && discount.getForMembersOnly().equals(d.getForMembersOnly());
             if (isOverlap)
-                return false;
+                return true;
         }
-        return true;
+        return false;
     }
 
 }

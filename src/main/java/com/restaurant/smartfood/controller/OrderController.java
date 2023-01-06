@@ -71,10 +71,10 @@ public class OrderController {
         return orderService.updateTotalPrice(orderId, amount);
     }
 
-    @PutMapping("/price/member/{orderId}")
+    @PutMapping("/price/member/{orderId}/{phoneNumber}")
     public Order applyMemberDiscount(@PathVariable("orderId") Long orderId,
-                                     @RequestBody Member member) {
-        return orderService.applyMemberDiscount(orderId, member);
+                                     @PathVariable("phoneNumber") String phoneNumber) {
+        return orderService.applyMemberDiscount(orderId, phoneNumber);
     }
 
     @PutMapping("/pay/{orderId}/{amount}")

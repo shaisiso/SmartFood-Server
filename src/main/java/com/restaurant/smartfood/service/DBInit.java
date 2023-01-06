@@ -27,6 +27,7 @@ public class DBInit implements CommandLineRunner {
     private final TableReservationRepository tableReservationRepository;
     private final OrderRepository orderRepository;
     private final MemberRepository memberRepository;
+
     private final DeliveryRepository deliveryRepository;
     private final WaitingListRepository waitingListRepository;
     private final DiscountRepository discountRepository;
@@ -465,6 +466,19 @@ public class DBInit implements CommandLineRunner {
                 .youGetDiscountFor(1)
                 .discountDescription("20% on the 3rd item from the Starters at every "+dayOfWeek.toString())
                 .build();
-        discountRepository.save(d);
+        var membersDiscount = Discount.builder()
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.of(2023,11,30))
+                .days(new TreeSet<>(Arrays.asList(DayOfWeek.SUNDAY,DayOfWeek.MONDAY,DayOfWeek.TUESDAY,DayOfWeek.WEDNESDAY,DayOfWeek.THURSDAY,DayOfWeek.FRIDAY,DayOfWeek.SATURDAY) ))
+                .categories(ItemCategory.getAllCategories())
+                .startHour(LocalTime.of(9,00))
+                .endHour(LocalTime.of(23,59))
+                .forMembersOnly(true)
+                .percent(5)
+                .ifYouOrder(0)
+                .youGetDiscountFor(1)
+                .discountDescription("5% on all of the menu for members")
+                .build();
+        discountRepository.saveAll(Arrays.asList(d,membersDiscount));
     }
 }

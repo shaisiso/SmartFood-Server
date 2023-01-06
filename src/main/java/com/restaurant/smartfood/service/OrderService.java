@@ -1,7 +1,6 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
-import com.restaurant.smartfood.repostitory.DiscountRepository;
 import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.OrderRepository;
 import com.restaurant.smartfood.websocket.WebSocketService;
@@ -18,7 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,7 +71,7 @@ public class OrderService {
         item.setOrder(order);
         var itemInOrder = itemInOrderService.addItemToOrder(item);
         order.getItems().add(itemInOrder);
-       // order.setOriginalTotalPrice(calculateTotalPrice(order));
+        // order.setOriginalTotalPrice(calculateTotalPrice(order));
         calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
@@ -93,14 +91,14 @@ public class OrderService {
         var order = getOrder(orderId);
         var itemsInOrder = itemInOrderService.addListOfItemsToOrder(items, order);
         order.getItems().addAll(itemsInOrder);
-      //  order.setOriginalTotalPrice(calculateTotalPrice(order));
+        //  order.setOriginalTotalPrice(calculateTotalPrice(order));
         calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
     public void calculateTotalPrices(Order order) {
-        checkIfEntitledToDiscount(order);
+        checkIfEntitledForDiscount(order);
         var priceToPay = order.getItems()
                 .stream()
                 .map(i -> i.getPrice())
@@ -113,7 +111,7 @@ public class OrderService {
         order.setTotalPriceToPay(priceToPay);
         order.setOriginalTotalPrice(originalTotalPrice);
 
-      //  return price;
+        //  return price;
     }
 
     public Order payment(Long orderId, Float amount) {
@@ -146,11 +144,10 @@ public class OrderService {
     }
 
     // TODO: check member discount from DiscountService
-    public Order applyMemberDiscount(Long orderId, Member member) {
+    public Order applyMemberDiscount(Long orderId, String phoneNumber) {
         var order = getOrder(orderId);
-        memberService.getMemberByPhoneNumber(member.getPhoneNumber());
-        order.setOriginalTotalPrice(order.getOriginalTotalPrice() * (float) 0.9);
-
+        memberService.getMemberByPhoneNumber(phoneNumber);
+        checkIfEntitledForDiscount(order, true);
         return orderRepository.save(order);
     }
 
@@ -212,14 +209,22 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public Order checkIfEntitledToDiscount(Order order) {
-        List<Discount> relevantDiscounts =discountService.getRelevantDiscountsForCurrentOrder(order);
+    public Order checkIfEntitledForDiscount(Order order) {
+        return checkIfEntitledForDiscount(order, false);
+    }
+
+    public Order checkIfEntitledForDiscount(Order order, boolean isForMembersOnly) {
+        List<Discount> relevantDiscounts = discountService.getRelevantDiscountsForCurrentOrder(order, isForMembersOnly);
         relevantDiscounts.forEach(discount -> {
             discount.getCategories().forEach(category -> {
                 var itemsInCategory = itemsInOrderByCategory(order, category);
                 var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
-                for (int i = 0; i < numberOfItemsForDiscount; i++)
-                    applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
+                for (int i = 0; i < numberOfItemsForDiscount; i++) {
+                    if (isForMembersOnly)
+                        applyItemInOrderAdditionalDiscount(itemsInCategory.get(i), discount.getPercent());
+                    else
+                        applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
+                }
             });
         });
 
@@ -234,9 +239,12 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    private ItemInOrder applyItemInOrderDiscount(ItemInOrder itemInOrder, int percent) {
+    private void applyItemInOrderDiscount(ItemInOrder itemInOrder, int percent) {
         itemInOrder.setPrice(itemInOrder.getItem().getPrice() * ((100 - percent) / (float) 100)); // maybe MenuItem getPrice
-        return itemInOrder;
+    }
+
+    private void applyItemInOrderAdditionalDiscount(ItemInOrder itemInOrder, int percent) {
+        itemInOrder.setPrice(itemInOrder.getPrice() * ((100 - percent) / (float) 100)); // maybe MenuItem getPrice
     }
 
 

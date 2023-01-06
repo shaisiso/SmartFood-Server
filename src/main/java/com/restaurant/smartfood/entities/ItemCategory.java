@@ -33,4 +33,8 @@ public enum ItemCategory {
                 map(category -> category.toString())
                 .collect(Collectors.toList());
     }
+    public static List<ItemCategory> getAllCategories() {
+        return ItemCategory.stream()
+                .collect(Collectors.toList());
+    }
 }

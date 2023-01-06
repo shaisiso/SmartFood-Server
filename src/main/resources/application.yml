@@ -7,9 +7,10 @@ timezone:
 reservation-duration: 2
 ---
 twilio:
-  account_sid: AC1b315bccc304f1b4381e74bca8cf552a
-  auth_token: 9fa1da677b002b785af35f340459ee12 #70f2a4a95fb7dbb3a4ad65b8119cca1b
-  trial_number: +18123894306
+  account_sid: 1
+  auth_token: 1
+  trial_number: 1
+
   phone-number-to: +972524453933
 
 -spring:

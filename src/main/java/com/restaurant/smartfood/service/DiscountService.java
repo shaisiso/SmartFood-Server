@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,15 +100,30 @@ public class DiscountService {
         return discountRepository.findByDatesAndHours(localStartDate, localEndDate, localStartHour, localEndHour);
     }
 
-    public List<Discount> getRelevantDiscountsForCurrentOrder(Long orderId, boolean isOnlyForMembers) {
+    public List<Discount> getRelevantDiscountsForOrder(Long orderId, boolean isOnlyForMembers) {
+        List<Discount> relevantDiscounts = new ArrayList<>();
         var order = orderService.getOrder(orderId);
-        return getRelevantDiscountsForCurrentOrder(order, isOnlyForMembers);
+        getDateRelevantDiscountsForOrder(order, isOnlyForMembers)
+                .forEach(discount -> {
+                    discount.getCategories().forEach(category -> {
+                        var relevantItemsNumber = order.getItems()
+                                .stream()
+                                .map(itemInOrder -> itemInOrder.getItem())
+                                .filter(menuItem -> menuItem.getCategory().equals(category))
+                                .count();
+                        if (relevantItemsNumber >= discount.getIfYouOrder() + discount.getYouGetDiscountFor())
+                            relevantDiscounts.add(discount);
+                    });
+                });
+        return relevantDiscounts;
+
     }
 
-    public List<Discount> getRelevantDiscountsForCurrentOrder(Order order) {
-        return getRelevantDiscountsForCurrentOrder(order,false);
+    public List<Discount> getDateRelevantDiscountsForOrder(Order order) {
+        return getDateRelevantDiscountsForOrder(order, false);
     }
-    public List<Discount> getRelevantDiscountsForCurrentOrder(Order order, boolean isOnlyForMembers) {
+
+    public List<Discount> getDateRelevantDiscountsForOrder(Order order, boolean isOnlyForMembers) {
         var dateNow = LocalDate.now(ZoneId.of(timezone));
         var timeNow = LocalTime.now(ZoneId.of(timezone));
         return discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
@@ -114,13 +131,17 @@ public class DiscountService {
                 .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) && d.getForMembersOnly() == isOnlyForMembers) // Members discount applied separately
                 .collect(Collectors.toList());
     }
-    public List<Discount> getAllRelevantDiscountsForCurrentOrder(Order order) {
+
+    public List<Discount> getAllDateRelevantDiscountsForOrder(Order order) {
         var dateNow = LocalDate.now(ZoneId.of(timezone));
         var timeNow = LocalTime.now(ZoneId.of(timezone));
-        return discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
+        var discounts = discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
                 .stream()
-                .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) ) // Members discount applied separately
+                .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()))
                 .collect(Collectors.toList());
+        discounts.sort(Comparator.comparing(Discount::getForMembersOnly));
+        return discounts;
+
     }
 
     private boolean isDiscountOverLap(Discount discount) { // overlap is separate between members and rest

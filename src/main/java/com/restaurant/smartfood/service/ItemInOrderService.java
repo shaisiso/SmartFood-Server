@@ -5,6 +5,7 @@ import com.restaurant.smartfood.entities.ItemInOrder;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.repostitory.ItemInOrderRepository;
 import com.restaurant.smartfood.websocket.WebSocketService;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Transactional
 @Service
+@Slf4j
 public class ItemInOrderService {
     @Autowired
     private ItemInOrderRepository itemInOrderRepository;
@@ -51,6 +53,7 @@ public class ItemInOrderService {
     }
 
     public void deleteItemFromOrder(Long itemId) {
+        log.debug("deleteItemFromOrder: "+itemId);
         var i = getItemInOrderById(itemId);
         itemInOrderRepository.delete(i);
         itemInOrderRepository.flush();
@@ -60,6 +63,7 @@ public class ItemInOrderService {
 
     public void deleteItemsListFromOrder(List<Long> itemsInOrderId) {
         for (var id : itemsInOrderId) {
+            log.info("deleteItemsListFromOrder: "+itemsInOrderId);
            var itemInOrder = itemInOrderRepository.findById(id).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "There is no itemInOrder with the id" + id));

@@ -54,8 +54,8 @@ public class OrderController {
         orderService.deleteItemFromOrder(itemId);
     }
 
-    @DeleteMapping("/item/list")
-    public Order deleteItemsListFromOrder(@Valid @RequestBody List<Long> itemsId) {
+    @PutMapping ("/item/list")
+    public Order deleteItemsListFromOrder( @RequestBody List<Long> itemsId) {
        return orderService.deleteItemsListFromOrder(itemsId);
     }
 

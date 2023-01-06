@@ -3,6 +3,7 @@ package com.restaurant.smartfood.service;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.TakeAway;
 import com.restaurant.smartfood.repostitory.TakeAwayRepository;
+import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Transactional
@@ -35,27 +35,20 @@ public class TakeAwayService {
     @Autowired
     private MemberService memberService;
 
-    @Value("${timezone.name}")
-    private String timezone;
+
     public TakeAway addTakeAway(TakeAway newTakeAway) {
-        newTakeAway = (TakeAway)orderService.initOrder(newTakeAway);
+        newTakeAway = (TakeAway) orderService.initOrder(newTakeAway);
         newTakeAway = connectPersonToTA(newTakeAway);
         var takeAwayInDB = takeAwayRepository.save(newTakeAway);
         takeAwayInDB.getItems().forEach(i -> {
             i.setOrder(takeAwayInDB);
             itemInOrderService.addItemToOrder(i);
         });
-//        var totalPrice = orderService.calculateTotalPrice(takeAwayInDB);
-//        takeAwayInDB.setOriginalTotalPrice(totalPrice);
-//        takeAwayInDB.setTotalPriceToPay(totalPrice);
-        if (memberService.isMember(newTakeAway.getPerson().getPhoneNumber()))
-            orderService.calculateTotalPricesForMembers(takeAwayInDB);
-        else
-            orderService.calculateTotalPrices(takeAwayInDB);
         orderService.calculateTotalPrices(takeAwayInDB);
         webSocketService.notifyExternalOrders(takeAwayInDB);
         return takeAwayRepository.save(takeAwayInDB);
     }
+
     private TakeAway connectPersonToTA(TakeAway takeAway) {
         if (takeAway.getPerson().getId() == null) {
             personService.getOptionalPersonByPhone(takeAway.getPerson().getPhoneNumber())
@@ -68,12 +61,13 @@ public class TakeAwayService {
                                 var p = personService.savePerson(takeAway.getPerson());
                                 takeAway.setPerson(p);
                             });
-        }else{
+        } else {
             var p = personService.updatePerson(takeAway.getPerson());
             takeAway.setPerson(p);
         }
         return takeAway;
     }
+
     public TakeAway updateTakeAway(TakeAway takeAway) {
         takeAwayRepository.findById(takeAway.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + takeAway.getId())
@@ -94,8 +88,8 @@ public class TakeAwayService {
 
     public List<TakeAway> getTakeAwaysByDates(String startDate, String endDate) {
         try {
-            LocalDate localStartDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            LocalDate localEndDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate localStartDate = Utils.parseToLocalDate(startDate);
+            LocalDate localEndDate = Utils.parseToLocalDate(endDate);
             return takeAwayRepository.findByDateIsBetween(localStartDate, localEndDate);
         } catch (Exception exception) {
             log.error(exception.getMessage());

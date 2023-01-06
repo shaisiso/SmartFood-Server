@@ -9,8 +9,10 @@ import org.hibernate.annotations.Polymorphism;
 import org.hibernate.annotations.PolymorphismType;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -63,4 +65,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    @ManyToOne
+    @Valid
+    private Person person;
 }

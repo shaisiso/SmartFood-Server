@@ -23,9 +23,9 @@ public class Delivery extends Order {
     @Valid
     private Employee deliveryGuy;
 
-    @NotNull
-    @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
-    @Valid
-    private Person person;
+//    @NotNull
+//    @ManyToOne(optional = false)
+//    @JoinColumn(nullable = false)
+//    @Valid
+//    private Person person;
 }

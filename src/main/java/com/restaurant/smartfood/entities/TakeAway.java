@@ -11,7 +11,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @SuperBuilder
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -20,9 +19,9 @@ import javax.validation.constraints.NotNull;
 @Table(name = "take_away")
 public class TakeAway extends Order {
 
-    @ManyToOne(optional = false)
-    @NotNull
-    @JoinColumn(nullable = false)
-    @Valid
-    private Person person;
+//    @ManyToOne(optional = false)
+//    @NotNull
+//    @JoinColumn(nullable = false)
+//    @Valid
+//    private Person person;
 }

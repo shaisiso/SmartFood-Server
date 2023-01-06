@@ -25,7 +25,6 @@ public class DBInit implements CommandLineRunner {
     private final EmployeeRepository employeeRepository;
     private final ItemInOrderRepository itemInOrderRepository;
     private final TableReservationRepository tableReservationRepository;
-    private final OrderRepository orderRepository;
     private final MemberRepository memberRepository;
 
     private final DeliveryRepository deliveryRepository;
@@ -383,25 +382,25 @@ public class DBInit implements CommandLineRunner {
     }
 
     private void addOrder() {
-        orderRepository.deleteAll();
-        var o = Order.builder()
-                .date(LocalDate.now())
-                .hour(LocalTime.now())
-                .originalTotalPrice(itemRepository.findById((long)1).get().getPrice())
-                .totalPriceToPay(itemRepository.findById((long)1).get().getPrice())
-                .status(OrderStatus.ACCEPTED)
-                .alreadyPaid((float)0)
-                .build();
-        var newOrder = orderRepository.save(o);
-
-        var i = ItemInOrder.builder()
-                .order(newOrder)
-                .item(itemRepository.findById((long)1).get())
-                .price(itemRepository.findById((long)1).get().getPrice())
-                .build();
-        itemInOrderRepository.save(i);
-        newOrder.setItems(Arrays.asList(i));
-        orderRepository.save(newOrder);
+//        orderRepository.deleteAll();
+//        var o = Order.builder()
+//                .date(LocalDate.now())
+//                .hour(LocalTime.now())
+//                .originalTotalPrice(itemRepository.findById((long)1).get().getPrice())
+//                .totalPriceToPay(itemRepository.findById((long)1).get().getPrice())
+//                .status(OrderStatus.ACCEPTED)
+//                .alreadyPaid((float)0)
+//                .build();
+//        var newOrder = orderRepository.save(o);
+//
+//        var i = ItemInOrder.builder()
+//                .order(newOrder)
+//                .item(itemRepository.findById((long)1).get())
+//                .price(itemRepository.findById((long)1).get().getPrice())
+//                .build();
+//        itemInOrderRepository.save(i);
+//        newOrder.setItems(Arrays.asList(i));
+//        orderRepository.save(newOrder);
     }
     private void addMember() {
         Member member = Member.builder()

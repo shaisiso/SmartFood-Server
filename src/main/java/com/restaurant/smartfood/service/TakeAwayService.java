@@ -32,6 +32,8 @@ public class TakeAwayService {
     private PersonService personService;
     @Autowired
     private WebSocketService webSocketService;
+    @Autowired
+    private MemberService memberService;
 
     @Value("${timezone.name}")
     private String timezone;
@@ -46,6 +48,10 @@ public class TakeAwayService {
 //        var totalPrice = orderService.calculateTotalPrice(takeAwayInDB);
 //        takeAwayInDB.setOriginalTotalPrice(totalPrice);
 //        takeAwayInDB.setTotalPriceToPay(totalPrice);
+        if (memberService.isMember(newTakeAway.getPerson().getPhoneNumber()))
+            orderService.calculateTotalPricesForMembers(takeAwayInDB);
+        else
+            orderService.calculateTotalPrices(takeAwayInDB);
         orderService.calculateTotalPrices(takeAwayInDB);
         webSocketService.notifyExternalOrders(takeAwayInDB);
         return takeAwayRepository.save(takeAwayInDB);

@@ -3,7 +3,7 @@ package com.restaurant.smartfood.service;
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
-import com.restaurant.smartfood.utils.ItemInOrderResponse;
+import com.restaurant.smartfood.utility.ItemInOrderResponse;
 import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +108,7 @@ public class OrderOfTableService {
         var order = orderOfTableRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id: " + orderId));
-        orderService.calculateTotalPrices(order);
+     //   orderService.calculateTotalPrices(order);
         return order;
     }
 
@@ -150,7 +150,7 @@ public class OrderOfTableService {
     public OrderOfTable getActiveOrdersOfTable(Integer tableId) {
         var order =optionalActiveTableOrder(tableId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no active order for this table"));
-        orderService.calculateTotalPrices(order);
+        //orderService.calculateTotalPrices(order);
         return order;
     }
 

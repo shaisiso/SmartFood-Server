@@ -4,7 +4,7 @@ import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.security.AuthorizeEmployee;
 import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.OrderOfTableService;
-import com.restaurant.smartfood.utils.ItemInOrderResponse;
+import com.restaurant.smartfood.utility.ItemInOrderResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

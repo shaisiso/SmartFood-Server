@@ -69,7 +69,9 @@ public class MemberService {
         return memberRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with phone number: " + phoneNumber));
     }
-
+    public Boolean isMember(String phoneNumber){
+        return memberRepository.findByPhoneNumber(phoneNumber).isPresent();
+    }
     public List<Member> getAllMembers() {
         return memberRepository.findAll();
     }

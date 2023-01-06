@@ -1,4 +1,4 @@
-package com.restaurant.smartfood.utils;
+package com.restaurant.smartfood.utility;
 
 import com.restaurant.smartfood.entities.ItemInOrder;
 import com.restaurant.smartfood.entities.MenuItem;

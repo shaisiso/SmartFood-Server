@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.DeliveryRepository;
+import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +33,15 @@ public class DeliveryService {
     private OrderService orderService;
     @Autowired
     private PersonService personService;
+    @Autowired
+    private MemberService memberService;
 
     @Value("${timezone.name}")
     private String timezone;
 
     public Delivery addDelivery(Delivery newDelivery) {
         var d = (Delivery) orderService.initOrder(newDelivery);
-        d= connectPersonToDelivery(d);
+        d = connectPersonToDelivery(d);
         var deliveryInDB = deliveryRepository.save(d);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
@@ -47,7 +50,10 @@ public class DeliveryService {
 //        var totalPrice = orderService.calculateTotalPrice(deliveryInDB);
 //        deliveryInDB.setOriginalTotalPrice(totalPrice);
 //        deliveryInDB.setTotalPriceToPay(totalPrice);
-        orderService.calculateTotalPrices(deliveryInDB);
+        if (memberService.isMember(newDelivery.getPerson().getPhoneNumber()))
+            orderService.calculateTotalPricesForMembers(deliveryInDB);
+        else
+            orderService.calculateTotalPrices(deliveryInDB);
         var dToReturn = deliveryRepository.save(deliveryInDB);
         webSocketService.notifyExternalOrders(dToReturn);
         return dToReturn;
@@ -59,7 +65,7 @@ public class DeliveryService {
         );
         var d = connectPersonToDelivery(delivery);
         var deliveryGuyId = d.getDeliveryGuy() != null ? d.getDeliveryGuy().getId() : null;
-        deliveryRepository.updateDelivery(deliveryGuyId,  d.getPerson().getId(), d.getId());
+        deliveryRepository.updateDelivery(deliveryGuyId, d.getPerson().getId(), d.getId());
         webSocketService.notifyExternalOrders(delivery);
         return delivery;
     }
@@ -76,7 +82,7 @@ public class DeliveryService {
                                 var p = personService.savePerson(delivery.getPerson());
                                 delivery.setPerson(p);
                             });
-        }else{
+        } else {
             var p = personService.updatePerson(delivery.getPerson());
             delivery.setPerson(p);
         }
@@ -93,8 +99,8 @@ public class DeliveryService {
 
     public List<Delivery> getDeliveriesByDates(String startDate, String endDate) {
         try {
-            LocalDate localStartDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            LocalDate localEndDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate localStartDate = Utils.parseToLocalDate(startDate);
+            LocalDate localEndDate = Utils.parseToLocalDate(endDate);
             return deliveryRepository.findByDateIsBetween(localStartDate, localEndDate);
         } catch (Exception exception) {
             log.error(exception.getMessage());

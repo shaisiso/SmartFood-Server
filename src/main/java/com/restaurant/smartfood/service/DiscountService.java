@@ -114,6 +114,14 @@ public class DiscountService {
                 .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) && d.getForMembersOnly() == isOnlyForMembers) // Members discount applied separately
                 .collect(Collectors.toList());
     }
+    public List<Discount> getAllRelevantDiscountsForCurrentOrder(Order order) {
+        var dateNow = LocalDate.now(ZoneId.of(timezone));
+        var timeNow = LocalTime.now(ZoneId.of(timezone));
+        return discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
+                .stream()
+                .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) ) // Members discount applied separately
+                .collect(Collectors.toList());
+    }
 
     private boolean isDiscountOverLap(Discount discount) { // overlap is separate between members and rest
         var overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@Getter
+//@Getter
 public class RestaurantTableService {
     private final RestaurantTableRepository restaurantTableRepository;
     private final  OrderOfTableService orderOfTableService;

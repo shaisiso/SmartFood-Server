@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.OrderRepository;
+import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -176,10 +177,10 @@ public class OrderService {
 
     public List<Order> getOrdersByDatesAndHours(String startDateStr, String endDateStr, String startTimeStr, String endTimeStr) {
         try {
-            LocalDate startDate = LocalDate.parse(startDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            LocalDate endDate = LocalDate.parse(endDateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            LocalTime startTime = LocalTime.parse(startTimeStr, DateTimeFormatter.ofPattern("HH:mm"));
-            LocalTime endTime = LocalTime.parse(endTimeStr, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalDate startDate = Utils.parseToLocalDate(startDateStr);
+            LocalDate endDate = Utils.parseToLocalDate(endDateStr);
+            LocalTime startTime = Utils.parseToLocalTime(startTimeStr);
+            LocalTime endTime = Utils.parseToLocalTime(endTimeStr);
             return orderRepository.findByDateIsBetweenAndHourIsBetween(startDate, endDate, startTime, endTime);
         } catch (Exception exception) {
             log.error(exception.getMessage());

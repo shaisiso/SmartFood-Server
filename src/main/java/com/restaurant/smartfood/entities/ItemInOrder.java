@@ -42,4 +42,18 @@ public class ItemInOrder {
     @Column(nullable = false)
     @DecimalMin(value = "0")
     private Float price;
+
+    public static ItemInOrder buildFromItem(MenuItem item){
+       return ItemInOrder.builder()
+                .item(item)
+                .price(item.getPrice())
+                .build();
+    }
+    public static ItemInOrder buildFromItem(Order order,MenuItem item){
+        return ItemInOrder.builder()
+                .item(item)
+                .price(item.getPrice())
+                .order(order)
+                .build();
+    }
 }

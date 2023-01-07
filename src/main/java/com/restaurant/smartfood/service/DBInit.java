@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.List;
 import java.util.TreeSet;
 
 @Service
@@ -28,12 +29,14 @@ public class DBInit implements CommandLineRunner {
     private final MemberRepository memberRepository;
 
     private final DeliveryRepository deliveryRepository;
+    private final DeliveryService deliverySerice;
     private final WaitingListRepository waitingListRepository;
     private final DiscountRepository discountRepository;
     private final CancelItemRequestRepository cancelItemRequestRepository;
     private final PasswordEncoder passwordEncoder;
+
     @Override
-    public void run(String... args)  {
+    public void run(String... args) {
         tableReservationRepository.deleteAll();
         employeeRepository.deleteAll();
         personRepository.deleteAll();
@@ -46,11 +49,11 @@ public class DBInit implements CommandLineRunner {
         createTables();
         addTableReservation();
         addEmployees();
-        addOrder();
         addMember();
         addWaitingList();
-        addDelivery();
         addDiscounts();
+        addOrders();
+
     }
 
     private void addItemsToMenu() {
@@ -303,7 +306,7 @@ public class DBInit implements CommandLineRunner {
                         .houseNumber(8)
                         .build())
                 .phoneNumber("0588888881")
-                .password(passwordEncoder.encode("123456") )
+                .password(passwordEncoder.encode("123456"))
                 .role(EmployeeRole.DELIVERY_GUY)
                 .build();
         Employee deliveryGuy2 = Employee.builder()
@@ -315,7 +318,7 @@ public class DBInit implements CommandLineRunner {
                         .houseNumber(12)
                         .build())
                 .phoneNumber("0588888882")
-                .password(passwordEncoder.encode("123456") )
+                .password(passwordEncoder.encode("123456"))
                 .role(EmployeeRole.DELIVERY_GUY)
                 .build();
         Employee manager = Employee.builder()
@@ -327,7 +330,7 @@ public class DBInit implements CommandLineRunner {
                         .houseNumber(10)
                         .build())
                 .phoneNumber("0523213400")
-                .password(passwordEncoder.encode("123456") )
+                .password(passwordEncoder.encode("123456"))
                 .role(EmployeeRole.MANAGER)
                 .build();
 
@@ -340,11 +343,11 @@ public class DBInit implements CommandLineRunner {
                         .houseNumber(20)
                         .build())
                 .phoneNumber("0520202020")
-                .password(passwordEncoder.encode("123456") )
+                .password(passwordEncoder.encode("123456"))
                 .role(EmployeeRole.SHIFT_MANAGER)
                 .build();
 
-        employeeRepository.saveAll(Arrays.asList(deliveryGuy1,deliveryGuy2,manager,shiftManager));
+        employeeRepository.saveAll(Arrays.asList(deliveryGuy1, deliveryGuy2, manager, shiftManager));
     }
 
     private void addTableReservation() {
@@ -381,27 +384,10 @@ public class DBInit implements CommandLineRunner {
         tableReservationRepository.saveAll(Arrays.asList(t));
     }
 
-    private void addOrder() {
-//        orderRepository.deleteAll();
-//        var o = Order.builder()
-//                .date(LocalDate.now())
-//                .hour(LocalTime.now())
-//                .originalTotalPrice(itemRepository.findById((long)1).get().getPrice())
-//                .totalPriceToPay(itemRepository.findById((long)1).get().getPrice())
-//                .status(OrderStatus.ACCEPTED)
-//                .alreadyPaid((float)0)
-//                .build();
-//        var newOrder = orderRepository.save(o);
-//
-//        var i = ItemInOrder.builder()
-//                .order(newOrder)
-//                .item(itemRepository.findById((long)1).get())
-//                .price(itemRepository.findById((long)1).get().getPrice())
-//                .build();
-//        itemInOrderRepository.save(i);
-//        newOrder.setItems(Arrays.asList(i));
-//        orderRepository.save(newOrder);
+    private void addOrders() {
+        addDeliveries();
     }
+
     private void addMember() {
         Member member = Member.builder()
                 .name("Frank Lampard")
@@ -412,7 +398,7 @@ public class DBInit implements CommandLineRunner {
                         .houseNumber(8)
                         .build())
                 .phoneNumber("0521234567")
-                .password(passwordEncoder.encode("123456") )
+                .password(passwordEncoder.encode("123456"))
                 .build();
         memberRepository.saveAll(Arrays.asList(member));
     }
@@ -421,63 +407,72 @@ public class DBInit implements CommandLineRunner {
         WaitingList w = WaitingList.builder()
                 .date(LocalDate.now())
                 .numberOfDiners(4)
-                .hour(LocalTime.of(20,00))
+                .hour(LocalTime.of(20, 00))
                 .person(memberRepository.findAll().get(0))
                 .build();
         waitingListRepository.save(w);
     }
-    private void addDelivery() {
-        Delivery d = Delivery.builder()
-                .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
-                .hour(LocalTime.now())
-                .person(personRepository.findByPhoneNumber("0521234567").get())
-                .date(LocalDate.now())
-                .originalTotalPrice(itemRepository.findAll().get(0).getPrice())
-                .totalPriceToPay(itemRepository.findAll().get(0).getPrice())
-                .status(OrderStatus.ACCEPTED)
-                .alreadyPaid((float)0)
-                .build();
-        var newDelivery = deliveryRepository.save(d);
 
-        var i = ItemInOrder.builder()
-                .order(newDelivery)
-                .item(itemRepository.findAll().get(0))
-                .price(itemRepository.findAll().get(0).getPrice())
-                .build();
-        itemInOrderRepository.save(i);
-        newDelivery.setItems(Arrays.asList(i));
+    private void addDeliveries() {
+        List<Delivery> deliveries = new ArrayList<>();
+        var menuItems = itemRepository.findAll();
+        LocalDate startDate = LocalDate.of(2022, 01, 01);
+        LocalDate endDate = LocalDate.now();
+        var dateOfOrder = startDate;
+        while (dateOfOrder.compareTo(endDate) <= 0) {
+            var item = menuItems.get((int) (Math.random() * menuItems.size()));
+            Delivery d = Delivery.builder()
+                    .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
+                    .hour(LocalTime.now())
+                    .person(personRepository.findByPhoneNumber("0521234567").get())
+                    .date(dateOfOrder)
+                    .originalTotalPrice(item.getPrice())
+                    .totalPriceToPay(item.getPrice())
+                    .status(OrderStatus.CLOSED)
+                    .alreadyPaid(item.getPrice())
+                    .build();
+            var newDelivery = deliveryRepository.save(d);
 
-        deliveryRepository.save(newDelivery);
+            var itemInOrder = ItemInOrder.buildFromItem(newDelivery, item);
+
+            itemInOrderRepository.save(itemInOrder);
+            newDelivery.setItems(Arrays.asList(itemInOrder));
+            deliveries.add(newDelivery);
+
+            dateOfOrder = dateOfOrder.plusDays(1);
+        }
+
+        deliveryRepository.saveAll(deliveries);
     }
 
     private void addDiscounts() {
-        var dayOfWeek =LocalDate.now().getDayOfWeek();
+        var dayOfWeek = LocalDate.now().getDayOfWeek();
         var d = Discount.builder()
                 .startDate(LocalDate.now())
-                .endDate(LocalDate.of(2023,11,30))
+                .endDate(LocalDate.of(2023, 11, 30))
                 .days(new TreeSet<>(Arrays.asList(dayOfWeek)))
                 .categories(Arrays.asList(ItemCategory.STARTERS))
-                .startHour(LocalTime.of(13,30))
-                .endHour(LocalTime.of(22,00))
+                .startHour(LocalTime.of(13, 30))
+                .endHour(LocalTime.of(22, 00))
                 .forMembersOnly(false)
                 .percent(20)
                 .ifYouOrder(2)
                 .youGetDiscountFor(1)
-                .discountDescription("20% on the 3rd item from the Starters at every "+dayOfWeek.toString())
+                .discountDescription("20% on the 3rd item from the Starters at every " + dayOfWeek.toString())
                 .build();
         var membersDiscount = Discount.builder()
                 .startDate(LocalDate.now())
-                .endDate(LocalDate.of(2023,11,30))
-                .days(new TreeSet<>(Arrays.asList(DayOfWeek.SUNDAY,DayOfWeek.MONDAY,DayOfWeek.TUESDAY,DayOfWeek.WEDNESDAY,DayOfWeek.THURSDAY,DayOfWeek.FRIDAY,DayOfWeek.SATURDAY) ))
+                .endDate(LocalDate.of(2023, 11, 30))
+                .days(new TreeSet<>(Arrays.asList(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY)))
                 .categories(ItemCategory.getAllCategories())
-                .startHour(LocalTime.of(9,00))
-                .endHour(LocalTime.of(23,59))
+                .startHour(LocalTime.of(9, 00))
+                .endHour(LocalTime.of(23, 59))
                 .forMembersOnly(true)
                 .percent(5)
                 .ifYouOrder(0)
                 .youGetDiscountFor(1)
                 .discountDescription("5% on all of the menu for members")
                 .build();
-        discountRepository.saveAll(Arrays.asList(d,membersDiscount));
+        discountRepository.saveAll(Arrays.asList(d, membersDiscount));
     }
 }

@@ -36,7 +36,7 @@ public class Order {
     private Long id;
 
     @Column(nullable = false)
-    @FutureOrPresent
+   // @FutureOrPresent TODO: remove comment , just for DBInit
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate date;
 

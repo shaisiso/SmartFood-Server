@@ -105,15 +105,20 @@ public class DiscountService {
         var order = orderService.getOrder(orderId);
         getDateRelevantDiscountsForOrder(order, isOnlyForMembers)
                 .forEach(discount -> {
-                    discount.getCategories().forEach(category -> {
-                        var relevantItemsNumber = order.getItems()
-                                .stream()
-                                .map(itemInOrder -> itemInOrder.getItem())
-                                .filter(menuItem -> menuItem.getCategory().equals(category))
-                                .count();
-                        if (relevantItemsNumber >= discount.getIfYouOrder() + discount.getYouGetDiscountFor())
-                            relevantDiscounts.add(discount);
-                    });
+                    discount.getCategories()
+                            .stream()
+                            .filter(category -> {
+                                var relevantItemsNumber = order.getItems()
+                                        .stream()
+                                        .map(itemInOrder -> itemInOrder.getItem())
+                                        .filter(menuItem -> menuItem.getCategory().equals(category))
+                                        .count();
+                                return relevantItemsNumber >= discount.getIfYouOrder() + discount.getYouGetDiscountFor();
+                            })
+                            .findAny()
+                            .ifPresent(c -> {
+                                relevantDiscounts.add(discount);
+                            });
                 });
         return relevantDiscounts;
 

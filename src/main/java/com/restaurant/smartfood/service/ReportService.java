@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.utility.DailyColumnReport;
+import com.restaurant.smartfood.utility.MonthlyColumnReport;
 import com.restaurant.smartfood.utility.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -27,8 +29,7 @@ public class ReportService {
         var startDate = parseDate(startDateSt);
         var endDate = parseDate(endDateSt);
         List<DailyColumnReport> incomeList = new ArrayList<>();
-        var orders = orderService.getOrdersByDates(startDateSt, endDateSt);
-        orders.sort(Comparator.comparing(Order::getDate));
+        List<Order> orders = getSortedOrdersByDates(startDateSt, endDateSt);
         var checkDate = startDate;
         while (checkDate.compareTo(endDate)<=0){
             LocalDate finalCheckDate = checkDate;
@@ -47,6 +48,34 @@ public class ReportService {
         return incomeList;
     }
 
+
+    public List<MonthlyColumnReport> getIncomeMonthlyColumnReport(String startDateSt, String endDateSt) {
+        var startDate = parseDate(startDateSt);
+        var endDate = parseDate(endDateSt);
+        List<MonthlyColumnReport> incomeList = new ArrayList<>();
+        List<Order> orders = getSortedOrdersByDates(startDateSt, endDateSt);
+        var checkDate = startDate;
+        while (checkDate.compareTo(endDate)<=0){
+            LocalDate finalCheckDate = checkDate;
+            var sumOfMonthlyIncome = orders.stream()
+                    .filter(o->o.getDate().getMonth().equals(finalCheckDate.getMonth()) && o.getDate().getYear() == finalCheckDate.getYear())
+                    .mapToDouble(Order::getAlreadyPaid)
+                    .sum();
+            var column = MonthlyColumnReport.builder()
+                    .month(checkDate.getMonth())
+                    .value(sumOfMonthlyIncome)
+                    .build();
+            incomeList.add(column);
+            checkDate =checkDate.plusMonths(1);
+        }
+        return incomeList;
+    }
+
+    private List<Order> getSortedOrdersByDates(String startDateSt, String endDateSt) {
+        var orders = orderService.getOrdersByDates(startDateSt, endDateSt);
+        orders.sort(Comparator.comparing(Order::getDate));
+        return orders;
+    }
     private LocalDate parseDate(String date) {
         try {
             return Utils.parseToLocalDate(date);
@@ -55,4 +84,5 @@ public class ReportService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
         }
     }
+
 }

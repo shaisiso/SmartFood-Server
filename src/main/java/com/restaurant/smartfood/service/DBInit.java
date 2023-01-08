@@ -29,7 +29,7 @@ public class DBInit implements CommandLineRunner {
     private final MemberRepository memberRepository;
 
     private final DeliveryRepository deliveryRepository;
-    private final DeliveryService deliverySerice;
+    private final TakeAwayRepository takeAwayRepository;
     private final WaitingListRepository waitingListRepository;
     private final DiscountRepository discountRepository;
     private final CancelItemRequestRepository cancelItemRequestRepository;
@@ -385,7 +385,51 @@ public class DBInit implements CommandLineRunner {
     }
 
     private void addOrders() {
-        addDeliveries();
+        List<Delivery> deliveries = new ArrayList<>();
+        List<TakeAway> takeAwayList = new ArrayList<>();
+
+        var menuItems = itemRepository.findAll();
+        LocalDate startDate = LocalDate.of(2022, 01, 01);
+        LocalDate endDate = LocalDate.now();
+        var dateOfOrder = startDate;
+        while (dateOfOrder.compareTo(endDate) <= 0) {
+            var item = menuItems.get((int) (Math.random() * menuItems.size()));
+            // Delivery
+            Delivery d = Delivery.builder()
+                    .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
+                    .hour(LocalTime.now())
+                    .person(personRepository.findByPhoneNumber("0521234567").get())
+                    .date(dateOfOrder)
+                    .originalTotalPrice(item.getPrice())
+                    .totalPriceToPay(item.getPrice())
+                    .status(OrderStatus.CLOSED)
+                    .alreadyPaid(item.getPrice())
+                    .build();
+            var newDelivery = deliveryRepository.save(d);
+            var itemInDelivery = ItemInOrder.buildFromItem(newDelivery, item);
+            itemInOrderRepository.save(itemInDelivery);
+            newDelivery.setItems(Arrays.asList(itemInDelivery));
+            deliveries.add(newDelivery);
+            // TA
+            TakeAway ta = TakeAway.builder()
+                    .hour(LocalTime.now())
+                    .person(personRepository.findByPhoneNumber("0521234567").get())
+                    .date(dateOfOrder)
+                    .originalTotalPrice(item.getPrice())
+                    .totalPriceToPay(item.getPrice())
+                    .status(OrderStatus.CLOSED)
+                    .alreadyPaid(item.getPrice())
+                    .build();
+            var newTA = takeAwayRepository.save(ta);
+            var itemInTA = ItemInOrder.buildFromItem(newTA, item);
+            itemInOrderRepository.save(itemInTA);
+            newTA.setItems(Arrays.asList(itemInTA));
+            takeAwayList.add(newTA);
+
+            dateOfOrder = dateOfOrder.plusDays(1);
+        }
+        takeAwayRepository.saveAll(takeAwayList);
+        deliveryRepository.saveAll(deliveries);
     }
 
     private void addMember() {
@@ -411,38 +455,6 @@ public class DBInit implements CommandLineRunner {
                 .person(memberRepository.findAll().get(0))
                 .build();
         waitingListRepository.save(w);
-    }
-
-    private void addDeliveries() {
-        List<Delivery> deliveries = new ArrayList<>();
-        var menuItems = itemRepository.findAll();
-        LocalDate startDate = LocalDate.of(2022, 01, 01);
-        LocalDate endDate = LocalDate.now();
-        var dateOfOrder = startDate;
-        while (dateOfOrder.compareTo(endDate) <= 0) {
-            var item = menuItems.get((int) (Math.random() * menuItems.size()));
-            Delivery d = Delivery.builder()
-                    .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
-                    .hour(LocalTime.now())
-                    .person(personRepository.findByPhoneNumber("0521234567").get())
-                    .date(dateOfOrder)
-                    .originalTotalPrice(item.getPrice())
-                    .totalPriceToPay(item.getPrice())
-                    .status(OrderStatus.CLOSED)
-                    .alreadyPaid(item.getPrice())
-                    .build();
-            var newDelivery = deliveryRepository.save(d);
-
-            var itemInOrder = ItemInOrder.buildFromItem(newDelivery, item);
-
-            itemInOrderRepository.save(itemInOrder);
-            newDelivery.setItems(Arrays.asList(itemInOrder));
-            deliveries.add(newDelivery);
-
-            dateOfOrder = dateOfOrder.plusDays(1);
-        }
-
-        deliveryRepository.saveAll(deliveries);
     }
 
     private void addDiscounts() {

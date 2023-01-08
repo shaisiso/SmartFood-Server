@@ -4,6 +4,8 @@ import com.restaurant.smartfood.entities.CancelItemRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,4 +15,5 @@ public interface CancelItemRequestRepository extends JpaRepository<CancelItemReq
     List<CancelItemRequest> findByOrderOfTableIdAndIsApprovedIsFalse(Long orderId);
     List<CancelItemRequest> findByIsApprovedIsFalse();
     List<CancelItemRequest> findByOrderOfTableId(Long orderId);
+    List <CancelItemRequest> findByDateIsBetween(LocalDateTime dateFrom, LocalDateTime dateTo);
 }

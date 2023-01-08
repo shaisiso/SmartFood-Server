@@ -12,9 +12,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DailyColumnReport {
+public class DailyColumnReport<T> {
 
     private LocalDate date;
     private DayOfWeek dayOfWeek;
-    private Double value;
+    private T value;
 }

@@ -11,7 +11,7 @@ import java.time.Month;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MonthlyColumnReport {
+public class MonthlyColumnReport<T> {
     private Month month;
-    private Double value;
+    private T value;
 }

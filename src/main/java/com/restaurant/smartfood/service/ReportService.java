@@ -1,8 +1,6 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.CancelItemRequest;
-import com.restaurant.smartfood.entities.MenuItem;
-import com.restaurant.smartfood.entities.Order;
+import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.utility.DailyColumnReport;
 import com.restaurant.smartfood.utility.MonthlyColumnReport;
@@ -17,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -26,7 +23,9 @@ import java.util.stream.Collectors;
 public class ReportService {
     private final OrderService orderService;
     private final CancelItemRequestRepository cancelRequestRepository;
-
+    private final OrderOfTableService orderOfTableService;
+    private final DeliveryService deliveryService;
+    private final TakeAwayService takeAwayService;
     public List<DailyColumnReport<Double>> getIncomeDailyColumnReport(String startDateSt, String endDateSt) {
         var startDate = parseDate(startDateSt);
         var endDate = parseDate(endDateSt);
@@ -118,5 +117,117 @@ public class ReportService {
         }
     }
 
+
+    public Map<String,List<DailyColumnReport<Long>>> getOrdersDailyReport(String startDateSt, String endDateSt) {
+        var startDate = parseDate(startDateSt);
+        var endDate = parseDate(endDateSt);
+        Map<String,List<DailyColumnReport<Long>>> ordersMap = new HashMap<>();
+        ArrayList<DailyColumnReport<Long>> deliveriesColumn = new ArrayList<>();
+        ArrayList<DailyColumnReport<Long>>  taColumn = new ArrayList<>();
+        ArrayList<DailyColumnReport<Long>>  tablesColumn = new ArrayList<>();
+        var deliveryList = getSortedDeliveriesByDates(startDateSt, endDateSt);
+        var takeAwayList = getSortedTAByDates(startDateSt, endDateSt);
+        var orderOfTableList = getSortedOrdersOfTableByDates(startDateSt, endDateSt);
+        var checkDate = startDate;
+        while (checkDate.compareTo(endDate) <= 0) {
+            LocalDate finalCheckDate = checkDate;
+            var totalDeliveries = deliveryList.stream()
+                    .filter(o -> o.getDate().equals(finalCheckDate))
+                    .count();
+            var totalTakeAway = takeAwayList.stream()
+                    .filter(o -> o.getDate().equals(finalCheckDate))
+                    .count();
+            var totalOrdersOfTable = orderOfTableList.stream()
+                    .filter(o -> o.getDate().equals(finalCheckDate))
+                    .count();
+            var columnDelivery = DailyColumnReport.<Long>builder()
+                    .date(checkDate)
+                    .dayOfWeek(checkDate.getDayOfWeek())
+                    .value(totalDeliveries)
+                    .build();
+            var columnTA = DailyColumnReport.<Long>builder()
+                    .date(checkDate)
+                    .dayOfWeek(checkDate.getDayOfWeek())
+                    .value(totalTakeAway)
+                    .build();
+            var columnTables = DailyColumnReport.<Long>builder()
+                    .date(checkDate)
+                    .dayOfWeek(checkDate.getDayOfWeek())
+                    .value(totalOrdersOfTable)
+                    .build();
+
+            deliveriesColumn.add(columnDelivery);
+            taColumn.add(columnTA);
+            tablesColumn.add(columnTables);
+
+            checkDate = checkDate.plusDays(1);
+        }
+        ordersMap.put("Tables",tablesColumn);
+        ordersMap.put("Deliveries",deliveriesColumn);
+        ordersMap.put("TA",taColumn);
+        return ordersMap;
+    }
+
+    public Map<String, List<MonthlyColumnReport<Long>>> getOrdersMonthlyReport(String startDateSt, String endDateSt) {
+        var startDate = parseDate(startDateSt);
+        var endDate = parseDate(endDateSt);
+        Map<String,List<MonthlyColumnReport<Long>>> ordersMap = new HashMap<>();
+        ArrayList<MonthlyColumnReport<Long>> deliveriesColumn = new ArrayList<>();
+        ArrayList<MonthlyColumnReport<Long>>  taColumn = new ArrayList<>();
+        ArrayList<MonthlyColumnReport<Long>>  tablesColumn = new ArrayList<>();
+        var deliveryList = getSortedDeliveriesByDates(startDateSt, endDateSt);
+        var takeAwayList = getSortedTAByDates(startDateSt, endDateSt);
+        var orderOfTableList = getSortedOrdersOfTableByDates(startDateSt, endDateSt);
+        var checkDate = startDate;
+        while (checkDate.compareTo(endDate) <= 0) {
+            LocalDate finalCheckDate = checkDate;
+            var totalDeliveries = deliveryList.stream()
+                    .filter(o -> o.getDate().getMonth().equals(finalCheckDate.getMonth()) && o.getDate().getYear() == finalCheckDate.getYear())
+                    .count();
+            var totalTakeAway = takeAwayList.stream()
+                    .filter(o -> o.getDate().getMonth().equals(finalCheckDate.getMonth()) && o.getDate().getYear() == finalCheckDate.getYear())
+                    .count();
+            var totalOrdersOfTable = orderOfTableList.stream()
+                    .filter(o -> o.getDate().getMonth().equals(finalCheckDate.getMonth()) && o.getDate().getYear() == finalCheckDate.getYear())
+                    .count();
+            var columnDelivery = MonthlyColumnReport.<Long>builder()
+                    .month(checkDate.getMonth())
+                    .value(totalDeliveries)
+                    .build();
+            var columnTA = MonthlyColumnReport.<Long>builder()
+                    .month(checkDate.getMonth())
+                    .value(totalTakeAway)
+                    .build();
+            var columnTables = MonthlyColumnReport.<Long>builder()
+                    .month(checkDate.getMonth())
+                    .value(totalOrdersOfTable)
+                    .build();
+
+            deliveriesColumn.add(columnDelivery);
+            taColumn.add(columnTA);
+            tablesColumn.add(columnTables);
+
+            checkDate = checkDate.plusMonths(1);
+        }
+        ordersMap.put("Tables",tablesColumn);
+        ordersMap.put("Deliveries",deliveriesColumn);
+        ordersMap.put("TA",taColumn);
+        return ordersMap;
+    }
+    private List<Delivery> getSortedDeliveriesByDates(String startDateSt, String endDateSt) {
+        var deliveries = deliveryService.getDeliveriesByDates(startDateSt, endDateSt);
+        deliveries.sort(Comparator.comparing(Order::getDate));
+        return deliveries;
+    }
+    private List<TakeAway> getSortedTAByDates(String startDateSt, String endDateSt) {
+        var ta = takeAwayService.getTakeAwaysByDates(startDateSt, endDateSt);
+        ta.sort(Comparator.comparing(Order::getDate));
+        return ta;
+    }
+    private List<OrderOfTable> getSortedOrdersOfTableByDates(String startDateSt, String endDateSt) {
+        var ordersOfTable = orderOfTableService.getOrdersOfTablesByDates(startDateSt, endDateSt);
+        ordersOfTable.sort(Comparator.comparing(Order::getDate));
+        return ordersOfTable;
+    }
 
 }

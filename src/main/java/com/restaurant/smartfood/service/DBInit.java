@@ -27,7 +27,7 @@ public class DBInit implements CommandLineRunner {
     private final ItemInOrderRepository itemInOrderRepository;
     private final TableReservationRepository tableReservationRepository;
     private final MemberRepository memberRepository;
-
+    private final OrderOfTableRepository orderOfTableRepository;
     private final DeliveryRepository deliveryRepository;
     private final TakeAwayRepository takeAwayRepository;
     private final WaitingListRepository waitingListRepository;
@@ -387,49 +387,77 @@ public class DBInit implements CommandLineRunner {
     private void addOrders() {
         List<Delivery> deliveries = new ArrayList<>();
         List<TakeAway> takeAwayList = new ArrayList<>();
-
+        List<OrderOfTable> orderOfTableList = new ArrayList<>();
+        var restaurantTables = restaurantTableRepository.findAll();
         var menuItems = itemRepository.findAll();
         LocalDate startDate = LocalDate.of(2022, 01, 01);
         LocalDate endDate = LocalDate.now();
         var dateOfOrder = startDate;
         while (dateOfOrder.compareTo(endDate) <= 0) {
             var item = menuItems.get((int) (Math.random() * menuItems.size()));
-            // Delivery
-            Delivery d = Delivery.builder()
-                    .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
-                    .hour(LocalTime.now())
-                    .person(personRepository.findByPhoneNumber("0521234567").get())
-                    .date(dateOfOrder)
-                    .originalTotalPrice(item.getPrice())
-                    .totalPriceToPay(item.getPrice())
-                    .status(OrderStatus.CLOSED)
-                    .alreadyPaid(item.getPrice())
-                    .build();
-            var newDelivery = deliveryRepository.save(d);
-            var itemInDelivery = ItemInOrder.buildFromItem(newDelivery, item);
-            itemInOrderRepository.save(itemInDelivery);
-            newDelivery.setItems(Arrays.asList(itemInDelivery));
-            deliveries.add(newDelivery);
+            var ordersNum = Math.random() * 10;
+            for (int i = 0; i < ordersNum; i++) {
+                // Delivery
+                Delivery d = Delivery.builder()
+                        .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
+                        .hour(LocalTime.now())
+                        .person(personRepository.findByPhoneNumber("0521234567").get())
+                        .date(dateOfOrder)
+                        .originalTotalPrice(item.getPrice())
+                        .totalPriceToPay(item.getPrice())
+                        .status(OrderStatus.CLOSED)
+                        .alreadyPaid(item.getPrice())
+                        .build();
+                var newDelivery = deliveryRepository.save(d);
+                var itemInDelivery = ItemInOrder.buildFromItem(newDelivery, item);
+                itemInOrderRepository.save(itemInDelivery);
+                newDelivery.setItems(Arrays.asList(itemInDelivery));
+                deliveries.add(newDelivery);
+            }
             // TA
-            TakeAway ta = TakeAway.builder()
-                    .hour(LocalTime.now())
-                    .person(personRepository.findByPhoneNumber("0521234567").get())
-                    .date(dateOfOrder)
-                    .originalTotalPrice(item.getPrice())
-                    .totalPriceToPay(item.getPrice())
-                    .status(OrderStatus.CLOSED)
-                    .alreadyPaid(item.getPrice())
-                    .build();
-            var newTA = takeAwayRepository.save(ta);
-            var itemInTA = ItemInOrder.buildFromItem(newTA, item);
-            itemInOrderRepository.save(itemInTA);
-            newTA.setItems(Arrays.asList(itemInTA));
-            takeAwayList.add(newTA);
+            ordersNum = Math.random() * 10;
+            for (int i = 0; i < ordersNum; i++) {
+                TakeAway ta = TakeAway.builder()
+                        .hour(LocalTime.now())
+                        .person(personRepository.findByPhoneNumber("0521234567").get())
+                        .date(dateOfOrder)
+                        .originalTotalPrice(item.getPrice())
+                        .totalPriceToPay(item.getPrice())
+                        .status(OrderStatus.CLOSED)
+                        .alreadyPaid(item.getPrice())
+                        .build();
+                var newTA = takeAwayRepository.save(ta);
+                var itemInTA = ItemInOrder.buildFromItem(newTA, item);
+                itemInOrderRepository.save(itemInTA);
+                newTA.setItems(Arrays.asList(itemInTA));
+                takeAwayList.add(newTA);
+            }
+            // Orders of tables
+            ordersNum = Math.random() * 15;
+            for (int i = 0; i < ordersNum; i++) {
+                var table = restaurantTables.get((int) (Math.random() * restaurantTables.size()));
+                OrderOfTable orderOfTable = OrderOfTable.builder()
+                        .hour(LocalTime.now())
+                        .date(dateOfOrder)
+                        .table(table)
+                        .numberOfDiners(table.getNumberOfSeats())
+                        .originalTotalPrice(item.getPrice())
+                        .totalPriceToPay(item.getPrice())
+                        .status(OrderStatus.CLOSED)
+                        .alreadyPaid(item.getPrice())
+                        .build();
+                var newOrderOfTable = orderOfTableRepository.save(orderOfTable);
+                var itemInOrder = ItemInOrder.buildFromItem(newOrderOfTable, item);
+                itemInOrderRepository.save(itemInOrder);
+                newOrderOfTable.setItems(Arrays.asList(itemInOrder));
+                orderOfTableList.add(newOrderOfTable);
+            }
 
             dateOfOrder = dateOfOrder.plusDays(1);
         }
         takeAwayRepository.saveAll(takeAwayList);
         deliveryRepository.saveAll(deliveries);
+        orderOfTableRepository.saveAll(orderOfTableList);
     }
 
     private void addMember() {

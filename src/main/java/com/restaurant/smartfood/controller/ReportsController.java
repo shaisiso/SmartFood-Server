@@ -39,4 +39,16 @@ public class ReportsController {
                                                        @PathVariable("endDate")String endDate){
         return reportService.getOrderedItemsReport(startDate,endDate);
     }
+    @GetMapping("/orders/daily/{startDate}/{endDate}")
+    @ResponseBody
+    public Map<String,List<DailyColumnReport<Long>>> getOrdersDailyReport(@PathVariable("startDate") String startDate,
+                                                      @PathVariable("endDate")String endDate){
+        return reportService.getOrdersDailyReport(startDate,endDate);
+    }
+    @GetMapping("/orders/monthly/{startDate}/{endDate}")
+    @ResponseBody
+    public Map<String,List<MonthlyColumnReport<Long>>> getOrdersMonthlyReport(@PathVariable("startDate") String startDate,
+                                                                          @PathVariable("endDate")String endDate){
+        return reportService.getOrdersMonthlyReport(startDate,endDate);
+    }
 }

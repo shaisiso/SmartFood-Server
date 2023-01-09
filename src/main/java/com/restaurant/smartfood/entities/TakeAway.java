@@ -19,9 +19,4 @@ import javax.validation.constraints.NotNull;
 @Table(name = "take_away")
 public class TakeAway extends Order {
 
-//    @ManyToOne(optional = false)
-//    @NotNull
-//    @JoinColumn(nullable = false)
-//    @Valid
-//    private Person person;
 }

@@ -3,6 +3,8 @@ package com.restaurant.smartfood.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Polymorphism;
 
 import javax.persistence.*;
@@ -45,11 +47,11 @@ public class WaitingList {
 //    @ManyToOne(optional = false)
 //    @JoinColumn(nullable = false)
 //    private Member member;
-    @ManyToOne(optional = false, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(optional = false)
     @JoinColumn(name = "person_id", nullable = false)
     @NotNull(message = "Person details must not be null")
     @Valid
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Person person;
 
     @NotNull(message = "Number of diners must not be null")

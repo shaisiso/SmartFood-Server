@@ -53,16 +53,19 @@ public class TableReservationService {
         return tableReservationRepository.save(reservation);
     }
 
-    public void deleteTableReservation(TableReservation reservation) {
-        tableReservationRepository.findById(reservation.getReservationId()).
-                ifPresentOrElse((t) -> tableReservationRepository.delete(reservation),
+    public void deleteTableReservation(Long reservationId) {
+        tableReservationRepository.findById(reservationId).
+                ifPresentOrElse(reservation -> {
+                            tableReservationRepository.delete(reservation);
+                            //
+                        //TODO:    waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour(), reservation.getTable());
+                        },
+
                         () -> {
                             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "There is no reservation with ID: " + reservation.getReservationId());
+                                    "There is no reservation with ID: " + reservationId);
                         });
 
-        //
-        waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour(), reservation.getTable());
 
     }
 
@@ -102,7 +105,7 @@ public class TableReservationService {
             hourTo = LocalTime.of(23, 59);
         log.info("from :" + hourFrom + ". to: " + hourTo + ". date: " + reservation.getDate());
         var res = tableReservationRepository.
-                findByDateIsAndHourIsBetween(reservation.getDate(), hourFrom, hourTo );
+                findByDateIsAndHourIsBetween(reservation.getDate(), hourFrom, hourTo);
         var res2 = tableReservationRepository.findByDate(reservation.getDate());
         log.info(res.toString());
         log.info("res2" + res2.toString());
@@ -167,12 +170,13 @@ public class TableReservationService {
         } catch (Exception e) {
             log.error(e.getMessage());
             log.error(e.getLocalizedMessage());
-             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
         }
     }
-    private LocalTime hourPlusDurationForReservation(LocalTime hour){
+
+    private LocalTime hourPlusDurationForReservation(LocalTime hour) {
         var hourPlus = hour.plusHours(durationForReservation);
-        if (hourPlus.compareTo(hour) <=0) //passed 00:00
+        if (hourPlus.compareTo(hour) <= 0) //passed 00:00
             hourPlus = LocalTime.of(23, 59);
         return hourPlus;
     }

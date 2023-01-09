@@ -26,22 +26,23 @@ import java.util.stream.Collectors;
 //@Getter
 public class RestaurantTableService {
     private final RestaurantTableRepository restaurantTableRepository;
-    private final  OrderOfTableService orderOfTableService;
+    private final OrderOfTableService orderOfTableService;
     private final TableReservationRepository tableReservationRepository;
     @Value("${timezone.name}")
     private String timezone;
+
     @Autowired
-    public RestaurantTableService(@Lazy OrderOfTableService orderOfTableService, RestaurantTableRepository restaurantTableRepository,TableReservationRepository tableReservationRepository){
-        this.orderOfTableService=orderOfTableService;
+    public RestaurantTableService(@Lazy OrderOfTableService orderOfTableService, RestaurantTableRepository restaurantTableRepository, TableReservationRepository tableReservationRepository) {
+        this.orderOfTableService = orderOfTableService;
         this.restaurantTableRepository = restaurantTableRepository;
-        this.tableReservationRepository =tableReservationRepository;
+        this.tableReservationRepository = tableReservationRepository;
     }
 
     public RestaurantTable updateRestaurantTable(RestaurantTable restaurantTable) {
         var table = getTable(restaurantTable.getTableId());
         if (restaurantTable.getNumberOfSeats() != null)
             table.setNumberOfSeats(restaurantTable.getNumberOfSeats());
-        if (restaurantTable.getIsBusy()!= null)
+        if (restaurantTable.getIsBusy() != null)
             table.setIsBusy(restaurantTable.getIsBusy());
         return restaurantTableRepository.save(table);
     }
@@ -62,17 +63,26 @@ public class RestaurantTableService {
     }
 
     public RestaurantTable changeTableBusy(Integer tableId, Boolean isBusy) {
-        var table =getTableById(tableId);
-        if (isBusy==false ){
-            orderOfTableService.optionalActiveTableOrder(tableId).ifPresent(to->{
-                if (to.getItems().isEmpty()){
+        var table = getTableById(tableId);
+        if (isBusy == false) {
+            orderOfTableService.optionalActiveTableOrder(tableId).ifPresent(to -> {
+                if (to.getItems().isEmpty()) {
                     orderOfTableService.deleteOrderOfTable(to.getId());
-                }else{
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Table " +tableId+" has active order, please close the order before");
+                } else {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Table " + tableId + " has active order, please close the order before");
                 }
             });
         }
         table.setIsBusy(isBusy);
+        return restaurantTableRepository.save(table);
+    }
+
+    public void deleteTable(Integer tableId) {
+        restaurantTableRepository.delete(getTable(tableId));
+    }
+
+    public RestaurantTable addTable(RestaurantTable table) {
+        table.setIsBusy(false);
         return restaurantTableRepository.save(table);
     }
 

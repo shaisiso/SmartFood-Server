@@ -2,11 +2,11 @@ package com.restaurant.smartfood.entities;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -28,5 +28,7 @@ public class OrderOfTable extends Order {
     @ManyToOne(optional = false)
     @NotNull(message = "Table must not be null")
     @JoinColumn(nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private RestaurantTable table;
+
 }

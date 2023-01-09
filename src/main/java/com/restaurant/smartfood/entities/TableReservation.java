@@ -3,6 +3,8 @@ package com.restaurant.smartfood.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 
 import javax.persistence.*;
@@ -19,14 +21,14 @@ import java.time.LocalTime;
 @ToString
 @Entity
 @Table(name = "table_reservations")
-public class TableReservation implements Comparable<TableReservation>{
+public class TableReservation implements Comparable<TableReservation> {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reservation_seq")
     @SequenceGenerator(name = "reservation_seq")
     private Long reservationId;
 
-    @ManyToOne(optional = false,cascade ={ CascadeType.MERGE,CascadeType.REMOVE} )
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
+    @ManyToOne(optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private RestaurantTable table;
 
     @NotNull(message = "Date must not be null")
@@ -43,24 +45,23 @@ public class TableReservation implements Comparable<TableReservation>{
     @NotNull(message = "Number of diners must not be null")
     @Column(nullable = false)
     @Min(1)
-    @Max(value=15, message = "For more that 15 people, call us")
+    @Max(value = 15, message = "For more that 15 people, call us")
     private Integer numberOfDiners;
 
     @Size(max = 255)
     private String additionalDetails;
 
-    @ManyToOne(optional = false,cascade ={ CascadeType.MERGE,CascadeType.REMOVE})
-    @JoinColumn(name = "person_id",nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "person_id", nullable = false)
     @NotNull(message = "Person details must not be null")
     @Valid
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Person person;
-
 
 
     @Override
     public int compareTo(TableReservation otherReservation) {
-        if (this.getDate().compareTo(otherReservation.getDate())==0) // equals date
+        if (this.getDate().compareTo(otherReservation.getDate()) == 0) // equals date
             return this.getHour().compareTo(otherReservation.getHour());
         return this.getDate().compareTo(otherReservation.getDate());
     }

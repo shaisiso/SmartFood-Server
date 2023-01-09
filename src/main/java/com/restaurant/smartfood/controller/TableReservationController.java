@@ -29,9 +29,9 @@ public class TableReservationController {
         return tableReservationService.saveTableReservation(updatedReservation);
     }
 
-    @DeleteMapping
-    public void deleteTableReservation(@RequestBody TableReservation reservation) {
-        tableReservationService.deleteTableReservation(reservation);
+    @DeleteMapping("/{id}")
+    public void deleteTableReservation(@PathVariable("id") Long reservationId) {
+        tableReservationService.deleteTableReservation(reservationId);
     }
 
     @GetMapping
@@ -39,7 +39,7 @@ public class TableReservationController {
         return tableReservationService.findAll();
     }
 
-    @GetMapping("/date/{startDate}/{endDate}") // TODO: CHECK LocalDate POSTMAN
+    @GetMapping("/date/{startDate}/{endDate}")
     public List<TableReservation> getTableReservationsByDates(@PathVariable("startDate") String startDate,
                                                               @PathVariable(required = false,
                                                                       name = "endDate") String endDate) {

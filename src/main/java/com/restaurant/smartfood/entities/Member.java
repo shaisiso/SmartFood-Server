@@ -12,16 +12,11 @@ import javax.validation.constraints.Size;
 
 @SuperBuilder
 @AllArgsConstructor
-//@NoArgsConstructor
 @Getter
 @Setter
 @ToString
 @Entity
 @Table(name = "members")
-public class Member extends RegisteredUser { // TODO: add extends RegisteredUser (also for employee)
+public class Member extends RegisteredUser {
 
-//    @NotBlank
-//    @Column(nullable = false)
-//    @Size(min = 6,message = "Password needs to be at least 8 characters")
-//    private String password;
 }

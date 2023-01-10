@@ -5,6 +5,9 @@ import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.repostitory.MemberRepository;
+import com.restaurant.smartfood.security.AuthorizeEmployee;
+import com.restaurant.smartfood.security.AuthorizeGeneralManager;
+import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{orderId}")
+    @AuthorizeGeneralManager
     public void deleteOrder(@PathVariable("orderId") Long orderId) {
         orderService.deleteOrder(orderId);
     }
@@ -50,11 +54,13 @@ public class OrderController {
     }
 
     @DeleteMapping("/item/{itemid}")
+    @AuthorizeManagers
     public void deleteItemFromOrder(@PathVariable("itemid") Long itemId) {
         orderService.deleteItemFromOrder(itemId);
     }
 
     @PutMapping ("/item/list")
+    @AuthorizeManagers
     public Order deleteItemsListFromOrder( @RequestBody List<Long> itemsId) {
        return orderService.deleteItemsListFromOrder(itemsId);
     }
@@ -66,6 +72,7 @@ public class OrderController {
     }
 
     @PutMapping("/price/{orderId}/{amount}")
+    @AuthorizeManagers
     public Order updateTotalPrice(@PathVariable("orderId") Long orderId,
                                   @PathVariable("amount") Float amount) {
         return orderService.updateTotalPrice(orderId, amount);
@@ -78,12 +85,14 @@ public class OrderController {
     }
 
     @PutMapping("/pay/{orderId}/{amount}")
+    @AuthorizeEmployee
     public Order payment(@PathVariable("orderId") Long orderId,
                          @PathVariable("amount") Float amount) {
         return orderService.payment(orderId, amount);
     }
 
     @PutMapping("/status/{orderId}/{status}")
+    @AuthorizeEmployee
     public Order updateStatus(@PathVariable("orderId") Long orderId,
                               @PathVariable("status") OrderStatus status) {
         return orderService.updateStatus(orderId, status);
@@ -95,6 +104,7 @@ public class OrderController {
     }
 
     @GetMapping
+    @AuthorizeManagers
     public List<Order> getAllOrders() {
         return orderService.getAllOrders();
     }

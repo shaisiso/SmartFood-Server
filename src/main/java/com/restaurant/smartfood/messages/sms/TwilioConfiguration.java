@@ -1,4 +1,4 @@
-package com.restaurant.smartfood.sms;
+package com.restaurant.smartfood.messages.sms;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

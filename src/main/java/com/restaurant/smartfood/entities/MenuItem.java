@@ -16,7 +16,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @Builder
 @Entity
 @Table(name = "menu_items")
-@OnDelete(action = OnDeleteAction.CASCADE)
 public class MenuItem {
 
     @Id

@@ -28,7 +28,8 @@ public class JwtAuthorization {
 
 
         if (header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization token is missing");
+            log.warn("Authorization token is missing");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized for this action");
         }
         try {
             var decodedJWT = verifyToken(request);
@@ -45,7 +46,7 @@ public class JwtAuthorization {
             else {
                 log.error("The authorization failed for a certain reason");
                 log.error(e.toString());
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization was failed");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized for this action.");
             }
         }
     }

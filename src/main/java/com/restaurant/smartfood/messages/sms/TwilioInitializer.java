@@ -1,4 +1,4 @@
-package com.restaurant.smartfood.sms;
+package com.restaurant.smartfood.messages.sms;
 
 import com.twilio.Twilio;
 import lombok.extern.slf4j.Slf4j;

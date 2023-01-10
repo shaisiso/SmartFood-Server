@@ -1,4 +1,4 @@
-package com.restaurant.smartfood.sms;
+package com.restaurant.smartfood.messages.sms;
 
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.rest.api.v2010.account.MessageCreator;

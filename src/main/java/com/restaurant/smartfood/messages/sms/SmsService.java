@@ -1,4 +1,4 @@
-package com.restaurant.smartfood.sms;
+package com.restaurant.smartfood.messages.sms;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

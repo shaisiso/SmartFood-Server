@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.messages.email.EmailService;
 import com.restaurant.smartfood.repostitory.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class DBInit implements CommandLineRunner {
     private final CancelItemRequestRepository cancelItemRequestRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     @Override
     public void run(String... args) {
         tableReservationRepository.deleteAll();
@@ -53,7 +55,6 @@ public class DBInit implements CommandLineRunner {
         addWaitingList();
         addDiscounts();
         addOrders();
-
     }
 
     private void addItemsToMenu() {

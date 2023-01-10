@@ -1,4 +1,4 @@
-package com.restaurant.smartfood.sms;
+package com.restaurant.smartfood.messages.sms;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +10,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/sms")
-public class SmsController {
+public class SmsController {  //TODO: Remove this class - just for test
 
     @Autowired
     private SmsService smsService;

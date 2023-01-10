@@ -1,17 +1,32 @@
 spring:
   profiles:
     active: dev
+
+  mail:
+    host: smtp.gmail.com
+    username: smartfoood2023@gmail.com
+    password: gshwkbcikltxiadv
+    port: 587
+   #protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 timezone:
   name: Asia/Jerusalem
 
-reservation-duration: 2 # hours
----
 twilio:
   account_sid: AC1b315bccc304f1b4381e74bca8cf552a
   auth_token: 9fa1da677b002b785af35f340459ee12 #70f2a4a95fb7dbb3a4ad65b8119cca1b
   trial_number: +18123894306
   phone-number-to: +972524453933
 
+reservation-duration: 2 # hours
+
+---
 -spring:
   devtools:
     restart:
@@ -28,11 +43,11 @@ spring:
     password: Aa123456
   jpa:
     hibernate:
-      ddl-auto:  create-drop #update
+      ddl-auto: create-drop #update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-       # format_sql: true
+        # format_sql: true
     show-sql: false
 logging:
   level:
@@ -52,9 +67,9 @@ spring:
     username: admin
     password: Aa123456
     #heroku DB
-#    url: jdbc:mysql://eu-cdbr-west-02.cleardb.net/heroku_a04d5356c8040dd
-#    username: b90558b4068387
-#    password: 41052d61
+  #    url: jdbc:mysql://eu-cdbr-west-02.cleardb.net/heroku_a04d5356c8040dd
+  #    username: b90558b4068387
+  #    password: 41052d61
   jpa:
     hibernate:
       ddl-auto: update   #create-drop

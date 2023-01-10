@@ -16,7 +16,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 @Entity
 @Table(name = "restaurant_tables")
-@OnDelete(action = OnDeleteAction.CASCADE)
 public class RestaurantTable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tables_seq")

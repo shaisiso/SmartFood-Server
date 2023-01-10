@@ -26,7 +26,7 @@ public class RestaurantTableController {
         return tableService.getAllTables();
     }
     @GetMapping("/{id}")
-    @AuthorizeEmployee
+   // @AuthorizeEmployee
     public RestaurantTable getTableById(@PathVariable("id") Integer tableId){
         return tableService.getTableById(tableId);
     }

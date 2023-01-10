@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
 import com.restaurant.smartfood.utility.ItemInOrderResponse;
@@ -33,11 +34,15 @@ public class OrderOfTableService {
     private final ItemInOrderService itemInOrderService;
     private final CancelItemRequestRepository cancelItemRequestRepository;
     private final WebSocketService webSocketService;
+    private final MessageService messageService;
     @Value("${timezone.name}")
     private String timezone;
 
     @Autowired
-    public OrderOfTableService(OrderOfTableRepository orderOfTableRepository, @Lazy OrderService orderService, RestaurantTableService restaurantTableService, TableReservationService tableReservationService, ItemInOrderService itemInOrderService, CancelItemRequestRepository cancelItemRequestRepository, WebSocketService webSocketService) {
+    public OrderOfTableService(OrderOfTableRepository orderOfTableRepository, @Lazy OrderService orderService,
+                               RestaurantTableService restaurantTableService, TableReservationService tableReservationService,
+                               ItemInOrderService itemInOrderService, CancelItemRequestRepository cancelItemRequestRepository,
+                               WebSocketService webSocketService, MessageService messageService) {
         this.orderOfTableRepository = orderOfTableRepository;
         this.orderService = orderService;
         this.restaurantTableService = restaurantTableService;
@@ -45,6 +50,7 @@ public class OrderOfTableService {
         this.itemInOrderService = itemInOrderService;
         this.cancelItemRequestRepository = cancelItemRequestRepository;
         this.webSocketService = webSocketService;
+        this.messageService = messageService;
     }
 
 
@@ -80,7 +86,7 @@ public class OrderOfTableService {
             // TODO: Test New Change
             var reservedTables = tableReservationService.findCurrentReservations()
                     .stream()
-                    .map(r->r.getTable())
+                    .map(r -> r.getTable())
                     .collect(Collectors.toList());
             if (reservedTables.contains(orderOfTable.getTable()))
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -108,7 +114,7 @@ public class OrderOfTableService {
         var order = orderOfTableRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id: " + orderId));
-     //   orderService.calculateTotalPrices(order);
+        //   orderService.calculateTotalPrices(order);
         return order;
     }
 
@@ -148,7 +154,7 @@ public class OrderOfTableService {
     }
 
     public OrderOfTable getActiveOrdersOfTable(Integer tableId) {
-        var order =optionalActiveTableOrder(tableId)
+        var order = optionalActiveTableOrder(tableId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no active order for this table"));
         //orderService.calculateTotalPrices(order);
         return order;
@@ -223,6 +229,7 @@ public class OrderOfTableService {
         orderOfTableRepository.findById(order.getId())
                 .ifPresent(oot -> {
                     order.setStatus(OrderStatus.CLOSED);
+                    messageService.sendMessages(order.getPerson(), "Your Order","Thank you for choosing Smart Food ! We hope you enjoyed your meal." );
                     restaurantTableService.changeTableBusy(oot.getTable().getTableId(), false);
                 });
 

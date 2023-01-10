@@ -7,6 +7,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
@@ -35,6 +36,7 @@ public class EmailService {
         this.emailSender = emailSender;
     }
 
+    @Async
     public void sendEmail(String toEmail, String subject, String body) {
         try {
             sendEmailWithHtml(toEmail, subject, body);
@@ -48,7 +50,7 @@ public class EmailService {
         }
     }
 
-    public void sendSimpleMessage(String toEmail, String subject, String body) {
+    private void sendSimpleMessage(String toEmail, String subject, String body) {
         if (toEmail == null || toEmail.isBlank()) {
             log.warn("Email is blank");
             return;
@@ -64,7 +66,7 @@ public class EmailService {
         log.info("Email was sent to: " + toEmail);
     }
 
-    public void sendEmailWithHtml(String toEmail, String subject, String body) throws MessagingException, UnsupportedEncodingException {
+    private void sendEmailWithHtml(String toEmail, String subject, String body) throws MessagingException, UnsupportedEncodingException {
         try {
             if (toEmail == null || toEmail.isBlank()) {
                 log.warn("Email is blank");
@@ -83,7 +85,7 @@ public class EmailService {
 
             // first part (the html)
             BodyPart messageBodyPart = new MimeBodyPart();
-            String htmlText = "<img src=\"cid:image\"><br/><H2>" + body + "</H1>";
+            String htmlText = "<img src=\"cid:image\"><br/><H3>" + body + "</H3>";
             messageBodyPart.setContent(htmlText, "text/html");
             // add it
             multipart.addBodyPart(messageBodyPart);

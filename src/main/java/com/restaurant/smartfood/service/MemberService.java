@@ -1,8 +1,10 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Member;
+import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,15 +19,13 @@ import java.util.List;
 @Slf4j
 @Transactional
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberService {
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private PersonService personService;
-    @Autowired
-    private PersonRepository personRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
+    private final PersonService personService;
+    private final PersonRepository personRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final MessageService messageService;
 
     public Member updateMember(Member member) {
         memberRepository.findById(member.getId()).ifPresentOrElse(
@@ -62,6 +62,8 @@ public class MemberService {
                     member.setId(memberDB.getId());
                 }
         );
+        messageService.sendMessages(member,"Member Registration","Welcome to Smart Food !!" +
+                " You are registered as Smart Food member. Our members  are entitled to special discounts. We wish you a good day. ");
         return member;
     }
 

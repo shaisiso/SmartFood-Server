@@ -1,6 +1,7 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.OrderRepository;
 import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
@@ -31,8 +32,9 @@ public class OrderService {
     private final ItemInOrderService itemInOrderService;
     private final MemberService memberService;
     private final DiscountService discountService;
-    private final WebSocketService webSocketService;
     private final OrderOfTableService orderOfTableService;
+    private final WebSocketService webSocketService;
+    private final MessageService messageService;
     @Value("${timezone.name}")
     private String timezone;
 
@@ -193,6 +195,7 @@ public class OrderService {
         order.setStatus(status);
         order = orderRepository.save(order);
         webSocketService.notifyExternalOrders(order);
+        messageService.sendMessages(order.getPerson(), "Your Order","Your Order is now "+status.toString()+". Thank you for choosing Smart Food !" );
         return order;
     }
 

@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 public enum OrderStatus {
     ACCEPTED ("Accepted"),
-    PREPARATION("Preparation"),
+    IN_PREPARATION("In Preparation"),
     READY("Ready"),
     ON_THE_WAY("On The Way"),
     CLOSED ("Closed");

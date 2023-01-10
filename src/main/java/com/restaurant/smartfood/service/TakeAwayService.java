@@ -2,9 +2,11 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.TakeAway;
+import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.TakeAwayRepository;
 import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,21 +21,16 @@ import java.util.List;
 @Transactional
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TakeAwayService {
 
-    @Autowired
-    private TakeAwayRepository takeAwayRepository;
+    private final TakeAwayRepository takeAwayRepository;
 
-    @Autowired
-    private ItemInOrderService itemInOrderService;
-    @Autowired
-    private OrderService orderService;
-    @Autowired
-    private PersonService personService;
-    @Autowired
-    private WebSocketService webSocketService;
-    @Autowired
-    private MemberService memberService;
+    private final ItemInOrderService itemInOrderService;
+    private final OrderService orderService;
+    private final PersonService personService;
+    private final WebSocketService webSocketService;
+    private final MessageService messageService;
 
 
     public TakeAway addTakeAway(TakeAway newTakeAway) {
@@ -46,6 +43,7 @@ public class TakeAwayService {
         });
         orderService.calculateTotalPrices(takeAwayInDB);
         webSocketService.notifyExternalOrders(takeAwayInDB);
+        messageService.sendMessages(newTakeAway.getPerson(),"New Take Away","Yor Take Away order was accepted and we will notify you when it's ready !!");
         return takeAwayRepository.save(takeAwayInDB);
     }
 

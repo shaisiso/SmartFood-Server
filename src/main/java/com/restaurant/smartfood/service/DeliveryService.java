@@ -1,9 +1,11 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.DeliveryRepository;
 import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,22 +21,15 @@ import java.util.List;
 @Transactional
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DeliveryService {
-    @Autowired
-    private DeliveryRepository deliveryRepository;
+    private final DeliveryRepository deliveryRepository;
+    private final ItemInOrderService itemInOrderService;
+    private final WebSocketService webSocketService;
+    private final OrderService orderService;
+    private final PersonService personService;
+    private final MessageService messageService;
 
-    @Autowired
-    private ItemInOrderService itemInOrderService;
-
-    @Autowired
-    private WebSocketService webSocketService;
-
-    @Autowired
-    private OrderService orderService;
-    @Autowired
-    private PersonService personService;
-    @Autowired
-    private MemberService memberService;
 
     @Value("${timezone.name}")
     private String timezone;
@@ -49,6 +44,7 @@ public class DeliveryService {
         });
         orderService.calculateTotalPrices(deliveryInDB);
         var dToReturn = deliveryRepository.save(deliveryInDB);
+        messageService.sendMessages(newDelivery.getPerson(),"New Delivery","Yor delivery was accepted and we will notify you when it's ready !!");
         webSocketService.notifyExternalOrders(dToReturn);
         return dToReturn;
     }

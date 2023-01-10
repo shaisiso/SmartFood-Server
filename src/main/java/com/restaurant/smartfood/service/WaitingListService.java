@@ -3,8 +3,10 @@ package com.restaurant.smartfood.service;
 import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.entities.WaitingList;
+import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import com.restaurant.smartfood.repostitory.WaitingListRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,25 +25,29 @@ import java.util.TimerTask;
 @Service
 @Slf4j
 @Transactional
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WaitingListService {
+    private final WaitingListRepository waitingListRepository;
+    private final TableReservationRepository tableReservationRepository;
+    private final MessageService messageService;
 
-    @Autowired
-    private WaitingListRepository waitingListRepository;
-    @Autowired
-    private TableReservationRepository tableReservationRepository;
-    Timer timer = new Timer();
-    boolean timePassed = false, customerResponse = false, tableTaken = false;
+    private Timer timer = new Timer();
+    private boolean timePassed = false, customerResponse = false, tableTaken = false;
 
     public WaitingList addToWaitingList(WaitingList waitingList) {
-        waitingListRepository.findByPersonIdAndDateAndHour(waitingList.getPerson().getId(),
-                waitingList.getDate(), waitingList.getHour()).ifPresent(w ->
-        {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "There is already waiting list request with those details.");
-        });
+        waitingListRepository.findByPersonIdAndDateAndHour(waitingList.getPerson().getId(), waitingList.getDate(), waitingList.getHour())
+                .ifPresent(w -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "There is already waiting list request with those details.");
+                });
+        messageService.sendMessages(waitingList.getPerson(),"Waiting List Request",getNewWaitingListMsg(waitingList) );
         return waitingListRepository.save(waitingList);
     }
-
+    private String getNewWaitingListMsg(WaitingList waitingList){
+        return "Hi "+waitingList.getPerson().getName()+", Your reservation request for "+waitingList.getNumberOfDiners()+" diners at the date: "
+                +waitingList.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")) +" at "+waitingList.getHour()+", is now in the waiting list." +
+                " We will update you in case that it can be fulfilled. ";
+    }
     public WaitingList updateWaitingList(WaitingList waitingList) {
         var w = waitingListRepository.findById(waitingList.getId()).orElseThrow(() ->
         {

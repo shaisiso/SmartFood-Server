@@ -27,7 +27,7 @@ public class TwilioSmsSender implements SmsSender {
 		if (!smsRequest.getPhoneNumber().startsWith("+972"))
 			smsRequest.setPhoneNumber("+972"+smsRequest.getPhoneNumber());
 		String header = "SmartFood:";
-		String url = getUrl();
+		//String url = getUrl();
 		
         PhoneNumber to =  new PhoneNumber(twilioConfiguration.getPhoneNumberTo());//new PhoneNumber(smsRequest.getPhoneNumber());
         PhoneNumber from = new PhoneNumber(twilioConfiguration.getTrialNumber());
@@ -43,23 +43,23 @@ public class TwilioSmsSender implements SmsSender {
 		}
 
     }
-
-	private String getUrl() {
-		 InetAddress ip;
-		 String clientPort = "3000";
-	     String ipAddress,hostname;
-	        try {
-	            ip = InetAddress.getLocalHost();
-	            hostname = ip.getHostName();
-	            ipAddress=ip.getHostAddress();
-	            log.info("Your current IP address : " + ipAddress);
-	            log.info("Your current Hostname : " + hostname);
-	            ipAddress+=":" + clientPort;
-	        } catch (UnknownHostException e) {
-	            e.printStackTrace();
-	            ipAddress ="";
-	        }
-	        return ipAddress;
-	}
+//
+//	private String getUrl() {
+//		 InetAddress ip;
+//		 String clientPort = "3000";
+//	     String ipAddress,hostname;
+//	        try {
+//	            ip = InetAddress.getLocalHost();
+//	            hostname = ip.getHostName();
+//	            ipAddress=ip.getHostAddress();
+//	            log.info("Your current IP address : " + ipAddress);
+//	            log.info("Your current Hostname : " + hostname);
+//	            ipAddress+=":" + clientPort;
+//	        } catch (UnknownHostException e) {
+//	            e.printStackTrace();
+//	            ipAddress ="";
+//	        }
+//	        return ipAddress;
+//	}
 
 }

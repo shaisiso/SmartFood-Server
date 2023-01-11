@@ -40,6 +40,7 @@ public class TwilioSmsSender implements SmsSender {
 			log.info("Send sms: {}",response.getBody());
 		}catch (Exception e){
 			log.error(e.getMessage());
+			log.warn("Could not send SMS ");
 		}
 
     }

@@ -52,7 +52,7 @@ public class DBInit implements CommandLineRunner {
         addTableReservation();
         addEmployees();
         addMember();
-        addWaitingList();
+     //   addWaitingList();
         addDiscounts();
         addOrders();
     }

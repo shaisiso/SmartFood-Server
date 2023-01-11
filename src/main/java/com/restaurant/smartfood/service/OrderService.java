@@ -17,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -111,7 +110,7 @@ public class OrderService {
         // Calculate prices
         var priceToPay = order.getItems()
                 .stream()
-                .map(i -> i.getPrice())
+                .map(ItemInOrder::getPrice)
                 .reduce((float) 0, Float::sum);
         var originalTotalPrice =
                 order.getItems()
@@ -162,7 +161,6 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    // TODO: check member discount from DiscountService
     public Order applyMemberDiscount(Long orderId, String phoneNumber) {
         var order = getOrder(orderId);
         var member = memberService.getMemberByPhoneNumber(phoneNumber);
@@ -192,10 +190,12 @@ public class OrderService {
 
     public Order updateStatus(Long orderId, OrderStatus status) {
         var order = getOrder(orderId);
+        if (status.equals(OrderStatus.CLOSED) && !order.getAlreadyPaid().equals(order.getTotalPriceToPay()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This order currently cannot be closed because it first need to pay the bill.");
         order.setStatus(status);
         order = orderRepository.save(order);
         webSocketService.notifyExternalOrders(order);
-        messageService.sendMessages(order.getPerson(), "Your Order","Your Order is now "+status.toString()+". Thank you for choosing Smart Food !" );
+        messageService.sendMessages(order.getPerson(), "Your Order","Your Order is now "+status+". Thank you for choosing Smart Food !" );
         return order;
     }
 
@@ -230,40 +230,36 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public Order checkIfEntitledForDiscount(Order order) {
+    public void checkIfEntitledForDiscount(Order order) {
         log.debug("checkIfEntitledForDiscount");
 
         List<Discount> relevantDiscounts = discountService.getDateRelevantDiscountsForOrder(order);
-        relevantDiscounts.forEach(discount -> {
-            discount.getCategories().forEach(category -> {
-                var itemsInCategory = itemsInOrderByCategory(order, category);
-                var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
-                for (int i = 0; i < numberOfItemsForDiscount; i++) {
-                    applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
-                }
-            });
-        });
+        relevantDiscounts.forEach(discount -> discount.getCategories().forEach(category -> {
+            var itemsInCategory = itemsInOrderByCategory(order, category);
+            var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
+            for (int i = 0; i < numberOfItemsForDiscount; i++) {
+                applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
+            }
+        }));
 
-        return orderRepository.save(order);
+        orderRepository.save(order);
     }
 
     public void membersCheckIfEntitledForDiscount(Order order) {
-        if (memberService.isMember(order.getPerson().getPhoneNumber()) == false)
+        if (!memberService.isMember(order.getPerson().getPhoneNumber()))
             return;
         log.debug("membersCheckIfEntitledForDiscount");
         List<Discount> relevantDiscounts = discountService.getAllDateRelevantDiscountsForOrder(order);
-        relevantDiscounts.forEach(discount -> {
-            discount.getCategories().forEach(category -> {
-                var itemsInCategory = itemsInOrderByCategory(order, category);
-                var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
-                for (int i = 0; i < numberOfItemsForDiscount; i++) {
-                    if (discount.getForMembersOnly() == false)
-                        applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
-                    else
-                        applyItemInOrderAdditionalDiscount(itemsInCategory.get(i), discount.getPercent());
-                }
-            });
-        });
+        relevantDiscounts.forEach(discount -> discount.getCategories().forEach(category -> {
+            var itemsInCategory = itemsInOrderByCategory(order, category);
+            var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
+            for (int i = 0; i < numberOfItemsForDiscount; i++) {
+                if (!discount.getForMembersOnly())
+                    applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
+                else
+                    applyItemInOrderAdditionalDiscount(itemsInCategory.get(i), discount.getPercent());
+            }
+        }));
 
         orderRepository.save(order);
     }

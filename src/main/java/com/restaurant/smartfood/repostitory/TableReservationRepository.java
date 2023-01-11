@@ -19,4 +19,5 @@ public interface TableReservationRepository extends JpaRepository<TableReservati
     List<TableReservation> findByPersonPhoneNumber(String phoneNumber);
 
     List<TableReservation> findByDateIsAndHourIsBetween(LocalDate date, LocalTime startHour, LocalTime endHour);
+    List<TableReservation> findByDateAndHourGreaterThanAndHourLessThan(LocalDate date, LocalTime startHour, LocalTime endHour);
 }

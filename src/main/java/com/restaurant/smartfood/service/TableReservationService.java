@@ -1,12 +1,12 @@
 package com.restaurant.smartfood.service;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
+import com.restaurant.smartfood.utility.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+//@Transactional
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TableReservationService {
@@ -41,34 +38,54 @@ public class TableReservationService {
     @Value("${reservation-duration}")
     private int durationForReservation;
 
+    @Transactional
     public TableReservation saveTableReservation(TableReservation reservation) {
+        return saveTableReservation(reservation, true);
+    }
+
+    @Transactional
+    public TableReservation saveTableReservation(TableReservation reservation, boolean sendMessage) {
         var freeTables = findSuitableTablesForReservation(reservation);
         if (freeTables.isEmpty())
             throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
         personService.savePerson(reservation.getPerson());
         reservation.setTable(freeTables.get(0));
         var savedReservation = tableReservationRepository.save(reservation);
-        messageService.sendMessages(savedReservation.getPerson(),"New Reservation",getNewReservationMsg(savedReservation) );
+        if (sendMessage)
+            messageService.sendMessages(savedReservation.getPerson(), "New Reservation", getNewReservationMsg(savedReservation));
         return savedReservation;
     }
-    private String getNewReservationMsg(TableReservation reservation){
-        return "Hi "+reservation.getPerson().getName()+", Your reservation for "+reservation.getNumberOfDiners()+" diners at the date: "
-                +reservation.getDate().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")) +" at "+reservation.getHour()+", was successfully saved ! Come Hungry !!";
+
+    private String getNewReservationMsg(TableReservation reservation) {
+        return "Hi " + reservation.getPerson().getName() + ", Your reservation for " + reservation.getNumberOfDiners() + " diners at the date: "
+                + reservation.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " at " + reservation.getHour() + ", was successfully saved ! Come Hungry !!";
     }
+
     public void deleteTableReservation(Long reservationId) {
         tableReservationRepository.findById(reservationId).
                 ifPresentOrElse(reservation -> {
                             tableReservationRepository.delete(reservation);
                             //
-                        //TODO:    waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour(), reservation.getTable());
+                            waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour());
+                            //TODO:    waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour(), reservation.getTable());
+
                         },
 
                         () -> {
-                            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "There is no reservation with ID: " + reservationId);
+                            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no reservation with ID: " + reservationId);
                         });
 
 
+    }
+
+    public void deleteWaitingListReservation(TableReservation tableReservation) {
+        if (tableReservationRepository.existsById(tableReservation.getReservationId()))
+            tableReservationRepository.deleteById(tableReservation.getReservationId());
+    }
+
+    public TableReservation getTableReservationById(Long reservationId) {
+        return tableReservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no reservation with ID: " + reservationId));
     }
 
     public List<TableReservation> getTableReservationsByDates(String startDateSt, String endDateSt) {
@@ -102,12 +119,11 @@ public class TableReservationService {
     private List<RestaurantTable> findSuitableTablesForReservation(TableReservation reservation) {
         // res = all table reservations in relevant date and hours
         var hourFrom = reservation.getHour().minusHours(durationForReservation);
-        var hourTo = reservation.getHour().plusHours(durationForReservation);
-        if (hourTo.compareTo(reservation.getHour()) != 1) //passed 00:00
+        var hourTo = Utils.hourPlusDurationForReservation(reservation.getHour(),durationForReservation);
+        if (hourTo.compareTo(reservation.getHour()) <= 0) //passed 00:00
             hourTo = LocalTime.of(23, 59);
-        log.info("from :" + hourFrom + ". to: " + hourTo + ". date: " + reservation.getDate());
         var res = tableReservationRepository.
-                findByDateIsAndHourIsBetween(reservation.getDate(), hourFrom, hourTo);
+                findByDateAndHourGreaterThanAndHourLessThan(reservation.getDate(), hourFrom, hourTo);
 
         List<RestaurantTable> reservedTables = res.stream()
                 .map(TableReservation::getTable)
@@ -115,7 +131,7 @@ public class TableReservationService {
 
         // freeTables = the free tables in the relevant hours
         var freeTables = restaurantTableRepository.findByNumberOfSeatsGreaterThanEqual(reservation.getNumberOfDiners());
-        freeTables.removeIf(t -> reservedTables.contains(t));
+        freeTables.removeIf(reservedTables::contains);
 
         freeTables.sort(Comparator.comparing(RestaurantTable::getNumberOfSeats));
         return freeTables;
@@ -128,7 +144,8 @@ public class TableReservationService {
                 findByDateIsAndHourIsBetween(LocalDate
                                 .now(ZoneId.of(timezone)),
                         LocalTime.now(ZoneId.of(timezone)).minusMinutes(15),
-                        LocalTime.now(ZoneId.of(timezone)).plusHours(durationForReservation));
+                        Utils.hourPlusDurationForReservation(LocalTime.now(ZoneId.of(timezone)),durationForReservation));
+
     }
 
 
@@ -141,12 +158,10 @@ public class TableReservationService {
                     .filter(t -> t.getNumberOfSeats() >= numberOfDiners)
                     .collect(Collectors.toSet());
             Map<RestaurantTable, Set<LocalTime>> tableReservedTimeMap = new HashMap<>();
-            reservedTables.forEach(reservedTable -> {
-                tableReservedTimeMap.put(reservedTable, reservationsInDate.stream()
-                        .filter(r -> r.getTable().getTableId().equals(reservedTable.getTableId()))
-                        .map(reservationOfTable -> reservationOfTable.getHour())
-                        .collect(Collectors.toSet()));
-            });
+            reservedTables.forEach(reservedTable -> tableReservedTimeMap.put(reservedTable, reservationsInDate.stream()
+                    .filter(r -> r.getTable().getTableId().equals(reservedTable.getTableId()))
+                    .map(TableReservation::getHour)
+                    .collect(Collectors.toSet())));
             List<String> availableHours = new ArrayList<>();
             var suitableTables = restaurantTableRepository.findByNumberOfSeatsGreaterThanEqual(numberOfDiners);
 
@@ -156,7 +171,7 @@ public class TableReservationService {
                     var time = LocalTime.of(hour, minute);
                     for (var suitableTable : suitableTables) {
                         if (!tableReservedTimeMap.containsKey(suitableTable) || tableReservedTimeMap.get(suitableTable).stream()
-                                .allMatch(reservedTime -> time.compareTo(hourPlusDurationForReservation(reservedTime)) > 0
+                                .allMatch(reservedTime -> time.compareTo(Utils.hourPlusDurationForReservation(reservedTime,durationForReservation)) > 0
                                         || time.compareTo(reservedTime.minusHours(durationForReservation)) < 0)
                         ) {
                             availableHours.add(time.format(DateTimeFormatter.ofPattern("HH:mm")));
@@ -173,10 +188,4 @@ public class TableReservationService {
         }
     }
 
-    private LocalTime hourPlusDurationForReservation(LocalTime hour) {
-        var hourPlus = hour.plusHours(durationForReservation);
-        if (hourPlus.compareTo(hour) <= 0) //passed 00:00
-            hourPlus = LocalTime.of(23, 59);
-        return hourPlus;
-    }
 }

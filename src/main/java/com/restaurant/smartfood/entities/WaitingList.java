@@ -43,10 +43,7 @@ public class WaitingList {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime hour;
 
-    //    @NotNull
-//    @ManyToOne(optional = false)
-//    @JoinColumn(nullable = false)
-//    private Member member;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "person_id", nullable = false)
     @NotNull(message = "Person details must not be null")
@@ -60,4 +57,5 @@ public class WaitingList {
     @Max(value = 15, message = "For more that 15 people, call us")
     private Integer numberOfDiners;
 
+    private Boolean wasNotified = false;
 }

@@ -24,8 +24,11 @@ twilio:
   trial_number: +18123894306
   phone-number-to: +972524453933
 
-reservation-duration: 2 # hours
 
+domain-url: http://localhost:3000
+reservation-duration: 2 # hours
+waiting-list:
+  reserve-time: 4 # minutes
 ---
 -spring:
   devtools:

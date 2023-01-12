@@ -195,8 +195,8 @@ public class WaitingListService {
 
     private String getMessageForAvailableReservation(TableReservation savedReservation, WaitingList waitingListRequest) {
         var reservationToken = getReservationToken(savedReservation, waitingListRequest);
-        // var url = domainUrl + "/waiting-list/" + reservationToken; // TODO: Return this
-        var url = reservationToken;
+        var url = domainUrl + "/waiting-list/" + reservationToken; // TODO: Return this
+       // var url = reservationToken;
         return "Hi, your reservation at: " + savedReservation.getDate() + " " + savedReservation.getHour() +
                 " can now take place please confirm on the link: " + url + "<div>If you won't response in 2 hours it will be cancelled automatically!</div>";
     }

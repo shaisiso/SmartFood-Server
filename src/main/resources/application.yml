@@ -2,18 +2,7 @@ spring:
   profiles:
     active: dev
 
-  mail:
-    host: smtp.gmail.com
-    username: smartfoood2023@gmail.com
-    password: gshwkbcikltxiadv
-    port: 587
-   #protocol: smtp
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
 
 timezone:
   name: Asia/Jerusalem
@@ -36,8 +25,11 @@ spring:
       on-profile: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/restaurant_system #?useSSL=false
-    username: root
+#    url: jdbc:mysql://localhost:3306/restaurant_system #?useSSL=false
+#    username: root
+#    password: Aa123456
+    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
+    username: admin
     password: Aa123456
   jpa:
     hibernate:
@@ -99,6 +91,8 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     show-sql: true
+    hibernate:
+      ddl-auto: create-drop #update
   config:
     activate:
       on-profile: test

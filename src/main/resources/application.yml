@@ -2,22 +2,33 @@ spring:
   profiles:
     active: dev
 
+  mail:
+    host: smtp.gmail.com
+    username: smartfoood2023@gmail.com
+    password: gshwkbcikltxiadv
+    port: 587
+    #protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+twilio:
+  accountSid: AC293cfa6493761d996a084556eba8781e
+  authToken: 999b36daddd3613ca27c3fe9e244979a
+  trialNumber: +16672432439
+  phoneNumberTo: +972524453933
+
 
 
 timezone:
   name: Asia/Jerusalem
 
-twilio:
-  account_sid: AC1b315bccc304f1b4381e74bca8cf552a
-  auth_token: a86348bb72f00041749a34c3c8abac2a #70f2a4a95fb7dbb3a4ad65b8119cca1b
-  trial_number: +18123894306
-  phone-number-to: +972524453933
-
-
 domain-url: http://localhost:3000
 reservation-duration: 2 # hours
 waiting-list:
-  reserve-time: 4 # minutes
+  reserve-time: 120 # minutes
 ---
 -spring:
   devtools:
@@ -30,12 +41,12 @@ spring:
       on-profile: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/restaurant_system #?useSSL=false
-#    username: root
-#    password: Aa123456
-    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
-    username: admin
+    url: jdbc:mysql://localhost:3306/restaurant_system #?useSSL=false
+    username: root
     password: Aa123456
+#    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
+#    username: admin
+#    password: Aa123456
   jpa:
     hibernate:
       ddl-auto: create-drop #update

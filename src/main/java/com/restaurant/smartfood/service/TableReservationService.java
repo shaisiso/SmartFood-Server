@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -45,15 +46,34 @@ public class TableReservationService {
 
     @Transactional
     public TableReservation saveTableReservation(TableReservation reservation, boolean sendMessage) {
-        var freeTables = findSuitableTablesForReservation(reservation);
-        if (freeTables.isEmpty())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
-        personService.savePerson(reservation.getPerson());
-        reservation.setTable(freeTables.get(0));
+        validateFutureDateTime(reservation);
+        boolean findTable =true;
+        if (reservation.getReservationId()!= null ){ //update reservation
+            var oldReservation =getTableReservationById(reservation.getReservationId());
+            if (oldReservation.getDate().equals(reservation.getDate()) && oldReservation.getHour().equals(reservation.getHour())){
+                findTable=false;
+                reservation.setTable(oldReservation.getTable());
+            }
+        }
+        if(findTable){
+            var freeTables = findSuitableTablesForReservation(reservation);
+            if (freeTables.isEmpty())
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
+            personService.savePerson(reservation.getPerson());
+            reservation.setTable(freeTables.get(0));
+        }
+
         var savedReservation = tableReservationRepository.save(reservation);
         if (sendMessage)
             messageService.sendMessages(savedReservation.getPerson(), "New Reservation", getNewReservationMsg(savedReservation));
         return savedReservation;
+    }
+
+    private void validateFutureDateTime(TableReservation reservation) {
+        var reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getHour());
+        var currentDateTime = LocalDateTime.now(ZoneId.of(timezone));
+        if (reservationDateTime.compareTo(currentDateTime)<=0)
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Reservation date and time should be in the future.");
     }
 
     private String getNewReservationMsg(TableReservation reservation) {
@@ -65,10 +85,7 @@ public class TableReservationService {
         tableReservationRepository.findById(reservationId).
                 ifPresentOrElse(reservation -> {
                             tableReservationRepository.delete(reservation);
-                            //
                             waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour());
-                            //TODO:    waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour(), reservation.getTable());
-
                         },
 
                         () -> {

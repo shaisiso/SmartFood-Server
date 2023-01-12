@@ -18,6 +18,11 @@ spring:
 timezone:
   name: Asia/Jerusalem
 
+twilio:
+  account_sid: AC1b315bccc304f1b4381e74bca8cf552a
+  auth_token: a86348bb72f00041749a34c3c8abac2a #70f2a4a95fb7dbb3a4ad65b8119cca1b
+  trial_number: +18123894306
+  phone-number-to: +972524453933
 
 
 domain-url: http://localhost:3000

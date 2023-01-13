@@ -1,10 +1,10 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
-import com.restaurant.smartfood.messages.email.EmailService;
 import com.restaurant.smartfood.repostitory.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +36,8 @@ public class DBInit implements CommandLineRunner {
     private final DiscountRepository discountRepository;
     private final CancelItemRequestRepository cancelItemRequestRepository;
     private final PasswordEncoder passwordEncoder;
-
+    @Value("${timezone.name}")
+    private String timezone;
 
     @Override
     public void run(String... args) {
@@ -375,10 +377,11 @@ public class DBInit implements CommandLineRunner {
                         .streetName("Dekel")
                         .build())
                 .build();
+        var hour = LocalTime.now(ZoneId.of(timezone)).plusHours(1).getHour();
         TableReservation t = TableReservation.builder().
                 table(restaurantTableRepository.findById(11).get())
-                .hour(LocalTime.now())
-                .date(LocalDate.now())
+                .hour(LocalTime.of(hour,0))
+                .date(LocalDate.now(ZoneId.of(timezone)))
                 .person(personRepository.save(p))
                 .numberOfDiners(2)
                 .build();
@@ -391,8 +394,8 @@ public class DBInit implements CommandLineRunner {
         List<OrderOfTable> orderOfTableList = new ArrayList<>();
         var restaurantTables = restaurantTableRepository.findAll();
         var menuItems = itemRepository.findAll();
-        LocalDate startDate = LocalDate.of(2022, 01, 01);
-        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = LocalDate.of(2022, 1, 1);
+        LocalDate endDate = LocalDate.now(ZoneId.of(timezone));
         var dateOfOrder = startDate;
         while (dateOfOrder.compareTo(endDate) <= 0) {
             var item = menuItems.get((int) (Math.random() * menuItems.size()));
@@ -401,7 +404,7 @@ public class DBInit implements CommandLineRunner {
                 // Delivery
                 Delivery d = Delivery.builder()
                         .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
-                        .hour(LocalTime.now())
+                        .hour(LocalTime.now(ZoneId.of(timezone)))
                         .person(personRepository.findByPhoneNumber("0521234567").get())
                         .date(dateOfOrder)
                         .originalTotalPrice(item.getPrice())
@@ -419,7 +422,7 @@ public class DBInit implements CommandLineRunner {
             ordersNum = Math.random() * 10;
             for (int i = 0; i < ordersNum; i++) {
                 TakeAway ta = TakeAway.builder()
-                        .hour(LocalTime.now())
+                        .hour(LocalTime.now(ZoneId.of(timezone)))
                         .person(personRepository.findByPhoneNumber("0521234567").get())
                         .date(dateOfOrder)
                         .originalTotalPrice(item.getPrice())
@@ -438,7 +441,7 @@ public class DBInit implements CommandLineRunner {
             for (int i = 0; i < ordersNum; i++) {
                 var table = restaurantTables.get((int) (Math.random() * restaurantTables.size()));
                 OrderOfTable orderOfTable = OrderOfTable.builder()
-                        .hour(LocalTime.now())
+                        .hour(LocalTime.now(ZoneId.of(timezone)))
                         .date(dateOfOrder)
                         .table(table)
                         .numberOfDiners(table.getNumberOfSeats())
@@ -478,23 +481,23 @@ public class DBInit implements CommandLineRunner {
 
     private void addWaitingList() {
         WaitingList w = WaitingList.builder()
-                .date(LocalDate.now())
+                .date(LocalDate.now(ZoneId.of(timezone)))
                 .numberOfDiners(4)
-                .hour(LocalTime.of(20, 00))
+                .hour(LocalTime.of(20, 0))
                 .person(memberRepository.findAll().get(0))
                 .build();
         waitingListRepository.save(w);
     }
 
     private void addDiscounts() {
-        var dayOfWeek = LocalDate.now().getDayOfWeek();
+        var dayOfWeek = LocalDate.now(ZoneId.of(timezone)).getDayOfWeek();
         var d = Discount.builder()
-                .startDate(LocalDate.now())
+                .startDate(LocalDate.now(ZoneId.of(timezone)))
                 .endDate(LocalDate.of(2023, 11, 30))
                 .days(new TreeSet<>(Arrays.asList(dayOfWeek)))
                 .categories(Arrays.asList(ItemCategory.STARTERS))
                 .startHour(LocalTime.of(13, 30))
-                .endHour(LocalTime.of(22, 00))
+                .endHour(LocalTime.of(22, 0))
                 .forMembersOnly(false)
                 .percent(20)
                 .ifYouOrder(2)
@@ -502,11 +505,11 @@ public class DBInit implements CommandLineRunner {
                 .discountDescription("20% on the 3rd item from the Starters at every " + dayOfWeek.toString())
                 .build();
         var membersDiscount = Discount.builder()
-                .startDate(LocalDate.now())
+                .startDate(LocalDate.now(ZoneId.of(timezone)))
                 .endDate(LocalDate.of(2023, 11, 30))
                 .days(new TreeSet<>(Arrays.asList(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY)))
                 .categories(ItemCategory.getAllCategories())
-                .startHour(LocalTime.of(9, 00))
+                .startHour(LocalTime.of(9, 0))
                 .endHour(LocalTime.of(23, 59))
                 .forMembersOnly(true)
                 .percent(5)

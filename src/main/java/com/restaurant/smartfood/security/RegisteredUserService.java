@@ -40,10 +40,19 @@ public class RegisteredUserService {
     private final JwtAuthentication jwtAuthentication;
     private final JwtAuthorization jwtAuthorization;
 
-    public ResponseEntity<AuthorizationTokens> login(LoginAuthenticationRequest credentials) {
-        var user = loadUser(credentials.getPhoneNumber());
-        validatePassword(user, credentials);
-        var tokens = jwtAuthentication.createTokens(user);
+    public ResponseEntity<AuthorizationTokens> memberLogin(LoginAuthenticationRequest credentials) {
+        var memberUser = new RegisteredUserPrincipal(memberRepository.findByPhoneNumber(credentials.getPhoneNumber())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials")));
+        validatePassword(memberUser, credentials);
+        var tokens = jwtAuthentication.createTokens(memberUser);
+        return tokens;
+    }
+
+    public ResponseEntity<AuthorizationTokens> employeeLogin(LoginAuthenticationRequest credentials) {
+        var employeeUser = new RegisteredUserPrincipal(employeeRepository.findByPhoneNumber(credentials.getPhoneNumber())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials")));
+        validatePassword(employeeUser, credentials);
+        var tokens = jwtAuthentication.createTokens(employeeUser);
         return tokens;
     }
 
@@ -66,7 +75,7 @@ public class RegisteredUserService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials");
     }
 
-    public ResponseEntity<AuthorizationTokens>  refreshToken(AuthorizationTokens tokens) throws IOException {
+    public ResponseEntity<AuthorizationTokens> refreshToken(AuthorizationTokens tokens) {
         String refreshToken = tokens.getRefreshToken();
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token is missing");

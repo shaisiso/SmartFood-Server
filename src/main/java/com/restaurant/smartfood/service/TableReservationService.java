@@ -48,7 +48,9 @@ public class TableReservationService {
     public TableReservation saveTableReservation(TableReservation reservation, boolean sendMessage) {
         validateFutureDateTime(reservation);
         boolean findTable =true;
+        var messageTitle= "New Reservation";
         if (reservation.getReservationId()!= null ){ //update reservation
+            messageTitle ="Reservation Update";
             var oldReservation =getTableReservationById(reservation.getReservationId());
             if (oldReservation.getDate().equals(reservation.getDate()) && oldReservation.getHour().equals(reservation.getHour())){
                 findTable=false;
@@ -65,7 +67,7 @@ public class TableReservationService {
 
         var savedReservation = tableReservationRepository.save(reservation);
         if (sendMessage)
-            messageService.sendMessages(savedReservation.getPerson(), "New Reservation", getNewReservationMsg(savedReservation));
+            messageService.sendMessages(savedReservation.getPerson(), messageTitle, getNewReservationMsg(savedReservation));
         return savedReservation;
     }
 

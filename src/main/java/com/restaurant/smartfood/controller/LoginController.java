@@ -17,12 +17,16 @@ public class LoginController {
     @Autowired
     private RegisteredUserService registeredUserService;
 
-    @PostMapping
-    public ResponseEntity<AuthorizationTokens> employeeLogin(@RequestBody LoginAuthenticationRequest credentials) throws InterruptedException {
-        return registeredUserService.login(credentials);
+    @PostMapping("/employee")
+    public ResponseEntity<AuthorizationTokens> employeeLogin(@RequestBody LoginAuthenticationRequest credentials)  {
+        return registeredUserService.employeeLogin(credentials);
+    }
+    @PostMapping("/member")
+    public ResponseEntity<AuthorizationTokens> memberLogin(@RequestBody LoginAuthenticationRequest credentials)  {
+        return registeredUserService.memberLogin(credentials);
     }
     @PostMapping("/refresh-token")
-    public ResponseEntity<AuthorizationTokens>  refreshToken( @RequestBody AuthorizationTokens tokens) throws IOException {
+    public ResponseEntity<AuthorizationTokens>  refreshToken( @RequestBody AuthorizationTokens tokens)  {
         return registeredUserService.refreshToken(tokens);
     }
 }

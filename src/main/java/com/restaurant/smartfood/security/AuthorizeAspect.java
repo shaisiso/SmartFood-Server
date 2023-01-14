@@ -42,7 +42,7 @@ public class AuthorizeAspect {
     }
     @Before("@annotation(AuthorizeMember)")
     public void authorizeMemberAspect() {
-        String[] roles = {"ROLE_MEMBER"};
+        String[] roles = {"ROLE_MEMBER","ROLE_MANAGER","ROLE_SHIFT_MANAGER","ROLE_DELIVERY_MANAGER","ROLE_KITCHEN_MANAGER","ROLE_BAR_MANAGER"};
         jwtAuthorization.authorizeRequest(request,roles);
     }
     @Before("@annotation(AuthorizeRegisteredUser)")

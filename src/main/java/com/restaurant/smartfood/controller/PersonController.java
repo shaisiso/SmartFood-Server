@@ -2,7 +2,6 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Person;
 import com.restaurant.smartfood.service.PersonService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

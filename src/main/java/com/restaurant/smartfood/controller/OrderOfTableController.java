@@ -21,7 +21,6 @@ public class OrderOfTableController {
     private OrderOfTableService orderOfTableService;
 
     @PostMapping
-   // @AuthorizeEmployee
     public OrderOfTable addOrderOfTable(@RequestBody @Valid OrderOfTable orderOfTable) {
         return orderOfTableService.addOrderOfTable(orderOfTable);
     }
@@ -39,7 +38,6 @@ public class OrderOfTableController {
     }
 
     @GetMapping("/{orderid}")
-   // @AuthorizeEmployee
     public OrderOfTable getOrderOfTableByOrderId(@PathVariable("orderid") Long orderId) {
         return orderOfTableService.getOrderOfTableByOrderId(orderId);
     }
@@ -51,7 +49,6 @@ public class OrderOfTableController {
     }
 
     @GetMapping("/active/{tableId}")
-   // @AuthorizeEmployee
     public OrderOfTable getActiveOrdersOfTable(@PathVariable("tableId") Integer tableId) {
         return orderOfTableService.getActiveOrdersOfTable(tableId);
     }
@@ -71,7 +68,6 @@ public class OrderOfTableController {
     }
 
     @PostMapping("/cancel/item")
- //   @AuthorizeEmployee
     public CancelItemRequest addRequestForCancelItem(@Valid @RequestBody CancelItemRequest cancelItemRequest) {
         return orderOfTableService.addRequestForCancelItem(cancelItemRequest);
     }
@@ -89,7 +85,6 @@ public class OrderOfTableController {
          orderOfTableService.handleRequestForCancelItem(cancelItemRequest);
     }
     @GetMapping("/cancel/item/{tableId}")
-  //  @AuthorizeEmployee
     public List<ItemInOrderResponse> getItemsInOrderOfTableForCancel(@PathVariable("tableId") Integer tableId) {
         return orderOfTableService.getItemsInOrderOfTableForCancel(tableId);
     }

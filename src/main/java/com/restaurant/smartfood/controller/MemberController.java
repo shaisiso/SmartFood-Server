@@ -1,6 +1,8 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Member;
+import com.restaurant.smartfood.security.AuthorizeEmployee;
+import com.restaurant.smartfood.security.AuthorizeMember;
 import com.restaurant.smartfood.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class MemberController {
     }
 
     @PutMapping
+    @AuthorizeMember
     public Member updateMember(@RequestBody @Valid Member member) {
         return memberService.updateMember(member);
     }
@@ -31,6 +34,7 @@ public class MemberController {
     }
 
     @GetMapping
+    @AuthorizeEmployee
     public List<Member> getAllMembers(){
         return memberService.getAllMembers();
     }

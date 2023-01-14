@@ -42,6 +42,7 @@ public class MemberService {
     }
 
     public Member addMember(Member member) {
+        member.setPassword(passwordEncoder.encode(member.getPassword()));
         personRepository.findByPhoneNumber(member.getPhoneNumber()).ifPresentOrElse(
                 personFromDB -> {
                     // person is existed in DB
@@ -52,8 +53,7 @@ public class MemberService {
                     memberRepository.findById(member.getId()).ifPresent((p) -> {
                         throw new ResponseStatusException(HttpStatus.CONFLICT, "Member id existed");
                     });
-                    memberRepository.insertMember(personFromDB.getId(),
-                            passwordEncoder.encode(member.getPassword()));
+                    memberRepository.insertMember(personFromDB.getId(), member.getPassword());
                 },
                 // person is NOT in DB -> save new member
                 () -> {
@@ -62,7 +62,7 @@ public class MemberService {
                     member.setId(memberDB.getId());
                 }
         );
-        messageService.sendMessages(member,"Member Registration","Welcome to Smart Food !!" +
+        messageService.sendMessages(member, "Member Registration", "Welcome to Smart Food !!" +
                 " You are registered as Smart Food member. Our members  are entitled to special discounts. We wish you a good day. ");
         return member;
     }
@@ -71,9 +71,11 @@ public class MemberService {
         return memberRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with phone number: " + phoneNumber));
     }
-    public Boolean isMember(String phoneNumber){
+
+    public Boolean isMember(String phoneNumber) {
         return memberRepository.findByPhoneNumber(phoneNumber).isPresent();
     }
+
     public List<Member> getAllMembers() {
         return memberRepository.findAll();
     }

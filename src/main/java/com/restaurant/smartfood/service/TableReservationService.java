@@ -47,6 +47,7 @@ public class TableReservationService {
     @Transactional
     public TableReservation saveTableReservation(TableReservation reservation, boolean sendMessage) {
         validateFutureDateTime(reservation);
+        log.info(reservation.toString());
         boolean findTable =true;
         var messageTitle= "New Reservation";
         if (reservation.getReservationId()!= null ){ //update reservation
@@ -56,6 +57,7 @@ public class TableReservationService {
                 findTable=false;
                 reservation.setTable(oldReservation.getTable());
             }
+            reservation.setPerson(personService.getPersonByPhone(reservation.getPerson().getPhoneNumber()));
         }
         if(findTable){
             var freeTables = findSuitableTablesForReservation(reservation);

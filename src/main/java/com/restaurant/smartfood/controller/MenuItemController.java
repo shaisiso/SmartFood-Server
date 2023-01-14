@@ -7,9 +7,7 @@ import com.restaurant.smartfood.security.AuthorizeGeneralManager;
 import com.restaurant.smartfood.service.MenuItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -17,15 +15,18 @@ import java.util.Map;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/menu")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_={@Autowired})
 public class MenuItemController {
     private final MenuItemService menuItemService;
+
     @PostMapping
+    @AuthorizeGeneralManager
     public MenuItem addItem(@Valid @RequestBody MenuItem item) {
         return menuItemService.addItem(item);
     }
 
     @PutMapping
+    @AuthorizeGeneralManager
     public MenuItem updateItem(@Valid @RequestBody MenuItem updatedItem) {
         return menuItemService.updateItem(updatedItem);
     }
@@ -62,7 +63,7 @@ public class MenuItemController {
     }
 
     @GetMapping("/{id}")
-    public MenuItem getItemByID(@PathVariable("id") Long itemId) throws NotFoundException {
+    public MenuItem getItemByID(@PathVariable("id") Long itemId) {
         return menuItemService.findItemById(itemId);
     }
 }

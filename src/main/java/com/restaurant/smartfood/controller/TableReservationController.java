@@ -1,14 +1,13 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.TableReservation;
+import com.restaurant.smartfood.security.AuthorizeEmployee;
+import com.restaurant.smartfood.security.AuthorizeManagers;
+import com.restaurant.smartfood.security.AuthorizeRegisteredUser;
 import com.restaurant.smartfood.service.TableReservationService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @RestController()
@@ -25,21 +24,25 @@ public class TableReservationController {
     }
 
     @PutMapping
+    @AuthorizeRegisteredUser
     public TableReservation updateTableReservation(@Valid @RequestBody TableReservation updatedReservation) {
         return tableReservationService.saveTableReservation(updatedReservation);
     }
 
     @DeleteMapping("/{id}")
+    @AuthorizeRegisteredUser
     public void deleteTableReservation(@PathVariable("id") Long reservationId) {
         tableReservationService.deleteTableReservation(reservationId);
     }
 
     @GetMapping
+    @AuthorizeManagers
     public List<TableReservation> getAll(){
         return tableReservationService.findAll();
     }
 
     @GetMapping("/date/{startDate}/{endDate}")
+    @AuthorizeEmployee
     public List<TableReservation> getTableReservationsByDates(@PathVariable("startDate") String startDate,
                                                               @PathVariable(required = false,
                                                                       name = "endDate") String endDate) {
@@ -47,10 +50,12 @@ public class TableReservationController {
     }
 
     @GetMapping("/phoneNumber/{phoneNumber}")
+    @AuthorizeRegisteredUser
     public List<TableReservation> getTableReservationsByCustomer(@PathVariable("phoneNumber") String phoneNumber) {
         return tableReservationService.getTableReservationsByCustomer(phoneNumber);
     }
     @GetMapping("/current")
+    @AuthorizeEmployee
     public List<TableReservation> getCurrentReservations(){
         return tableReservationService.findCurrentReservations();
     }

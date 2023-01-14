@@ -51,7 +51,7 @@ public class TableReservation implements Comparable<TableReservation> {
     @Size(max = 255)
     private String additionalDetails;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.MERGE)
     @JoinColumn(name = "person_id", nullable = false)
     @NotNull(message = "Person details must not be null")
     @Valid

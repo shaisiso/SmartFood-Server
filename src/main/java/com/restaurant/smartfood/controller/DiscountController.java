@@ -2,6 +2,7 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Discount;
 import com.restaurant.smartfood.entities.ItemCategory;
+import com.restaurant.smartfood.security.AuthorizeGeneralManager;
 import com.restaurant.smartfood.service.DiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,16 +19,19 @@ public class DiscountController {
     private DiscountService discountService;
 
     @PostMapping
+    @AuthorizeGeneralManager
     public Discount addDiscount(@RequestBody @Valid Discount discount) {
         return discountService.addDiscount(discount);
     }
 
     @PutMapping
+    @AuthorizeGeneralManager
     public Discount updateDiscount(@RequestBody @Valid Discount discount) {
         return discountService.updateDiscount(discount);
     }
 
     @DeleteMapping("/{discountid}")
+    @AuthorizeGeneralManager
     public void deleteDiscount(@PathVariable("discountid") Long id) {
         discountService.deleteDiscount(id);
     }

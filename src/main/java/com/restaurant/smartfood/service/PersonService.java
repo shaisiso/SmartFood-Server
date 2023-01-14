@@ -22,14 +22,23 @@ public class PersonService {
                     if (newPerson.getEmail() != null && !newPerson.getEmail().equals(personFromDB.getEmail())) // email updated
                         validateEmail(newPerson);
                     newPerson.setId(personFromDB.getId());
+                    copyPerson(newPerson,personFromDB);
+                    personRepository.save(personFromDB);
                 },
                 () -> {
                     validateFields(newPerson);
+                    personRepository.save(newPerson);
                 }
         );
-        return personRepository.save(newPerson);
+        return newPerson;
     }
-
+    private Person copyPerson(Person from,Person to){
+        to.setName(from.getName());
+        to.setEmail(from.getEmail());
+        to.setAddress(from.getAddress());
+        to.setPhoneNumber(from.getPhoneNumber());
+        return to;
+    }
     public Person updatePerson(Person person) {
         if(person.getEmail() !=null &&person.getEmail().isEmpty())
             person.setEmail(null);

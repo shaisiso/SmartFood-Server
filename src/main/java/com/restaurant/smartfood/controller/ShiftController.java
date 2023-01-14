@@ -2,6 +2,7 @@ package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.Shift;
+import com.restaurant.smartfood.security.AuthorizeEmployee;
 import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.ShiftService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,13 @@ public class ShiftController {
     private ShiftService shiftService;
 
     @PostMapping
+    @AuthorizeEmployee
     public Shift enterShift(@Valid @RequestBody Shift newShift) {
         return shiftService.startShift(newShift);
     }
 
     @PutMapping
+    @AuthorizeEmployee
     public Shift exitShift(@Valid @RequestBody Shift shift) {
         return shiftService.exitShift(shift);
     }
@@ -34,32 +37,39 @@ public class ShiftController {
         return shiftService.updateShift(shift);
     }
 
-    @AuthorizeManagers
+
     @DeleteMapping("/{shiftId}")
+    @AuthorizeManagers
     public void deleteShift(@PathVariable("shiftId") Long shiftId) {
         shiftService.deleteShift(shiftId);
     }
 
     @GetMapping("/{phoneNumber}/{startDate}/{endDate}")
+    @AuthorizeEmployee
     public List<Shift> getShiftsByEmployeeAndDates(
             @PathVariable("phoneNumber") String phoneNumber,
             @PathVariable("startDate") String startDate,
             @PathVariable("endDate") String endDate) {
         return shiftService.getShiftsByEmployeeAndDates(phoneNumber, startDate, endDate);
     }
+
     @GetMapping("/{startDate}/{endDate}")
+    @AuthorizeManagers
     public List<Shift> getShiftsByDates(
             @PathVariable("startDate") String startDate,
             @PathVariable("endDate") String endDate) {
         return shiftService.getShiftsByDates(startDate, endDate);
     }
+
     @GetMapping("/approve")
-    public List<Shift> getAllShiftsToApprove(){
+    @AuthorizeManagers
+    public List<Shift> getAllShiftsToApprove() {
         return shiftService.getAllShiftsToApprove();
     }
 
     @GetMapping("/active/delivery")
-    public List<Employee> findAllDeliveryGuyInShift(){
+    @AuthorizeManagers
+    public List<Employee> findAllDeliveryGuyInShift() {
         return shiftService.findAllDeliveryGuyInShift();
     }
 }

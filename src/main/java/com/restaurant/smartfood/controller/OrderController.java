@@ -1,18 +1,13 @@
 package com.restaurant.smartfood.controller;
 
 import com.restaurant.smartfood.entities.ItemInOrder;
-import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.entities.OrderStatus;
-import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.security.AuthorizeEmployee;
-import com.restaurant.smartfood.security.AuthorizeGeneralManager;
 import com.restaurant.smartfood.security.AuthorizeManagers;
 import com.restaurant.smartfood.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -31,7 +26,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{orderId}")
-    @AuthorizeGeneralManager
+    @AuthorizeManagers
     public void deleteOrder(@PathVariable("orderId") Long orderId) {
         orderService.deleteOrder(orderId);
     }
@@ -49,6 +44,7 @@ public class OrderController {
     }
 
     @PutMapping("/item")
+    @AuthorizeManagers
     public Order updateItemInOrder(@RequestBody @Valid ItemInOrder item) {
         return orderService.updateItemInOrder(item);
     }

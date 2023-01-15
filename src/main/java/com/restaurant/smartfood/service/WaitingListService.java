@@ -261,6 +261,7 @@ public class WaitingListService {
         return savedReservations;
     }
 
+    @Transactional
     public TableReservation approveReservation(String reservationToken) {
         Algorithm algorithm = Algorithm.HMAC512(JwtProperties.SECRET.getBytes());
         // parse the token and validate it

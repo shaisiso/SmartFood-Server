@@ -29,7 +29,10 @@ public class RestaurantTableController {
     public RestaurantTable getTableById(@PathVariable("id") Integer tableId){
         return tableService.getTableById(tableId);
     }
-
+    @GetMapping("/max")
+    public Integer getTableMaxSize(){
+        return tableService.getTableMaxSize();
+    }
     @PutMapping("/busy/{tableId}/{isBusy}")
     public RestaurantTable changeTableBusy(@PathVariable("tableId") Integer tableId,@PathVariable("isBusy")Boolean isBusy) {
         return tableService.changeTableBusy(tableId,isBusy);

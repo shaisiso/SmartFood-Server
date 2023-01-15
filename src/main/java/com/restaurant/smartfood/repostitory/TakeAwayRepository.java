@@ -13,10 +13,7 @@ import java.util.List;
 
 @Repository
 public interface TakeAwayRepository extends JpaRepository<TakeAway, Long> {
-    @Modifying
-    @Query(value = "update take_away set person_id=:personId where id=:id", nativeQuery = true)
-    void updateTakeAway(@Param("personId") Long personDetailsId,
-                        @Param("id") Long id);
+
     List<TakeAway> findByDateIsBetween(LocalDate localStartDate, LocalDate localEndDate);
     List<TakeAway> findByPersonId(Long memberId);
     List<TakeAway> findByStatusIsNot(OrderStatus closed);

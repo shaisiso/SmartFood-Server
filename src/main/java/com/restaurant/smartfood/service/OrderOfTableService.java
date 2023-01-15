@@ -86,7 +86,7 @@ public class OrderOfTableService {
             // TODO: Test New Change
             var reservedTables = tableReservationService.findCurrentReservations()
                     .stream()
-                    .map(r -> r.getTable())
+                    .map(TableReservation::getTable)
                     .collect(Collectors.toList());
             if (reservedTables.contains(orderOfTable.getTable()))
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -111,11 +111,9 @@ public class OrderOfTableService {
     }
 
     public OrderOfTable getOrderOfTableByOrderId(Long orderId) {
-        var order = orderOfTableRepository.findById(orderId).orElseThrow(() ->
+        return orderOfTableRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id: " + orderId));
-        //   orderService.calculateTotalPrices(order);
-        return order;
     }
 
     public List<OrderOfTable> getActiveOrdersOfTables() {
@@ -138,12 +136,12 @@ public class OrderOfTableService {
     }
 
 
-    private RestaurantTable checkTableIsNotBusy(OrderOfTable orderOfTable) {
+    private void checkTableIsNotBusy(OrderOfTable orderOfTable) {
         var table = restaurantTableService.getTable(orderOfTable.getTable().getTableId());
         if (table.getIsBusy())
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Table number " + table.getTableId() + " is busy");
         table.setIsBusy(true);
-        return restaurantTableService.updateRestaurantTable(table);
+        restaurantTableService.updateRestaurantTable(table);
     }
 
     public Optional<OrderOfTable> optionalActiveTableOrder(Integer tableId) {
@@ -154,10 +152,8 @@ public class OrderOfTableService {
     }
 
     public OrderOfTable getActiveOrdersOfTable(Integer tableId) {
-        var order = optionalActiveTableOrder(tableId)
+        return optionalActiveTableOrder(tableId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no active order for this table"));
-        //orderService.calculateTotalPrices(order);
-        return order;
     }
 
     public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
@@ -194,7 +190,7 @@ public class OrderOfTableService {
     public void handleRequestForCancelItem(CancelItemRequest cancelItemRequest) {
         var cancelRequestInDB = getCancelItemRequestById(cancelItemRequest.getId());
         cancelRequestInDB.setIsApproved(cancelItemRequest.getIsApproved());
-        if (cancelItemRequest.getIsApproved() == true) {
+        if (cancelItemRequest.getIsApproved()) {
             var itemInOrder = cancelRequestInDB.getItemInOrder();
             cancelRequestInDB.setItemInOrder(null);
             orderService.deleteItemFromOrder(itemInOrder.getId());
@@ -211,7 +207,7 @@ public class OrderOfTableService {
 
     public List<ItemInOrderResponse> getItemsInOrderOfTableForCancel(Integer tableId) {
         var table = restaurantTableService.getTableById(tableId);
-        if (table.getIsBusy() == false)
+        if (!table.getIsBusy())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The requested table is not busy");
         var orderOfTable = getActiveOrdersOfTable(tableId);
         return cancelItemRequestRepository.findByOrderOfTableIdAndIsApprovedIsFalse(orderOfTable.getId())
@@ -229,10 +225,8 @@ public class OrderOfTableService {
         orderOfTableRepository.findById(order.getId())
                 .ifPresent(oot -> {
                     order.setStatus(OrderStatus.CLOSED);
-                    messageService.sendMessages(order.getPerson(), "Your Order","Thank you for choosing Smart Food ! We hope you enjoyed your meal." );
+                    messageService.sendMessages(order.getPerson(), "Your Order", "Thank you for choosing Smart Food ! We hope you enjoyed your meal.");
                     restaurantTableService.changeTableBusy(oot.getTable().getTableId(), false);
                 });
-
-
     }
 }

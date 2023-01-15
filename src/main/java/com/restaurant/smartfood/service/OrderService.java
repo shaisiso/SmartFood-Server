@@ -32,6 +32,7 @@ public class OrderService {
     private final MemberService memberService;
     private final DiscountService discountService;
     private final OrderOfTableService orderOfTableService;
+    private final PersonService personService;
     private final WebSocketService webSocketService;
     private final MessageService messageService;
     @Value("${timezone.name}")
@@ -58,9 +59,6 @@ public class OrderService {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);
         });
-//        var totalPrice = calculateTotalPrice(orderInDB);
-//        orderInDB.setOriginalTotalPrice(totalPrice);
-//        orderInDB.setTotalPriceToPay(totalPrice);
         calculateTotalPrices(orderInDB);
         return orderRepository.save(orderInDB);
     }
@@ -195,7 +193,34 @@ public class OrderService {
         order.setStatus(status);
         order = orderRepository.save(order);
         webSocketService.notifyExternalOrders(order);
-        messageService.sendMessages(order.getPerson(), "Your Order","Your Order is now "+status+". Thank you for choosing Smart Food !" );
+        messageService.sendMessages(order.getPerson(), "Your Order", "Your Order is now " + status + ". Thank you for choosing Smart Food !");
+        return order;
+    }
+
+    public Order updatePerson(Long orderId, Person person) {
+        var order = getOrder(orderId);
+        connectPersonToOrder(order,person);
+        order = orderRepository.save(order);
+        webSocketService.notifyExternalOrders(order);
+        return order;
+    }
+
+    public Order connectPersonToOrder(Order order, Person personToSave) {
+        if (personToSave.getId() == null) {
+            personService.getOptionalPersonByPhone(personToSave.getPhoneNumber())
+                    .ifPresentOrElse(p -> {
+                            //    var person = order.getPerson();
+                                personToSave.setId(p.getId());
+                                order.setPerson(personService.savePerson(personToSave));
+                            },
+                            () -> {
+                                var p = personService.savePerson(personToSave);
+                                order.setPerson(p);
+                            });
+        } else {
+            var p = personService.updatePerson(personToSave);
+            order.setPerson(p);
+        }
         return order;
     }
 
@@ -224,9 +249,6 @@ public class OrderService {
         itemInOrderService.deleteItemFromOrder(itemId);
         calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
-//        order.getItems().add(itemInOrder);
-//        order.setOriginalTotalPrice(calculateTotalPrice(order));
-//        webSocketService.notifyExternalOrders(order);
         orderRepository.save(order);
     }
 

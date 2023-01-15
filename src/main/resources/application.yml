@@ -20,12 +20,9 @@ twilio:
   trialNumber: +16672432439
   phoneNumberTo: +972524453933
 
-
-
 timezone:
   name: Asia/Jerusalem
 
-domain-url: http://localhost:3000
 reservation-duration: 2 # hours
 waiting-list:
   reserve-time: 120 # minutes
@@ -61,8 +58,9 @@ logging:
 server:
   error:
     include-stacktrace: never
-
+domain-url: http://localhost:3000
 ---
+domain-url: http://localhost:3000
 spring:
   config:
     activate:

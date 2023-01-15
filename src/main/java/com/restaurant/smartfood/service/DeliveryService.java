@@ -8,14 +8,11 @@ import com.restaurant.smartfood.websocket.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Transactional
@@ -27,16 +24,11 @@ public class DeliveryService {
     private final ItemInOrderService itemInOrderService;
     private final WebSocketService webSocketService;
     private final OrderService orderService;
-    private final PersonService personService;
     private final MessageService messageService;
-
-
-    @Value("${timezone.name}")
-    private String timezone;
 
     public Delivery addDelivery(Delivery newDelivery) {
         var d = (Delivery) orderService.initOrder(newDelivery);
-        d = connectPersonToDelivery(d);
+        d =(Delivery) orderService.connectPersonToOrder(d,d.getPerson());
         var deliveryInDB = deliveryRepository.save(d);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
@@ -53,32 +45,12 @@ public class DeliveryService {
         deliveryRepository.findById(delivery.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + delivery.getId())
         );
-        var d = connectPersonToDelivery(delivery);
-        var deliveryGuyId = d.getDeliveryGuy() != null ? d.getDeliveryGuy().getId() : null;
-        deliveryRepository.updateDelivery(deliveryGuyId, d.getPerson().getId(), d.getId());
+      //  var d = connectPersonToDelivery(delivery);
+        var deliveryGuyId = delivery.getDeliveryGuy() != null ? delivery.getDeliveryGuy().getId() : null;
+        deliveryRepository.updateDelivery(deliveryGuyId, delivery.getId());
         webSocketService.notifyExternalOrders(delivery);
         return delivery;
     }
-
-    private Delivery connectPersonToDelivery(Delivery delivery) {
-        if (delivery.getPerson().getId() == null) {
-            personService.getOptionalPersonByPhone(delivery.getPerson().getPhoneNumber())
-                    .ifPresentOrElse(p -> {
-                                var person = delivery.getPerson();
-                                person.setId(p.getId());
-                                delivery.setPerson(personService.savePerson(person));
-                            },
-                            () -> {
-                                var p = personService.savePerson(delivery.getPerson());
-                                delivery.setPerson(p);
-                            });
-        } else {
-            var p = personService.updatePerson(delivery.getPerson());
-            delivery.setPerson(p);
-        }
-        return delivery;
-    }
-
     public void deleteDelivery(Long orderId) {
         var delivery = deliveryRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + orderId)

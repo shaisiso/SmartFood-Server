@@ -24,13 +24,6 @@ public class TakeAwayController { //TODO shahar: check in post man
     public TakeAway addTakeAway(@RequestBody @Valid TakeAway newTakeAway) {
         return takeAwayService.addTakeAway(newTakeAway);
     }
-
-    @PutMapping
-    @AuthorizeManagers
-    public TakeAway updateTakeAway(@RequestBody @Valid TakeAway takeAway) {
-        return takeAwayService.updateTakeAway(takeAway);
-    }
-
     @DeleteMapping("/{orderId}")
     @AuthorizeManagers
     public void deleteTakeAway(@PathVariable("orderId") Long orderId) {

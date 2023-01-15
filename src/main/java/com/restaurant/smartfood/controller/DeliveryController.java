@@ -43,9 +43,9 @@ public class DeliveryController {
                                                @PathVariable("endDate") String endDate) {
         return deliveryService.getDeliveriesByDates(startDate, endDate);
     }
-    @GetMapping("/member/{memberid}")
+    @GetMapping("/member/{memberId}")
     @AuthorizeRegisteredUser
-    public List<Delivery> getDeliveriesByMember(@PathVariable("memberid") Long memberId) {
+    public List<Delivery> getDeliveriesByMember(@PathVariable("memberId") Long memberId) {
         return deliveryService.getDeliveriesByMember(memberId);
     }
 

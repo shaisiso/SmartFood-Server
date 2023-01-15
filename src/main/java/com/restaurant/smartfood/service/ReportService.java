@@ -220,7 +220,7 @@ public class ReportService {
         return deliveries;
     }
     private List<TakeAway> getSortedTAByDates(String startDateSt, String endDateSt) {
-        var ta = takeAwayService.getTakeAwaysByDates(startDateSt, endDateSt);
+        var ta = takeAwayService.getTakeAwayListByDates(startDateSt, endDateSt);
         ta.sort(Comparator.comparing(Order::getDate));
         return ta;
     }

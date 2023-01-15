@@ -22,6 +22,10 @@ public class WebSocketService {
       //  notificationService.sendTaskNotification();
         messagingTemplate.convertAndSend("/topic/external-orders", order);
     }
+    public void notifyMemberOrder(Order order){
+        if (order.getPerson() !=null)
+            messagingTemplate.convertAndSend("/topic/external-orders/"+order.getPerson().getId(), order);
+    }
     public void notifyCancelItemRequest(CancelItemRequest request){
         messagingTemplate.convertAndSend("/topic/cancel-item-requests", request);
     }

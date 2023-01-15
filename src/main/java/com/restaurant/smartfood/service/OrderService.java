@@ -193,6 +193,7 @@ public class OrderService {
         order.setStatus(status);
         order = orderRepository.save(order);
         webSocketService.notifyExternalOrders(order);
+        webSocketService.notifyMemberOrder(order);
         messageService.sendMessages(order.getPerson(), "Your Order", "Your Order is now " + status + ". Thank you for choosing Smart Food !");
         return order;
     }

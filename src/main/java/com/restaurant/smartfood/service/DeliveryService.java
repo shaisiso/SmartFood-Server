@@ -24,6 +24,7 @@ public class DeliveryService {
     private final ItemInOrderService itemInOrderService;
     private final WebSocketService webSocketService;
     private final OrderService orderService;
+    private final MemberService memberService;
     private final MessageService messageService;
 
     public Delivery addDelivery(Delivery newDelivery) {
@@ -71,6 +72,7 @@ public class DeliveryService {
     }
 
     public List<Delivery> getDeliveriesByMember(Long memberId) {
+        memberService.getMemberById(memberId);
         return deliveryRepository.findByPersonId(memberId);
     }
 

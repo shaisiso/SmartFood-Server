@@ -477,7 +477,7 @@ public class DBInit implements CommandLineRunner {
                 Delivery d = Delivery.builder()
                         .deliveryGuy(employeeRepository.findByPhoneNumber("0588888881").get())
                         .hour(LocalTime.now(ZoneId.of(timezone)))
-                        .person(personRepository.findByPhoneNumber("0521234567").get())
+                        .person(personRepository.findById(1000L).get())
                         .date(dateOfOrder)
                         .originalTotalPrice(item.getPrice())
                         .totalPriceToPay(item.getPrice())
@@ -495,7 +495,7 @@ public class DBInit implements CommandLineRunner {
             for (int i = 0; i < ordersNum; i++) {
                 TakeAway ta = TakeAway.builder()
                         .hour(LocalTime.now(ZoneId.of(timezone)))
-                        .person(personRepository.findByPhoneNumber("0521234567").get())
+                        .person(personRepository.findById(1000L).get())
                         .date(dateOfOrder)
                         .originalTotalPrice(item.getPrice())
                         .totalPriceToPay(item.getPrice())

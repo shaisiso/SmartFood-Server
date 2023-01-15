@@ -32,25 +32,25 @@ public class TakeAwayController { //TODO shahar: check in post man
 
     @GetMapping("/date/{startDate}/{endDate}")
     @AuthorizeEmployee
-    public List<TakeAway> getTakeAwaysByDates(@PathVariable("startDate") String startDate,
-                                               @PathVariable("endDate") String endDate) {
-        return takeAwayService.getTakeAwaysByDates(startDate, endDate);
+    public List<TakeAway> getTakeAwayListByDates(@PathVariable("startDate") String startDate,
+                                                 @PathVariable("endDate") String endDate) {
+        return takeAwayService.getTakeAwayListByDates(startDate, endDate);
     }
-    @GetMapping("/member/{memberid}")
+    @GetMapping("/member/{memberId}")
     @AuthorizeRegisteredUser
-    public List<TakeAway> getTakeAwaysByMember(@PathVariable("memberid") Long memberId) {
-        return takeAwayService.getTakeAwaysByMember(memberId);
+    public List<TakeAway> getTakeAwayListByMember(@PathVariable("memberId") Long memberId) {
+        return takeAwayService.getTakeAwayListByMember(memberId);
     }
 
     @GetMapping("/active")
     @AuthorizeEmployee
-    public List<TakeAway> getActiveTakeAways() {
-        return takeAwayService.getActiveTakeAways();
+    public List<TakeAway> getActiveTakeAwayList() {
+        return takeAwayService.getActiveTakeAwayList();
     }
 
     @GetMapping("/status/{status}")
     @AuthorizeEmployee
-    public List<TakeAway> getTakeAwaysByStatus(@PathVariable("status") OrderStatus status) {
-        return takeAwayService.getTakeAwaysByStatus(status);
+    public List<TakeAway> getTakeAwayListByStatus(@PathVariable("status") OrderStatus status) {
+        return takeAwayService.getTakeAwayListByStatus(status);
     }
 }

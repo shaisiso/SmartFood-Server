@@ -29,6 +29,7 @@ public class TakeAwayService {
     private final OrderService orderService;
     private final WebSocketService webSocketService;
     private final MessageService messageService;
+    private final MemberService memberService;
 
 
     public TakeAway addTakeAway(TakeAway newTakeAway) {
@@ -52,7 +53,7 @@ public class TakeAwayService {
         webSocketService.notifyExternalOrders(takeAway);
     }
 
-    public List<TakeAway> getTakeAwaysByDates(String startDate, String endDate) {
+    public List<TakeAway> getTakeAwayListByDates(String startDate, String endDate) {
         try {
             LocalDate localStartDate = Utils.parseToLocalDate(startDate);
             LocalDate localEndDate = Utils.parseToLocalDate(endDate);
@@ -63,15 +64,16 @@ public class TakeAwayService {
         }
     }
 
-    public List<TakeAway> getTakeAwaysByMember(Long memberId) {
+    public List<TakeAway> getTakeAwayListByMember(Long memberId) {
+        memberService.getMemberById(memberId);
         return takeAwayRepository.findByPersonId(memberId);
     }
 
-    public List<TakeAway> getActiveTakeAways() {
+    public List<TakeAway> getActiveTakeAwayList() {
         return takeAwayRepository.findByStatusIsNot(OrderStatus.CLOSED);
     }
 
-    public List<TakeAway> getTakeAwaysByStatus(OrderStatus status) {
+    public List<TakeAway> getTakeAwayListByStatus(OrderStatus status) {
         return takeAwayRepository.findByStatus(status);
     }
 }

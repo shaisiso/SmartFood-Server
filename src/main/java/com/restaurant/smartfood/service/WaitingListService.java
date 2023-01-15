@@ -242,7 +242,7 @@ public class WaitingListService {
                     .person(waitingRequest.getPerson())
                     .build();
             try {
-                var savedReservation = tableReservationService.saveTableReservation(reservation, false);
+                var savedReservation = tableReservationService.addTableReservation(reservation, false);
                 waitingRequestInDB.setWasNotified(true);
                 waitingRequestInDB = waitingListRepository.save(waitingRequestInDB);
                 savedReservations.put(savedReservation, waitingRequestInDB);

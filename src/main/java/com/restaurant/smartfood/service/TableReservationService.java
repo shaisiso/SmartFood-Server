@@ -40,43 +40,65 @@ public class TableReservationService {
     private int durationForReservation;
 
     @Transactional
-    public TableReservation saveTableReservation(TableReservation reservation) {
-        return saveTableReservation(reservation, true);
+    public TableReservation addTableReservation(TableReservation reservation) {
+        return addTableReservation(reservation, true);
     }
 
     @Transactional
-    public TableReservation saveTableReservation(TableReservation reservation, boolean sendMessage) {
+    public TableReservation addTableReservation(TableReservation reservation, boolean sendMessage) {
         validateFutureDateTime(reservation);
         log.info(reservation.toString());
-        boolean findTable =true;
-        var messageTitle= "New Reservation";
-        if (reservation.getReservationId()!= null ){ //update reservation
-            messageTitle ="Reservation Update";
-            var oldReservation =getTableReservationById(reservation.getReservationId());
-            if (oldReservation.getDate().equals(reservation.getDate()) && oldReservation.getHour().equals(reservation.getHour())){
-                findTable=false;
-                reservation.setTable(oldReservation.getTable());
-            }
-            reservation.setPerson(personService.getPersonByPhone(reservation.getPerson().getPhoneNumber()));
-        }
-        if(findTable){
-            var freeTables = findSuitableTablesForReservation(reservation);
-            if (freeTables.isEmpty())
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
-            personService.savePerson(reservation.getPerson());
-            reservation.setTable(freeTables.get(0));
-        }
-
+        var messageTitle = "New Reservation";
+        var freeTables = findSuitableTablesForReservation(reservation);
+        if (freeTables.isEmpty())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
+        personService.savePerson(reservation.getPerson());
+        reservation.setTable(freeTables.get(0));
         var savedReservation = tableReservationRepository.save(reservation);
         if (sendMessage)
             messageService.sendMessages(savedReservation.getPerson(), messageTitle, getNewReservationMsg(savedReservation));
         return savedReservation;
     }
 
+    @Transactional
+    public TableReservation updateTableReservation(TableReservation reservation) {
+        validateFutureDateTime(reservation);
+        boolean findTable = true;
+        boolean oldTableFlag = false;
+        boolean checkWaitingList = false;
+        var messageTitle = "Reservation Update";
+        var oldReservation = getTableReservationById(reservation.getReservationId());
+        if (oldReservation.getDate().equals(reservation.getDate()) && oldReservation.getHour().equals(reservation.getHour())) {
+            if (oldReservation.getNumberOfDiners().compareTo(reservation.getNumberOfDiners()) == 0) {
+                findTable = false;
+            } else if (oldReservation.getNumberOfDiners().compareTo(reservation.getNumberOfDiners()) > 0) {
+                oldTableFlag = true; // look for smaller table but can stay also in the previous table
+            }
+            reservation.setTable(oldReservation.getTable());
+        }
+        reservation.setPerson(personService.getPersonByPhone(reservation.getPerson().getPhoneNumber()));
+        if (findTable) {
+            var freeTables = findSuitableTablesForReservation(reservation);
+            if (freeTables.isEmpty()) {
+                if (!oldTableFlag)
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
+            } else {
+                reservation.setTable(freeTables.get(0));
+                checkWaitingList =true;  // the previous table was cleared, so maybe waiting list requests can be fulfilled
+            }
+        }
+        personService.savePerson(reservation.getPerson());
+        var savedReservation = tableReservationRepository.save(reservation);
+        messageService.sendMessages(savedReservation.getPerson(), messageTitle, getNewReservationMsg(savedReservation));
+        if (checkWaitingList)
+            waitingListService.checkWaitingListsForTime(oldReservation.getDate(),oldReservation.getHour());
+        return savedReservation;
+    }
+
     private void validateFutureDateTime(TableReservation reservation) {
         var reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getHour());
         var currentDateTime = LocalDateTime.now(ZoneId.of(timezone));
-        if (reservationDateTime.compareTo(currentDateTime)<=0)
+        if (reservationDateTime.compareTo(currentDateTime) <= 0)
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Reservation date and time should be in the future.");
     }
 
@@ -140,7 +162,7 @@ public class TableReservationService {
     private List<RestaurantTable> findSuitableTablesForReservation(TableReservation reservation) {
         // res = all table reservations in relevant date and hours
         var hourFrom = reservation.getHour().minusHours(durationForReservation);
-        var hourTo = Utils.hourPlusDurationForReservation(reservation.getHour(),durationForReservation);
+        var hourTo = Utils.hourPlusDurationForReservation(reservation.getHour(), durationForReservation);
         if (hourTo.compareTo(reservation.getHour()) <= 0) //passed 00:00
             hourTo = LocalTime.of(23, 59);
         var res = tableReservationRepository.
@@ -165,7 +187,7 @@ public class TableReservationService {
                 findByDateIsAndHourIsBetween(LocalDate
                                 .now(ZoneId.of(timezone)),
                         LocalTime.now(ZoneId.of(timezone)).minusMinutes(15),
-                        Utils.hourPlusDurationForReservation(LocalTime.now(ZoneId.of(timezone)),durationForReservation));
+                        Utils.hourPlusDurationForReservation(LocalTime.now(ZoneId.of(timezone)), durationForReservation));
 
     }
 
@@ -192,7 +214,7 @@ public class TableReservationService {
                     var time = LocalTime.of(hour, minute);
                     for (var suitableTable : suitableTables) {
                         if (!tableReservedTimeMap.containsKey(suitableTable) || tableReservedTimeMap.get(suitableTable).stream()
-                                .allMatch(reservedTime -> time.compareTo(Utils.hourPlusDurationForReservation(reservedTime,durationForReservation)) > 0
+                                .allMatch(reservedTime -> time.compareTo(Utils.hourPlusDurationForReservation(reservedTime, durationForReservation)) > 0
                                         || time.compareTo(reservedTime.minusHours(durationForReservation)) < 0)
                         ) {
                             availableHours.add(time.format(DateTimeFormatter.ofPattern("HH:mm")));

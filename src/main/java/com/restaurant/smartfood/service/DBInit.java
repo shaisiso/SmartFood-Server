@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -42,18 +43,18 @@ public class DBInit implements CommandLineRunner {
     @Override
     public void run(String... args) {
         tableReservationRepository.deleteAll();
+        cancelItemRequestRepository.deleteAll();
         employeeRepository.deleteAll();
         personRepository.deleteAll();
-        cancelItemRequestRepository.deleteAll();
         itemRepository.deleteAll();
         restaurantTableRepository.deleteAll();
 
 
         addItemsToMenu();
         createTables();
-        addTableReservation();
         addEmployees();
         addMember();
+        addTableReservation();
      //   addWaitingList();
         addDiscounts();
         addOrders();
@@ -289,7 +290,7 @@ public class DBInit implements CommandLineRunner {
                 .isBusy(false)
                 .build();
         RestaurantTable t10 = RestaurantTable.builder()
-                .numberOfSeats(20)
+                .numberOfSeats(15)
                 .isBusy(false)
                 .build();
         RestaurantTable t11 = RestaurantTable.builder()
@@ -429,17 +430,6 @@ public class DBInit implements CommandLineRunner {
     private void addTableReservation() {
         tableReservationRepository.deleteAll();
 
-        var p2 = Person.builder()
-                .name("Cristiano Ronaldo")
-                .phoneNumber("0577777777")
-                .address(Address.builder()
-                        .city("Portugal")
-                        .houseNumber(7)
-                        .streetName("Midiera")
-                        .build())
-                .build();
-        personRepository.save(p2);
-
         var p = Person.builder()
                 .name("Avi Ben-Shabat")
                 .phoneNumber("0523535353")
@@ -451,14 +441,23 @@ public class DBInit implements CommandLineRunner {
                         .build())
                 .build();
         var hour = LocalTime.now(ZoneId.of(timezone)).plusHours(1).getHour();
-        TableReservation t = TableReservation.builder().
+        TableReservation t1 = TableReservation.builder().
                 table(restaurantTableRepository.findById(11).get())
                 .hour(LocalTime.of(hour,0))
                 .date(LocalDate.now(ZoneId.of(timezone)))
                 .person(personRepository.save(p))
                 .numberOfDiners(2)
                 .build();
-        tableReservationRepository.saveAll(Arrays.asList(t));
+
+        TableReservation t2 = TableReservation.builder().
+                table(restaurantTableRepository.findById(11).get())
+                .hour(LocalTime.of(12,0))
+                .date(LocalDate.now(ZoneId.of(timezone)))
+                .person(personRepository.findByPhoneNumber("0521234567").get())
+                .numberOfDiners(2)
+                .build();
+
+        tableReservationRepository.saveAll(Arrays.asList(t1, t2));
     }
 
     private void addOrders() {

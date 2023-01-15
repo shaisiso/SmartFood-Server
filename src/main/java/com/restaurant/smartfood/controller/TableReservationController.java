@@ -20,13 +20,13 @@ public class TableReservationController {
 
     @PostMapping
     public TableReservation addTableReservation(@Valid @RequestBody TableReservation reservation) {
-        return tableReservationService.saveTableReservation(reservation);
+        return tableReservationService.addTableReservation(reservation);
     }
 
     @PutMapping
     @AuthorizeRegisteredUser
     public TableReservation updateTableReservation(@Valid @RequestBody TableReservation updatedReservation) {
-        return tableReservationService.saveTableReservation(updatedReservation);
+        return tableReservationService.updateTableReservation(updatedReservation);
     }
 
     @DeleteMapping("/{id}")

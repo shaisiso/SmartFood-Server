@@ -24,10 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -113,13 +113,22 @@ public class WaitingListService {
         return waitingListRepository.findById(waitingListId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no waiting list request with this id: " + waitingListId));
     }
-
     @Async
-    public void checkWaitingLists(LocalDate date, LocalTime hour) {
+    public void checkAllWaitingLists(){
+        var waitingList = waitingListRepository.findByDateIsGreaterThanEqual(LocalDate.now(ZoneId.of(timezone)));
+        checkWaitingList(waitingList);
+    }
+    @Async
+    public void checkWaitingListsForTime(LocalDate date, LocalTime hour) {
         var waitingList = waitingListRepository
                 .findByDateIsAndHourIsBetween(date, hour.minusHours(durationForReservation), Utils.hourPlusDurationForReservation(hour, durationForReservation));
+        checkWaitingList(waitingList);
+    }
+    private void checkWaitingList(List<WaitingList> waitingList){
         // Waiting list returned  fifo
         log.debug("waitingList: size -" + waitingList.size() + " , " + waitingList);
+        if (waitingList.isEmpty())
+            return;
         // Save all the available reservation to make sure that no one else is bypassing the queue
         Map<TableReservation, WaitingList> savedReservationsMap = saveWaitingAsReservations(waitingList);
         if (savedReservationsMap.isEmpty()) // if no reservation can be saved then this method is done.
@@ -188,7 +197,6 @@ public class WaitingListService {
 //            }
 //        }, 30*1000, 30*1000);
     }
-
     private long getMsForResponse() {
         return minutesForWaitingListResponse * 60 * 1000;
     }

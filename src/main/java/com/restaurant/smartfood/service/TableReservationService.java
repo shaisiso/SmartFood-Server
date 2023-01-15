@@ -89,7 +89,7 @@ public class TableReservationService {
         tableReservationRepository.findById(reservationId).
                 ifPresentOrElse(reservation -> {
                             tableReservationRepository.delete(reservation);
-                            waitingListService.checkWaitingLists(reservation.getDate(), reservation.getHour());
+                            waitingListService.checkWaitingListsForTime(reservation.getDate(), reservation.getHour());
                         },
 
                         () -> {

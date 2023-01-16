@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: prod
 
 ---
 logging:
@@ -34,13 +34,13 @@ spring:
       on-profile: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
-    username: admin
-    password: Aa123456
+#    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
+#    username: admin
+#    password: Aa123456
     #heroku DB
-#    url: jdbc:mysql://eu-cdbr-west-02.cleardb.net/heroku_a04d5356c8040dd
-#    username: b90558b4068387
-#    password: 41052d61
+    url: jdbc:mysql://eu-cdbr-west-02.cleardb.net/heroku_a04d5356c8040dd
+    username: b90558b4068387
+    password: 41052d61
   jpa:
     hibernate:
       ddl-auto: update

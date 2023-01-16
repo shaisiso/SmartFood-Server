@@ -31,6 +31,7 @@ public class DBInit implements CommandLineRunner {
     private final TableReservationRepository tableReservationRepository;
     private final MemberRepository memberRepository;
     private final OrderOfTableRepository orderOfTableRepository;
+    private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
     private final TakeAwayRepository takeAwayRepository;
     private final WaitingListRepository waitingListRepository;
@@ -44,10 +45,16 @@ public class DBInit implements CommandLineRunner {
     public void run(String... args) {
         tableReservationRepository.deleteAll();
         cancelItemRequestRepository.deleteAll();
+        deliveryRepository.deleteAll();
+        orderOfTableRepository.deleteAll();
+        orderRepository.deleteAll();
+   //     takeAwayRepository.deleteAll();
+
         employeeRepository.deleteAll();
         personRepository.deleteAll();
         itemRepository.deleteAll();
         restaurantTableRepository.deleteAll();
+
 
 
         addItemsToMenu();
@@ -440,12 +447,13 @@ public class DBInit implements CommandLineRunner {
                         .streetName("Dekel")
                         .build())
                 .build();
+        var person = personRepository.save(p);
         var hour = LocalTime.now(ZoneId.of(timezone)).plusHours(1).getHour();
         TableReservation t1 = TableReservation.builder().
                 table(restaurantTableRepository.findById(11).get())
                 .hour(LocalTime.of(hour,0))
                 .date(LocalDate.now(ZoneId.of(timezone)))
-                .person(personRepository.save(p))
+                .person(person)
                 .numberOfDiners(2)
                 .build();
 
@@ -453,7 +461,7 @@ public class DBInit implements CommandLineRunner {
                 table(restaurantTableRepository.findById(11).get())
                 .hour(LocalTime.of(12,0))
                 .date(LocalDate.now(ZoneId.of(timezone)))
-                .person(personRepository.findByPhoneNumber("0521234567").get())
+                .person(person)
                 .numberOfDiners(2)
                 .build();
 

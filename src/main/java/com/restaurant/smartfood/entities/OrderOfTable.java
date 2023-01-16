@@ -10,7 +10,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor

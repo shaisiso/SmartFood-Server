@@ -6,6 +6,7 @@ import com.restaurant.smartfood.messages.sms.SmsRequest;
 import com.restaurant.smartfood.messages.sms.SmsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,10 @@ import java.util.concurrent.CompletableFuture;
 public class MessageService {
     private final SmsService smsService;
     private final EmailService emailService;
-
+    @Value("${message-service.send-emails}")
+    private boolean emailsSendEnabled;
+    @Value("${message-service.default-mail}")
+    private String defaultMail;
     @Autowired
     public MessageService(SmsService smsService, EmailService emailService) {
         this.smsService = smsService;
@@ -35,7 +39,9 @@ public class MessageService {
                     .message(message)
                     .build();
             smsService.sendSms(sms);
-            if (person.getEmail() != null && !person.getEmail().isBlank())//TODO: CHANGE IT TO ACTUAL EMAIL !!
-                emailService.sendEmail("shaisisso1@gmail.com", subject, message);
+            if (!emailsSendEnabled)
+                emailService.sendEmail(defaultMail, subject, message);
+            else if (person.getEmail() != null && !person.getEmail().isBlank())
+            emailService.sendEmail(person.getEmail(), subject, message);
     }
 }

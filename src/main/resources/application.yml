@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: prod
 
   mail:
     host: smtp.gmail.com
@@ -14,11 +14,14 @@ spring:
           auth: true
           starttls:
             enable: true
+
+
+
 twilio:
   accountSid: AC293cfa6493761d996a084556eba8781e
   authToken: 999b36daddd3613ca27c3fe9e244979a
   trialNumber: +16672432439
-  phoneNumberTo: +972524453933
+  phoneNumberTo: +972524453933  # trial account can send sms only to one verified phone number
 
 timezone:
   name: Asia/Jerusalem
@@ -41,9 +44,9 @@ spring:
     url: jdbc:mysql://localhost:3306/restaurant_system #?useSSL=false
     username: root
     password: Aa123456
-#    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
-#    username: admin
-#    password: Aa123456
+  #    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
+  #    username: admin
+  #    password: Aa123456
   jpa:
     hibernate:
       ddl-auto: create-drop #update
@@ -58,9 +61,16 @@ logging:
 server:
   error:
     include-stacktrace: never
+
+message-service:
+  send-emails: false
+  default-mail: smartfoood2023@gmail.com # when send-emails is false, mails will be sent each time to this address instead of the real address
 domain-url: http://localhost:3000
 ---
-domain-url: http://localhost:3000
+domain-url: https://www.smartfood-project.link
+message-service:
+  send-emails: true # to disable send of emails change to false
+  default-mail: smartfoood2023@gmail.com # when send-emails is false, mails will be sent each time to this address instead of the real address
 spring:
   config:
     activate:
@@ -76,10 +86,10 @@ spring:
   #    password: 41052d61
   jpa:
     hibernate:
-      ddl-auto: update   #create-drop
-
-    show-sql: true
+      ddl-auto: update  # create-drop  #
+    #show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
+
 logging:
   level:
     com.restaurant.smartfood: info

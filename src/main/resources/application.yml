@@ -44,9 +44,6 @@ spring:
     url: jdbc:mysql://localhost:3306/restaurant_system #?useSSL=false
     username: root
     password: Aa123456
-  #    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
-  #    username: admin
-  #    password: Aa123456
   jpa:
     hibernate:
       ddl-auto: create-drop #update
@@ -59,6 +56,21 @@ logging:
   level:
     com.restaurant.smartfood: debug
 server:
+#  port: 443
+#  ssl:
+#    enabled: true
+#    key-store: src/main/resources/bootsecurity.p12
+#    key-store-password: password
+#    keyStoreType: PKCS12
+#    keyAlias: bootsecurity
+
+#  port: 443
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-password: password
+#    key-store-type: PKCS12
+#    key-alias: tomcat
+
   error:
     include-stacktrace: never
 
@@ -94,13 +106,7 @@ logging:
   level:
     com.restaurant.smartfood: info
 server:
-  #  ssl:
-  #    key-store: classpath:springboot.p12
-  #    key-store-password: password
-  #    key-store-type: pkcs12
-  #    key-alias: springboot
-  #    key-password: password
-  #  port: 8443
+
   port: 5000
   error:
     include-stacktrace: never

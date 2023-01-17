@@ -17,7 +17,7 @@ public class Utils {
         return  LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
     }
     public static LocalTime hourPlusDurationForReservation(LocalTime hour,int durationForReservation){
-        var hourPlus = hour.plusHours(durationForReservation);
+        LocalTime hourPlus = hour.plusHours(durationForReservation);
         if (hourPlus.compareTo(hour) <= 0) //passed 00:00
             hourPlus = LocalTime.of(23, 59);
         return hourPlus;

@@ -43,7 +43,7 @@ public class TakeAwayService {
     public TakeAway addTakeAway(TakeAway newTakeAway) {
         newTakeAway = (TakeAway) orderService.initOrder(newTakeAway);
         newTakeAway = (TakeAway)  orderService.connectPersonToOrder(newTakeAway,newTakeAway.getPerson());
-        var takeAwayInDB = takeAwayRepository.save(newTakeAway);
+        TakeAway takeAwayInDB = takeAwayRepository.save(newTakeAway);
         takeAwayInDB.getItems().forEach(i -> {
             i.setOrder(takeAwayInDB);
             itemInOrderService.addItemToOrder(i);
@@ -54,7 +54,7 @@ public class TakeAwayService {
         return takeAwayRepository.save(takeAwayInDB);
     }
     public void deleteTakeAway(Long orderId) {
-        var takeAway = takeAwayRepository.findById(orderId).orElseThrow(() ->
+        TakeAway takeAway = takeAwayRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + orderId)
         );
         takeAwayRepository.delete(takeAway);

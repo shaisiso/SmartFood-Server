@@ -22,6 +22,7 @@ public class MessageService {
     private boolean emailsSendEnabled;
     @Value("${message-service.default-mail}")
     private String defaultMail;
+
     @Autowired
     public MessageService(SmsService smsService, EmailService emailService) {
         this.smsService = smsService;
@@ -30,18 +31,18 @@ public class MessageService {
 
     @Async
     public void sendMessages(Person person, String subject, String message) {
-            if (person == null) {
-                log.warn("Person details are missing, could not send message");
-                return;
-            }
-            var sms = SmsRequest.builder()
-                    .phoneNumber(person.getPhoneNumber())
-                    .message(message)
-                    .build();
-            smsService.sendSms(sms);
-            if (!emailsSendEnabled)
-                emailService.sendEmail(defaultMail, subject, message);
-            else if (person.getEmail() != null && !person.getEmail().isBlank())
+        if (person == null) {
+            log.warn("Person details are missing, could not send message");
+            return;
+        }
+        SmsRequest sms = SmsRequest.builder()
+                .phoneNumber(person.getPhoneNumber())
+                .message(message)
+                .build();
+        smsService.sendSms(sms);
+        if (!emailsSendEnabled)
+            emailService.sendEmail(defaultMail, subject, message);
+        else if (person.getEmail() != null && !person.getEmail().isEmpty())
             emailService.sendEmail(person.getEmail(), subject, message);
     }
 }

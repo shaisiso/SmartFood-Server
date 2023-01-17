@@ -64,7 +64,7 @@ public class OrderOfTableService {
 
     private OrderOfTable prepareOrderToSave(OrderOfTable orderOfTable) {
         orderOfTable = (OrderOfTable) orderService.initOrder(orderOfTable);
-        var orderInDB = orderOfTableRepository.save(orderOfTable);
+        OrderOfTable orderInDB = orderOfTableRepository.save(orderOfTable);
         orderInDB.getItems().forEach(i -> {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);
@@ -77,14 +77,14 @@ public class OrderOfTableService {
     }
 
     public OrderOfTable updateOrderOfTable(OrderOfTable orderOfTable) {
-        var originalOrder = orderOfTableRepository.findById(orderOfTable.getId()).orElseThrow(() ->
+        OrderOfTable originalOrder = orderOfTableRepository.findById(orderOfTable.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id: " + orderOfTable.getId())
         );
         if (!originalOrder.getTable().getTableId().equals(orderOfTable.getTable().getTableId())) {
             checkTableIsNotBusy(orderOfTable);
             // TODO: Test New Change
-            var reservedTables = tableReservationService.findCurrentReservations()
+            List<RestaurantTable> reservedTables = tableReservationService.findCurrentReservations()
                     .stream()
                     .map(TableReservation::getTable)
                     .collect(Collectors.toList());
@@ -99,11 +99,11 @@ public class OrderOfTableService {
     }
 
     public void deleteOrderOfTable(Long id) {
-        var o = orderOfTableRepository.findById(id).orElseThrow(() ->
+        OrderOfTable o = orderOfTableRepository.findById(id).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no order of table with the id " + id));
-        var cancelRequests = cancelItemRequestRepository.findByOrderOfTableId(o.getId());
-        for (var cancelRequest : cancelRequests) {
+        List<CancelItemRequest>  cancelRequests = cancelItemRequestRepository.findByOrderOfTableId(o.getId());
+        for (CancelItemRequest cancelRequest : cancelRequests) {
             cancelRequest.setOrderOfTable(null);
         }
         cancelItemRequestRepository.saveAll(cancelRequests);
@@ -137,7 +137,7 @@ public class OrderOfTableService {
 
 
     private void checkTableIsNotBusy(OrderOfTable orderOfTable) {
-        var table = restaurantTableService.getTable(orderOfTable.getTable().getTableId());
+        RestaurantTable table = restaurantTableService.getTable(orderOfTable.getTable().getTableId());
         if (table.getIsBusy())
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Table number " + table.getTableId() + " is busy");
         table.setIsBusy(true);
@@ -157,13 +157,13 @@ public class OrderOfTableService {
     }
 
     public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
-        var fullRequest = buildFullRequest(cancelItemRequest, false);
+        CancelItemRequest fullRequest = buildFullRequest(cancelItemRequest, false);
         webSocketService.notifyCancelItemRequest(fullRequest);
         return cancelItemRequestRepository.save(fullRequest);
     }
 
     public CancelItemRequest addCancelItemRequestAndDeleteItem(CancelItemRequest cancelItemRequest) {
-        var fullRequest = buildFullRequest(cancelItemRequest, true);
+        CancelItemRequest fullRequest = buildFullRequest(cancelItemRequest, true);
         orderService.deleteItemFromOrder(fullRequest.getItemInOrder().getId());
         // itemInOrderService.deleteItemFromOrder();
         fullRequest.setItemInOrder(null);
@@ -171,12 +171,12 @@ public class OrderOfTableService {
     }
 
     private CancelItemRequest buildFullRequest(CancelItemRequest cancelItemRequest, Boolean isApproved) {
-        var itemInOrder = itemInOrderService.getItemInOrderById(cancelItemRequest.getItemInOrder().getId());
+        ItemInOrder itemInOrder = itemInOrderService.getItemInOrderById(cancelItemRequest.getItemInOrder().getId());
         cancelItemRequestRepository.findByItemInOrderIdAndIsApprovedIsFalse(itemInOrder.getId())
                 .ifPresent(r -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "This item was already sent for cancel");
                 });
-        var orderOfTable = getOrderOfTableByOrderId(itemInOrder.getOrder().getId());
+        OrderOfTable orderOfTable = getOrderOfTableByOrderId(itemInOrder.getOrder().getId());
         return CancelItemRequest.builder()
                 .menuItem(itemInOrder.getItem())
                 .orderOfTable(orderOfTable)
@@ -188,10 +188,10 @@ public class OrderOfTableService {
     }
 
     public void handleRequestForCancelItem(CancelItemRequest cancelItemRequest) {
-        var cancelRequestInDB = getCancelItemRequestById(cancelItemRequest.getId());
+        CancelItemRequest cancelRequestInDB = getCancelItemRequestById(cancelItemRequest.getId());
         cancelRequestInDB.setIsApproved(cancelItemRequest.getIsApproved());
         if (cancelItemRequest.getIsApproved()) {
-            var itemInOrder = cancelRequestInDB.getItemInOrder();
+            ItemInOrder itemInOrder = cancelRequestInDB.getItemInOrder();
             cancelRequestInDB.setItemInOrder(null);
             orderService.deleteItemFromOrder(itemInOrder.getId());
             cancelItemRequestRepository.save(cancelRequestInDB);
@@ -206,10 +206,10 @@ public class OrderOfTableService {
     }
 
     public List<ItemInOrderResponse> getItemsInOrderOfTableForCancel(Integer tableId) {
-        var table = restaurantTableService.getTableById(tableId);
+        RestaurantTable table = restaurantTableService.getTableById(tableId);
         if (!table.getIsBusy())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The requested table is not busy");
-        var orderOfTable = getActiveOrdersOfTable(tableId);
+        OrderOfTable orderOfTable = getActiveOrdersOfTable(tableId);
         return cancelItemRequestRepository.findByOrderOfTableIdAndIsApprovedIsFalse(orderOfTable.getId())
                 .stream()
                 .map(cr -> ItemInOrderResponse.buildItemInOrderResponse(cr.getItemInOrder()))

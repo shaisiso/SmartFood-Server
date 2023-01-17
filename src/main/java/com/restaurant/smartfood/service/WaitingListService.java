@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.restaurant.smartfood.entities.Person;
 import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.entities.WaitingList;
 import com.restaurant.smartfood.messages.MessageService;
@@ -60,7 +61,7 @@ public class WaitingListService {
 
     @Transactional
     public WaitingList addToWaitingList(WaitingList waitingList) {
-        var person = personService.savePerson(waitingList.getPerson());
+        Person person = personService.savePerson(waitingList.getPerson());
         waitingListRepository.findByPersonIdAndDateAndHour(person.getId(), waitingList.getDate(), waitingList.getHour())
                 .ifPresent(w -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -79,7 +80,7 @@ public class WaitingListService {
 
     @Transactional
     public WaitingList updateWaitingList(WaitingList waitingList) {
-        var w = waitingListRepository.findById(waitingList.getId()).orElseThrow(() ->
+        WaitingList w = waitingListRepository.findById(waitingList.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no waiting list request with those details."));
         if (waitingList.getDate().equals(w.getDate()) && waitingList.getHour().equals(w.getHour())) {
             w.setNumberOfDiners(waitingList.getNumberOfDiners());
@@ -115,12 +116,12 @@ public class WaitingListService {
     }
     @Async
     public void checkAllWaitingLists(){
-        var waitingList = waitingListRepository.findByDateIsGreaterThanEqual(LocalDate.now(ZoneId.of(timezone)));
+        List<WaitingList> waitingList = waitingListRepository.findByDateIsGreaterThanEqual(LocalDate.now(ZoneId.of(timezone)));
         checkWaitingList(waitingList);
     }
     @Async
     public void checkWaitingListsForTime(LocalDate date, LocalTime hour) {
-        var waitingList = waitingListRepository
+        List<WaitingList> waitingList = waitingListRepository
                 .findByDateIsAndHourIsBetween(date, hour.minusHours(durationForReservation), Utils.hourPlusDurationForReservation(hour, durationForReservation));
         checkWaitingList(waitingList);
     }
@@ -137,11 +138,11 @@ public class WaitingListService {
         final int[] i = {0};
         scheduledFuture = taskScheduler.scheduleWithFixedDelay(() -> {
             log.debug("savedReservation size: " + savedReservationsMap.size());
-            var mapIterator = savedReservationsMap.entrySet().iterator();
+            Iterator<Map.Entry<TableReservation, WaitingList>> mapIterator = savedReservationsMap.entrySet().iterator();
             while (mapIterator.hasNext()) {
-                var entry = mapIterator.next();
-                var reservation = entry.getKey();
-                var waitingRequest = entry.getValue();
+                Map.Entry<TableReservation, WaitingList> entry = mapIterator.next();
+                TableReservation reservation = entry.getKey();
+                WaitingList waitingRequest = entry.getValue();
                 if (waitingListRepository.findById(waitingRequest.getId()).isPresent()) { // if waiting list was not deleted it means that the time passed, and we need to move to the next
                     waitingList.removeIf(w -> w.getId().equals(waitingRequest.getId()));
                     deleteFromWaitingList(waitingRequest.getId());  // delete table reservation and waiting list
@@ -202,8 +203,8 @@ public class WaitingListService {
     }
 
     private String getMessageForAvailableReservation(TableReservation savedReservation, WaitingList waitingListRequest) {
-        var reservationToken = getReservationToken(savedReservation, waitingListRequest);
-        var url = domainUrl + "/waiting-list/" + reservationToken; // TODO: Return this
+        String reservationToken = getReservationToken(savedReservation, waitingListRequest);
+        String url = domainUrl + "/waiting-list/" + reservationToken; // TODO: Return this
        // var url = reservationToken;
         return "Hi, your reservation at: " + savedReservation.getDate() + " " + savedReservation.getHour() +
                 " can now take place please confirm on the link: " + url + "<div>If you won't response in 2 hours it will be cancelled automatically!</div>";
@@ -222,27 +223,27 @@ public class WaitingListService {
 
     private Map<TableReservation, WaitingList> saveWaitingAsReservations(List<WaitingList> waitingList) {
         Map<TableReservation, WaitingList> savedReservations = new LinkedHashMap<>(); //Order is important
-        var iterator = waitingList.iterator();
+        Iterator< WaitingList> iterator = waitingList.iterator();
         while (iterator.hasNext()) {
-            var waitingRequest = iterator.next();
-            var optionalWR = waitingListRepository.findById(waitingRequest.getId());
+            WaitingList waitingRequest = iterator.next();
+            Optional<WaitingList> optionalWR = waitingListRepository.findById(waitingRequest.getId());
             if (!optionalWR.isPresent()){
                 iterator.remove();
                 continue;
             }
-            var waitingRequestInDB = optionalWR.get();
+            WaitingList waitingRequestInDB = optionalWR.get();
             if (waitingRequestInDB.getWasNotified()){
                 iterator.remove();
                 continue;
             }
-            var reservation = TableReservation.builder()
+            TableReservation reservation = TableReservation.builder()
                     .date(waitingRequest.getDate())
                     .numberOfDiners(waitingRequest.getNumberOfDiners())
                     .hour(waitingRequest.getHour())
                     .person(waitingRequest.getPerson())
                     .build();
             try {
-                var savedReservation = tableReservationService.addTableReservation(reservation, false);
+                TableReservation savedReservation = tableReservationService.addTableReservation(reservation, false);
                 waitingRequestInDB.setWasNotified(true);
                 waitingRequestInDB = waitingListRepository.save(waitingRequestInDB);
                 savedReservations.put(savedReservation, waitingRequestInDB);
@@ -269,8 +270,8 @@ public class WaitingListService {
             DecodedJWT decodedJWT = JWT.require(algorithm)
                     .build()
                     .verify(reservationToken);
-            var reservationId = decodedJWT.getClaim("reservationId").asLong();
-            var waitingListId = decodedJWT.getClaim("waitingListId").asLong();
+            Long reservationId = decodedJWT.getClaim("reservationId").asLong();
+            Long waitingListId = decodedJWT.getClaim("waitingListId").asLong();
             deleteFromWaitingList(waitingListId);
             return tableReservationService.getTableReservationById(reservationId);
         } catch (SignatureVerificationException e) {

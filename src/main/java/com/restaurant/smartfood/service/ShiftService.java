@@ -19,7 +19,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +45,7 @@ public class ShiftService {
     public Shift startShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)
             newShift.setShiftEntrance(LocalDateTime.now(ZoneId.of(timezone)));
-        var employee = employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
+        Employee employee = employeeRepository.findByPhoneNumber(newShift.getEmployee().getPhoneNumber())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "There is no employee with phone number: " + newShift.getEmployee().getPhoneNumber()));
         validateFirstShiftStart(employee);
@@ -52,20 +54,20 @@ public class ShiftService {
             newShift.setIsApproved(true);
             return shiftRepository.save(newShift);
         } else { // notify shift manager
-            var shift = shiftRepository.save(newShift);
+            Shift shift = shiftRepository.save(newShift);
             webSocketService.notifyShiftsChange(shift);
             return shift;
         }
     }
 
     private boolean isManagers(Employee employee) {
-        return List.of(EmployeeRole.MANAGER, EmployeeRole.SHIFT_MANAGER, EmployeeRole.DELIVERY_MANAGER, EmployeeRole.KITCHEN_MANAGER, EmployeeRole.BAR_MANAGER)
+        return Arrays.asList(EmployeeRole.MANAGER, EmployeeRole.SHIFT_MANAGER, EmployeeRole.DELIVERY_MANAGER, EmployeeRole.KITCHEN_MANAGER, EmployeeRole.BAR_MANAGER)
                 .contains(employee.getRole());
     }
 
     private void validateFirstShiftStart(Employee employee) {
-        var dateStart = LocalDate.now(ZoneId.of(timezone)).atStartOfDay();
-        var dateEnd = LocalDate.now(ZoneId.of(timezone)).atTime(23, 59);
+        LocalDateTime dateStart = LocalDate.now(ZoneId.of(timezone)).atStartOfDay();
+        LocalDateTime dateEnd = LocalDate.now(ZoneId.of(timezone)).atTime(23, 59);
         shiftRepository.findByEmployeePhoneNumberAndShiftEntranceIsBetween(employee.getPhoneNumber(), dateStart, dateEnd)
                 .stream().filter(shift -> shift.getShiftExit() == null)
                 .findFirst()
@@ -75,13 +77,13 @@ public class ShiftService {
     }
 
     public Shift exitShift(Shift shift) {
-        var shiftId = shift.getShiftID() != null ? shift.getShiftID() : -1;
-        var shiftFound = shiftRepository.findById(shiftId)
+        Long shiftId = shift.getShiftID() != null ? shift.getShiftID() : -1;
+        Shift shiftFound = shiftRepository.findById(shiftId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Shift was not found"));
         if (shiftFound.getShiftExit() == null)
             shiftFound.setShiftExit(LocalDateTime.now(ZoneId.of(timezone)));
         if (!isManagers(shift.getEmployee())) {
-            var updatedShift = shiftRepository.save(shiftFound);
+            Shift updatedShift = shiftRepository.save(shiftFound);
             webSocketService.notifyShiftsChange(updatedShift);
             return updatedShift;
         }
@@ -92,7 +94,7 @@ public class ShiftService {
         shiftRepository.findById(shift.getShiftID())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found"));
         if (!isManagers(shift.getEmployee())) {
-            var updatedShift = shiftRepository.save(shift);
+            Shift updatedShift = shiftRepository.save(shift);
             webSocketService.notifyShiftsChange(updatedShift);
             return updatedShift;
         }
@@ -100,12 +102,14 @@ public class ShiftService {
     }
 
     public void deleteShift(Long shiftId) {
-        shiftRepository.findById(shiftId).ifPresentOrElse(s -> {
+       Optional<Shift> optionalShift = shiftRepository.findById(shiftId);
+       if(optionalShift.isPresent()) {
+           Shift s =optionalShift.get();
             shiftRepository.delete(s);
             webSocketService.notifyShiftsChange(s);
-        }, () -> {
+        }else  {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The requested shift was not found");
-        });
+        }
     }
 
     public List<Shift> getShiftsByEmployeeAndDates(String phoneNumber, String startDate, String endDate) {

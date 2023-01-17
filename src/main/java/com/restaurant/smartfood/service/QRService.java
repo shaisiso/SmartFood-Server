@@ -48,7 +48,7 @@ public class QRService {
             DecodedJWT decodedJWT = JWT.require(algorithm)
                     .build()
                     .verify(token);
-            var tableId = decodedJWT.getClaim("tableId").asInt();
+            Integer tableId = decodedJWT.getClaim("tableId").asInt();
             return tableService.getTableById(tableId);
         } catch (SignatureVerificationException e) {
             log.error("Authorization was failed . " + e.getMessage());

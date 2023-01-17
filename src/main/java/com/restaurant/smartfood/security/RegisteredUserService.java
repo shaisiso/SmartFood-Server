@@ -4,8 +4,10 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restaurant.smartfood.entities.Employee;
+import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.RegisteredUser;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.MemberRepository;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,27 +51,27 @@ public class RegisteredUserService {
     }
 
     public ResponseEntity<AuthorizationTokens> memberLogin(LoginAuthenticationRequest credentials) {
-        var memberUser = new RegisteredUserPrincipal(memberRepository.findByPhoneNumber(credentials.getPhoneNumber())
+        RegisteredUserPrincipal memberUser = new RegisteredUserPrincipal(memberRepository.findByPhoneNumber(credentials.getPhoneNumber())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials")));
         validatePassword(memberUser, credentials);
-        var tokens = jwtAuthentication.createTokens(memberUser);
+        ResponseEntity<AuthorizationTokens> tokens = jwtAuthentication.createTokens(memberUser);
         return tokens;
     }
 
     public ResponseEntity<AuthorizationTokens> employeeLogin(LoginAuthenticationRequest credentials) {
-        var employeeUser = new RegisteredUserPrincipal(employeeRepository.findByPhoneNumber(credentials.getPhoneNumber())
+        RegisteredUserPrincipal employeeUser = new RegisteredUserPrincipal(employeeRepository.findByPhoneNumber(credentials.getPhoneNumber())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials")));
         validatePassword(employeeUser, credentials);
-        var tokens = jwtAuthentication.createTokens(employeeUser);
+        ResponseEntity<AuthorizationTokens> tokens = jwtAuthentication.createTokens(employeeUser);
         return tokens;
     }
 
     private RegisteredUserPrincipal loadUser(String phoneNumber) {
-        var employeeOp = employeeRepository.findByPhoneNumber(phoneNumber);
+        Optional<Employee> employeeOp = employeeRepository.findByPhoneNumber(phoneNumber);
         if (employeeOp.isPresent()) {
             return new RegisteredUserPrincipal(employeeOp.get());
         } else {
-            var member = memberRepository.findByPhoneNumber(phoneNumber)
+            Member member = memberRepository.findByPhoneNumber(phoneNumber)
                     .orElseThrow(() -> {
                         log.error("User not found in the database");
                         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials");
@@ -89,7 +92,7 @@ public class RegisteredUserService {
         }
         try {
             // verify token
-            var decodedJWT = jwtAuthorization.verifyToken(refreshToken);
+            DecodedJWT decodedJWT = jwtAuthorization.verifyToken(refreshToken);
             String userPhone = decodedJWT.getSubject();
             // generate new access and refresh tokens
             UserDetails principal = loadUser(userPhone);

@@ -29,7 +29,7 @@ public class ItemInOrderService {
     }
 
     public List<ItemInOrder> addListOfItemsToOrder(List<ItemInOrder> itemsInOrder, Order order) {
-        for (var itemInOrder : itemsInOrder) {
+        for (ItemInOrder itemInOrder : itemsInOrder) {
             itemInOrder.setOrder(order);
             itemInOrder.setPrice(itemInOrder.getItem().getPrice());
         }
@@ -38,7 +38,7 @@ public class ItemInOrderService {
     }
 
     public ItemInOrder updateItemInOrder(ItemInOrder item) {
-        var i = getItemInOrderById(item.getId());
+        ItemInOrder i = getItemInOrderById(item.getId());
         item.setOrder(i.getOrder());
         if (item.getPrice() == null)
             item.setPrice(i.getPrice());
@@ -54,7 +54,7 @@ public class ItemInOrderService {
 
     public void deleteItemFromOrder(Long itemId) {
         log.debug("deleteItemFromOrder: "+itemId);
-        var i = getItemInOrderById(itemId);
+        ItemInOrder i = getItemInOrderById(itemId);
         itemInOrderRepository.delete(i);
         itemInOrderRepository.flush();
 
@@ -62,9 +62,9 @@ public class ItemInOrderService {
 
 
     public void deleteItemsListFromOrder(List<Long> itemsInOrderId) {
-        for (var id : itemsInOrderId) {
+        for (Long id : itemsInOrderId) {
             log.info("deleteItemsListFromOrder: "+itemsInOrderId);
-           var itemInOrder = itemInOrderRepository.findById(id).orElseThrow(() ->
+            ItemInOrder itemInOrder = itemInOrderRepository.findById(id).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "There is no itemInOrder with the id" + id));
         }

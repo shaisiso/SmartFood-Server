@@ -51,7 +51,7 @@ public class EmailService {
     }
 
     private void sendSimpleMessage(String toEmail, String subject, String body) {
-        if (toEmail == null || toEmail.isBlank()) {
+        if (toEmail == null || toEmail.isEmpty()) {
             log.warn("Email is blank");
             return;
         }
@@ -68,7 +68,7 @@ public class EmailService {
 
     private void sendEmailWithHtml(String toEmail, String subject, String body) throws MessagingException, UnsupportedEncodingException {
         try {
-            if (toEmail == null || toEmail.isBlank()) {
+            if (toEmail == null || toEmail.isEmpty()) {
                 log.warn("Email is blank");
                 return;
             }

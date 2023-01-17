@@ -40,7 +40,7 @@ public class JwtAuthentication {
                 .withExpiresAt(new Date(System.currentTimeMillis() + 10 * JwtProperties.EXPIRATION_TIME))
                 .sign(algorithm);
 
-        var tokens = AuthorizationTokens.builder()
+        AuthorizationTokens tokens = AuthorizationTokens.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

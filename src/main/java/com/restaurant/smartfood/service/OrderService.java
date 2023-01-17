@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +37,7 @@ public class OrderService {
     private final MessageService messageService;
     @Value("${timezone.name}")
     private String timezone;
+
     @Autowired
     public OrderService(OrderRepository orderRepository, ItemInOrderService itemInOrderService, MemberService memberService, DiscountService discountService, OrderOfTableService orderOfTableService, PersonService personService, WebSocketService webSocketService, MessageService messageService) {
         this.orderRepository = orderRepository;
@@ -63,8 +65,8 @@ public class OrderService {
     }
 
     public Order addOrder(Order order) {
-        var o = initOrder(order);
-        var orderInDB = orderRepository.save(o);
+        Order o = initOrder(order);
+        Order orderInDB = orderRepository.save(o);
         orderInDB.getItems().forEach(i -> {
             i.setOrder(orderInDB);
             itemInOrderService.addItemToOrder(i);
@@ -74,9 +76,9 @@ public class OrderService {
     }
 
     public Order addItemToOrder(Long orderId, ItemInOrder item) {
-        var order = getOrder(orderId);
+        Order order = getOrder(orderId);
         item.setOrder(order);
-        var itemInOrder = itemInOrderService.addItemToOrder(item);
+        ItemInOrder itemInOrder = itemInOrderService.addItemToOrder(item);
         order.getItems().add(itemInOrder);
         // order.setOriginalTotalPrice(calculateTotalPrice(order));
         calculateTotalPrices(order);
@@ -88,7 +90,7 @@ public class OrderService {
     public Order deleteItemsListFromOrder(List<Long> itemsInOrderId) {
         if (itemsInOrderId == null || itemsInOrderId.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "List of items is missing");
-        var order = itemInOrderService.getItemInOrderById(itemsInOrderId.get(0)).getOrder();
+        Order order = itemInOrderService.getItemInOrderById(itemsInOrderId.get(0)).getOrder();
         itemInOrderService.deleteItemsListFromOrder(itemsInOrderId);
         calculateTotalPrices(order);
         order = orderRepository.save(order);
@@ -97,8 +99,8 @@ public class OrderService {
     }
 
     public Order addItemsListToOrder(Long orderId, List<ItemInOrder> items) {
-        var order = getOrder(orderId);
-        var itemsInOrder = itemInOrderService.addListOfItemsToOrder(items, order);
+        Order order = getOrder(orderId);
+        List<ItemInOrder> itemsInOrder = itemInOrderService.addListOfItemsToOrder(items, order);
         order.getItems().addAll(itemsInOrder);
         //  order.setOriginalTotalPrice(calculateTotalPrice(order));
         calculateTotalPrices(order);
@@ -116,11 +118,11 @@ public class OrderService {
             checkIfEntitledForDiscount(order);
 
         // Calculate prices
-        var priceToPay = order.getItems()
+        Float priceToPay = order.getItems()
                 .stream()
                 .map(ItemInOrder::getPrice)
                 .reduce((float) 0, Float::sum);
-        var originalTotalPrice =
+        Float originalTotalPrice =
                 order.getItems()
                         .stream()
                         .map(i -> i.getItem().getPrice())
@@ -132,7 +134,7 @@ public class OrderService {
     public Order payment(Long orderId, Float amount) {
         if (amount <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please provide valid payment amount.");
-        var order = getOrder(orderId);
+        Order order = getOrder(orderId);
         amount = normalizeAmount(amount, order);
         if (order.getTotalPriceToPay() < amount + order.getAlreadyPaid())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't pay more then the remaining amount.");
@@ -145,7 +147,7 @@ public class OrderService {
     }
 
     private Float normalizeAmount(Float amountReceived, Order order) {
-        var remainingAmount = order.getTotalPriceToPay() - order.getAlreadyPaid();
+        Float remainingAmount = order.getTotalPriceToPay() - order.getAlreadyPaid();
         if (Math.abs(amountReceived - remainingAmount) < 0.1) {
             return remainingAmount;
         }
@@ -153,14 +155,14 @@ public class OrderService {
     }
 
     public Order updateComment(Long orderId, String comment) {
-        var order = getOrder(orderId);
+        Order order = getOrder(orderId);
         order.setOrderComment(comment);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
     }
 
     public Order updateTotalPrice(Long orderId, Float amount) {
-        var order = getOrder(orderId);
+        Order order = getOrder(orderId);
         if (amount > order.getOriginalTotalPrice())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The amount is bigger than the total price");
@@ -170,8 +172,8 @@ public class OrderService {
     }
 
     public Order applyMemberDiscount(Long orderId, String phoneNumber) {
-        var order = getOrder(orderId);
-        var member = memberService.getMemberByPhoneNumber(phoneNumber);
+        Order order = getOrder(orderId);
+        Member member = memberService.getMemberByPhoneNumber(phoneNumber);
         order.setPerson(member);
         calculateTotalPrices(order);
         return orderRepository.save(order);
@@ -197,7 +199,7 @@ public class OrderService {
     }
 
     public Order updateStatus(Long orderId, OrderStatus status) {
-        var order = getOrder(orderId);
+        Order order = getOrder(orderId);
         if (status.equals(OrderStatus.CLOSED) && !order.getAlreadyPaid().equals(order.getTotalPriceToPay()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This order currently cannot be closed because it first need to pay the bill.");
         order.setStatus(status);
@@ -209,8 +211,8 @@ public class OrderService {
     }
 
     public Order updatePerson(Long orderId, Person person) {
-        var order = getOrder(orderId);
-        connectPersonToOrder(order,person);
+        Order order = getOrder(orderId);
+        connectPersonToOrder(order, person);
         order = orderRepository.save(order);
         webSocketService.notifyExternalOrders(order);
         return order;
@@ -218,25 +220,25 @@ public class OrderService {
 
     public Order connectPersonToOrder(Order order, Person personToSave) {
         if (personToSave.getId() == null) {
-            personService.getOptionalPersonByPhone(personToSave.getPhoneNumber())
-                    .ifPresentOrElse(p -> {
-                            //    var person = order.getPerson();
-                                personToSave.setId(p.getId());
-                                order.setPerson(personService.savePerson(personToSave));
-                            },
-                            () -> {
-                                var p = personService.savePerson(personToSave);
-                                order.setPerson(p);
-                            });
+            Optional<Person> op = personService.getOptionalPersonByPhone(personToSave.getPhoneNumber());
+            if (op.isPresent()) {
+                Person p = op.get();
+                //    var person = order.getPerson();
+                personToSave.setId(p.getId());
+                order.setPerson(personService.savePerson(personToSave));
+            } else {
+                Person p = personService.savePerson(personToSave);
+                order.setPerson(p);
+            }
         } else {
-            var p = personService.updatePerson(personToSave);
+            Person p = personService.updatePerson(personToSave);
             order.setPerson(p);
         }
         return order;
     }
 
     public void deleteOrder(Long orderId) {
-        var order = getOrder(orderId);
+        Order order = getOrder(orderId);
         orderRepository.delete(order);
         webSocketService.notifyExternalOrders(order);
     }
@@ -246,8 +248,8 @@ public class OrderService {
     }
 
     public Order updateItemInOrder(ItemInOrder item) {
-        var i = itemInOrderService.updateItemInOrder(item);
-        var order = getOrder(i.getOrder().getId());
+        ItemInOrder i = itemInOrderService.updateItemInOrder(item);
+        Order order = getOrder(i.getOrder().getId());
         //order.setOriginalTotalPrice(calculateTotalPrice(order));
         calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
@@ -255,8 +257,8 @@ public class OrderService {
     }
 
     public void deleteItemFromOrder(Long itemId) {
-        var itemInOrder = itemInOrderService.getItemInOrderById(itemId);
-        var order = itemInOrder.getOrder();
+        ItemInOrder itemInOrder = itemInOrderService.getItemInOrderById(itemId);
+        Order order = itemInOrder.getOrder();
         itemInOrderService.deleteItemFromOrder(itemId);
         calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
@@ -268,8 +270,8 @@ public class OrderService {
 
         List<Discount> relevantDiscounts = discountService.getDateRelevantDiscountsForOrder(order);
         relevantDiscounts.forEach(discount -> discount.getCategories().forEach(category -> {
-            var itemsInCategory = itemsInOrderByCategory(order, category);
-            var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
+            List<ItemInOrder> itemsInCategory = itemsInOrderByCategory(order, category);
+            int numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
             for (int i = 0; i < numberOfItemsForDiscount; i++) {
                 applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());
             }
@@ -284,8 +286,8 @@ public class OrderService {
         log.debug("membersCheckIfEntitledForDiscount");
         List<Discount> relevantDiscounts = discountService.getAllDateRelevantDiscountsForOrder(order);
         relevantDiscounts.forEach(discount -> discount.getCategories().forEach(category -> {
-            var itemsInCategory = itemsInOrderByCategory(order, category);
-            var numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
+            List<ItemInOrder> itemsInCategory = itemsInOrderByCategory(order, category);
+            int numberOfItemsForDiscount = itemsInCategory.size() / (discount.getIfYouOrder() + discount.getYouGetDiscountFor());
             for (int i = 0; i < numberOfItemsForDiscount; i++) {
                 if (!discount.getForMembersOnly())
                     applyItemInOrderDiscount(itemsInCategory.get(i), discount.getPercent());

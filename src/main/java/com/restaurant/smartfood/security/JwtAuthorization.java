@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,7 +33,7 @@ public class JwtAuthorization {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized for this action");
         }
         try {
-            var decodedJWT = verifyToken(request);
+            DecodedJWT decodedJWT = verifyToken(request);
             verifyPermission(decodedJWT, requestedAuthorities);
         } catch (SignatureVerificationException e) {
             log.error("Authorization was failed. " + e.getMessage());
@@ -66,7 +67,7 @@ public class JwtAuthorization {
 
     private void verifyPermission(DecodedJWT decodedJWT, String[] requestedAuthorities) {
         //get roles
-        var roles = Arrays.stream(decodedJWT.getClaim("roles").asArray(String.class)).collect(Collectors.toList());
+        List<String> roles = Arrays.stream(decodedJWT.getClaim("roles").asArray(String.class)).collect(Collectors.toList());
 
         AtomicBoolean hasPermission = new AtomicBoolean(false);
         Stream.of(requestedAuthorities).forEach(requestedAuthority -> {

@@ -27,7 +27,7 @@ public class RegisteredUserPrincipal implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities =new ArrayList<>();
         if (registeredUser instanceof Employee){
-            var employee = (Employee)registeredUser;
+            Employee employee = (Employee)registeredUser;
             authorities.add(new SimpleGrantedAuthority("ROLE_"+employee.getRole()));
         }
         else{

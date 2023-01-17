@@ -1,7 +1,9 @@
 package com.restaurant.smartfood.service;
 
+import com.restaurant.smartfood.entities.Delivery;
 import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.EmployeeRole;
+import com.restaurant.smartfood.entities.Person;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import com.restaurant.smartfood.security.ChangePasswordRequest;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -28,56 +31,54 @@ public class EmployeeService {
     @Autowired
     private PersonRepository personRepository;
     @Autowired
-    private  DeliveryService deliveryService;
+    private DeliveryService deliveryService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     public Employee addEmployee(Employee employee) {
-        personRepository.findByPhoneNumber(employee.getPhoneNumber()).ifPresentOrElse(
-                personFromDB -> {
-                    // person is existed in DB
-                    if (employee.getEmail() != null && !employee.getEmail().equals(personFromDB.getEmail())) // email updated
-                        personService.validateEmail(employee);
-                    employee.setId(personFromDB.getId());
-                    // validate that was not saved already
-                    employeeRepository.findById(employee.getId()).ifPresent((p) -> {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee with this phone is existed: " + employee.getPhoneNumber());
-                    });
-                    employeeRepository.insertEmployee(personFromDB.getId(),
-                            passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());
-                },
-                // person is NOT in DB -> save new employee
-                () -> {
-                    personService.validateFields(employee);
-                    employee.setPassword(passwordEncoder.encode(employee.getPassword()));
-                    var employeeDB = employeeRepository.save(employee);
-                    employee.setId(employeeDB.getId());
-                }
-        );
+        Optional<Person> optionalPerson = personRepository.findByPhoneNumber(employee.getPhoneNumber());
+        if (optionalPerson.isPresent()) {            // person is existed in DB
+            Person personFromDB = optionalPerson.get();
+            if (employee.getEmail() != null && !employee.getEmail().equals(personFromDB.getEmail())) // email updated
+                personService.validateEmail(employee);
+            employee.setId(personFromDB.getId());
+            // validate that was not saved already
+            employeeRepository.findById(employee.getId()).ifPresent((p) -> {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee with this phone is existed: " + employee.getPhoneNumber());
+            });
+            employeeRepository.insertEmployee(personFromDB.getId(),
+                    passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());
+        } else {        // person is NOT in DB -> save new employee
+            personService.validateFields(employee);
+            employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+            Employee employeeDB = employeeRepository.save(employee);
+            employee.setId(employeeDB.getId());
+        }
         return employee;
     }
 
     public Employee updateEmployee(Employee updatedEmployee) {
-        employeeRepository.findById(updatedEmployee.getId()).ifPresentOrElse(
-                employeeDB -> {
-                    personService.updatePerson(updatedEmployee);
-                    employeeRepository.updateEmployee(updatedEmployee.getId(),
-                            employeeDB.getPassword()  , updatedEmployee.getRole().toString());
-                },
-                () -> {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + updatedEmployee.getId());
-                }
-        );
+        Optional<Employee> optionalEmployee = employeeRepository.findById(updatedEmployee.getId());
+        if (optionalEmployee.isPresent()) {
+            Employee employeeDB = optionalEmployee.get();
+            personService.updatePerson(updatedEmployee);
+            employeeRepository.updateEmployee(updatedEmployee.getId(),
+                    employeeDB.getPassword(), updatedEmployee.getRole().toString());
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + updatedEmployee.getId());
+        }
         return updatedEmployee;
     }
-    public Employee updatePassword(ChangePasswordRequest changePasswordRequest){
-        var employee = getEmployeeByID(changePasswordRequest.getUserId());
+
+    public Employee updatePassword(ChangePasswordRequest changePasswordRequest) {
+        Employee employee = getEmployeeByID(changePasswordRequest.getUserId());
         if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), employee.getPassword()))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Old password is wrong.");
-        var newEncryptedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        String newEncryptedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
         employee.setPassword(newEncryptedPassword);
         return employeeRepository.save(employee);
     }
+
     public Employee getEmployeeByPhoneNumber(String employeePhoneNumber) {
         return employeeRepository.findByPhoneNumber(employeePhoneNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with phone number: " + employeePhoneNumber));
@@ -88,21 +89,21 @@ public class EmployeeService {
     }
 
     public void deleteEmployee(Long employeeId) {
-        employeeRepository.findById(employeeId)
-                .ifPresentOrElse(e -> {
-                            onDeleteDeliveryGuySetNull(e);
-                            employeeRepository.delete(e);
-                        },
-                        () -> {
-                            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "There is no employee with id: " + employeeId);
-                        });
+        Optional<Employee> optionalEmployee = employeeRepository.findById(employeeId);
+        if (optionalEmployee.isPresent()) {
+            Employee e = optionalEmployee.get();
+            onDeleteDeliveryGuySetNull(e);
+            employeeRepository.delete(e);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "There is no employee with id: " + employeeId);
+        }
     }
 
     private void onDeleteDeliveryGuySetNull(Employee employee) {
-        if (employee.getRole().equals(EmployeeRole.DELIVERY_GUY)){
-            var deliveries = deliveryService.getDeliveriesByDeliveryGuy(employee.getId());
-            deliveries.forEach(d-> d.setDeliveryGuy(null));
+        if (employee.getRole().equals(EmployeeRole.DELIVERY_GUY)) {
+            List<Delivery> deliveries = deliveryService.getDeliveriesByDeliveryGuy(employee.getId());
+            deliveries.forEach(d -> d.setDeliveryGuy(null));
             deliveryService.saveAll(deliveries);
         }
 

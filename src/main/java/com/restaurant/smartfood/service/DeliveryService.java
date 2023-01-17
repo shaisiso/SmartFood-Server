@@ -38,15 +38,15 @@ public class DeliveryService {
     }
 
     public Delivery addDelivery(Delivery newDelivery) {
-        var d = (Delivery) orderService.initOrder(newDelivery);
+        Delivery d = (Delivery) orderService.initOrder(newDelivery);
         d = (Delivery) orderService.connectPersonToOrder(d, d.getPerson());
-        var deliveryInDB = deliveryRepository.save(d);
+        Delivery deliveryInDB = deliveryRepository.save(d);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
             itemInOrderService.addItemToOrder(i);
         });
         orderService.calculateTotalPrices(deliveryInDB);
-        var dToReturn = deliveryRepository.save(deliveryInDB);
+        Delivery dToReturn = deliveryRepository.save(deliveryInDB);
         messageService.sendMessages(newDelivery.getPerson(), "New Delivery", "Yor delivery was accepted and we will notify you when it's ready !!");
         webSocketService.notifyExternalOrders(dToReturn);
         return dToReturn;
@@ -57,14 +57,14 @@ public class DeliveryService {
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + delivery.getId())
         );
         //  var d = connectPersonToDelivery(delivery);
-        var deliveryGuyId = delivery.getDeliveryGuy() != null ? delivery.getDeliveryGuy().getId() : null;
+        Long deliveryGuyId = delivery.getDeliveryGuy() != null ? delivery.getDeliveryGuy().getId() : null;
         deliveryRepository.updateDelivery(deliveryGuyId, delivery.getId());
         webSocketService.notifyExternalOrders(delivery);
         return delivery;
     }
 
     public void deleteDelivery(Long orderId) {
-        var delivery = deliveryRepository.findById(orderId).orElseThrow(() ->
+        Delivery delivery = deliveryRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + orderId)
         );
         deliveryRepository.delete(delivery);

@@ -31,7 +31,7 @@ public class RestaurantTableService {
     }
 
     public RestaurantTable updateRestaurantTable(RestaurantTable restaurantTable) {
-        var table = getTable(restaurantTable.getTableId());
+        RestaurantTable table = getTable(restaurantTable.getTableId());
         boolean checkWaitingList=false;
         if (restaurantTable.getNumberOfSeats() != null) {
             if (restaurantTable.getNumberOfSeats() > table.getNumberOfSeats())
@@ -41,7 +41,7 @@ public class RestaurantTableService {
         if (restaurantTable.getIsBusy() != null)
             table.setIsBusy(restaurantTable.getIsBusy());
 
-        var tableInDB = restaurantTableRepository.save(table);
+        RestaurantTable tableInDB = restaurantTableRepository.save(table);
         if (checkWaitingList)
             waitingListService.checkAllWaitingLists();
 
@@ -64,7 +64,7 @@ public class RestaurantTableService {
     }
 
     public RestaurantTable changeTableBusy(Integer tableId, Boolean isBusy) {
-        var table = getTableById(tableId);
+        RestaurantTable table = getTableById(tableId);
         if (!isBusy) {
             orderOfTableService.optionalActiveTableOrder(tableId).ifPresent(to -> {
                 if (to.getItems().isEmpty()) {
@@ -84,7 +84,7 @@ public class RestaurantTableService {
 
     public RestaurantTable addTable(RestaurantTable table) {
         table.setIsBusy(false);
-        var tableInDB = restaurantTableRepository.save(table);
+        RestaurantTable tableInDB = restaurantTableRepository.save(table);
         waitingListService.checkAllWaitingLists();
         return tableInDB;
     }

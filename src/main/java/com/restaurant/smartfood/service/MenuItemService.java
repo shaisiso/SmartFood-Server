@@ -39,12 +39,12 @@ public class MenuItemService {
 
 
     public Map<String, List<MenuItem>> getCategorizedMenu() {
-        var menu = itemRepository.findAll();
-        var categories = ItemCategory.stream()
+        List<MenuItem> menu = itemRepository.findAll();
+        List<ItemCategory> categories = ItemCategory.stream()
                 .collect(Collectors.toList());
         Map<String, List<MenuItem>> categorizedMenus = new LinkedHashMap<>();
         categories.forEach(category -> {
-            var itemsForCategory = menu.stream()
+            List<MenuItem> itemsForCategory = menu.stream()
                     .filter(menuItem -> menuItem.getCategory().equals(category))
                     .collect(Collectors.toList());
             categorizedMenus.put(category.toString(), itemsForCategory);
@@ -57,7 +57,7 @@ public class MenuItemService {
     }
 
     public void deleteMenuItem(Long itemId) {
-        var item = findItemById(itemId);
+        MenuItem item = findItemById(itemId);
         itemRepository.delete(item);
     }
 

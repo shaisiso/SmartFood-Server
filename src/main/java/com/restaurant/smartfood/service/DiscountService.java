@@ -2,6 +2,7 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Discount;
 import com.restaurant.smartfood.entities.ItemCategory;
+import com.restaurant.smartfood.entities.ItemInOrder;
 import com.restaurant.smartfood.entities.Order;
 import com.restaurant.smartfood.repostitory.DiscountRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class DiscountService {
     }
 
     public void deleteDiscount(Long id) {
-        var d = discountRepository.findById(id).orElseThrow(() ->
+        Discount d = discountRepository.findById(id).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no discount with the id " + id));
         discountRepository.delete(d);
     }
@@ -78,7 +79,7 @@ public class DiscountService {
     }
 
     public List<Discount> getTodayDiscounts() {
-        var today = LocalDate.now(ZoneId.of(timezone));
+        LocalDate today = LocalDate.now(ZoneId.of(timezone));
         return discountRepository.findByStartDateIsLessThanEqualAndEndDateIsGreaterThanEqual
                 (today, today);
     }
@@ -102,13 +103,13 @@ public class DiscountService {
 
     public List<Discount> getRelevantDiscountsForOrder(Long orderId, boolean isOnlyForMembers) {
         List<Discount> relevantDiscounts = new ArrayList<>();
-        var order = orderService.getOrder(orderId);
+        Order order = orderService.getOrder(orderId);
         getDateRelevantDiscountsForOrder(order, isOnlyForMembers)
                 .forEach(discount -> {
                     discount.getCategories()
                             .stream()
                             .filter(category -> {
-                                var relevantItemsNumber = order.getItems()
+                                Long relevantItemsNumber = order.getItems()
                                         .stream()
                                         .map(itemInOrder -> itemInOrder.getItem())
                                         .filter(menuItem -> menuItem.getCategory().equals(category))
@@ -129,8 +130,8 @@ public class DiscountService {
     }
 
     public List<Discount> getDateRelevantDiscountsForOrder(Order order, boolean isOnlyForMembers) {
-        var dateNow = LocalDate.now(ZoneId.of(timezone));
-        var timeNow = LocalTime.now(ZoneId.of(timezone));
+        LocalDate dateNow = LocalDate.now(ZoneId.of(timezone));
+        LocalTime timeNow = LocalTime.now(ZoneId.of(timezone));
         return discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
                 .stream()
                 .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()) && d.getForMembersOnly() == isOnlyForMembers) // Members discount applied separately
@@ -138,9 +139,9 @@ public class DiscountService {
     }
 
     public List<Discount> getAllDateRelevantDiscountsForOrder(Order order) {
-        var dateNow = LocalDate.now(ZoneId.of(timezone));
-        var timeNow = LocalTime.now(ZoneId.of(timezone));
-        var discounts = discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
+        LocalDate dateNow = LocalDate.now(ZoneId.of(timezone));
+        LocalTime timeNow = LocalTime.now(ZoneId.of(timezone));
+        List<Discount> discounts = discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
                 .stream()
                 .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()))
                 .collect(Collectors.toList());
@@ -150,10 +151,10 @@ public class DiscountService {
     }
 
     private boolean isDiscountOverLap(Discount discount) { // overlap is separate between members and rest
-        var overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
+        List<Discount>  overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
                 discount.getStartHour(), discount.getEndHour());
-        for (var d : overlappedDiscounts) {
-            var isOverlap = d.getDays()
+        for (Discount d : overlappedDiscounts) {
+            boolean isOverlap = d.getDays()
                     .stream()
                     .anyMatch(day -> discount.getDays().contains(day))
                     && d.getCategories()

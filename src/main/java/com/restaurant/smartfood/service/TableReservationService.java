@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 @Service
 //@Transactional
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TableReservationService {
     private final TableReservationRepository tableReservationRepository;
     private final PersonService personService;
@@ -38,6 +37,14 @@ public class TableReservationService {
     private String timezone;
     @Value("${reservation-duration}")
     private int durationForReservation;
+    @Autowired
+    public TableReservationService(TableReservationRepository tableReservationRepository, PersonService personService, RestaurantTableRepository restaurantTableRepository, MessageService messageService, WaitingListService waitingListService) {
+        this.tableReservationRepository = tableReservationRepository;
+        this.personService = personService;
+        this.restaurantTableRepository = restaurantTableRepository;
+        this.messageService = messageService;
+        this.waitingListService = waitingListService;
+    }
 
     @Transactional
     public TableReservation addTableReservation(TableReservation reservation) {

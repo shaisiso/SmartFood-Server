@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired)) //Autowired annotated lombok generated constructor
 @Component
 public class JwtAuthentication {
 

@@ -12,13 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDate;
 import java.util.List;
 
 @Transactional
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final ItemInOrderService itemInOrderService;
@@ -27,9 +27,19 @@ public class DeliveryService {
     private final MemberService memberService;
     private final MessageService messageService;
 
+    @Autowired
+    public DeliveryService(DeliveryRepository deliveryRepository, ItemInOrderService itemInOrderService, WebSocketService webSocketService, OrderService orderService, MemberService memberService, MessageService messageService) {
+        this.deliveryRepository = deliveryRepository;
+        this.itemInOrderService = itemInOrderService;
+        this.webSocketService = webSocketService;
+        this.orderService = orderService;
+        this.memberService = memberService;
+        this.messageService = messageService;
+    }
+
     public Delivery addDelivery(Delivery newDelivery) {
         var d = (Delivery) orderService.initOrder(newDelivery);
-        d =(Delivery) orderService.connectPersonToOrder(d,d.getPerson());
+        d = (Delivery) orderService.connectPersonToOrder(d, d.getPerson());
         var deliveryInDB = deliveryRepository.save(d);
         deliveryInDB.getItems().forEach(i -> {
             i.setOrder(deliveryInDB);
@@ -37,7 +47,7 @@ public class DeliveryService {
         });
         orderService.calculateTotalPrices(deliveryInDB);
         var dToReturn = deliveryRepository.save(deliveryInDB);
-        messageService.sendMessages(newDelivery.getPerson(),"New Delivery","Yor delivery was accepted and we will notify you when it's ready !!");
+        messageService.sendMessages(newDelivery.getPerson(), "New Delivery", "Yor delivery was accepted and we will notify you when it's ready !!");
         webSocketService.notifyExternalOrders(dToReturn);
         return dToReturn;
     }
@@ -46,12 +56,13 @@ public class DeliveryService {
         deliveryRepository.findById(delivery.getId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + delivery.getId())
         );
-      //  var d = connectPersonToDelivery(delivery);
+        //  var d = connectPersonToDelivery(delivery);
         var deliveryGuyId = delivery.getDeliveryGuy() != null ? delivery.getDeliveryGuy().getId() : null;
         deliveryRepository.updateDelivery(deliveryGuyId, delivery.getId());
         webSocketService.notifyExternalOrders(delivery);
         return delivery;
     }
+
     public void deleteDelivery(Long orderId) {
         var delivery = deliveryRepository.findById(orderId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + orderId)

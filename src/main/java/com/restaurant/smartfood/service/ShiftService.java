@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ShiftService {
 
 
@@ -34,6 +33,12 @@ public class ShiftService {
     private final WebSocketService webSocketService;
     @Value("${timezone.name}")
     private String timezone;
+    @Autowired
+    public ShiftService(ShiftRepository shiftRepository, EmployeeRepository employeeRepository, WebSocketService webSocketService) {
+        this.shiftRepository = shiftRepository;
+        this.employeeRepository = employeeRepository;
+        this.webSocketService = webSocketService;
+    }
 
     public Shift startShift(Shift newShift) {
         if (newShift.getShiftEntrance() == null)

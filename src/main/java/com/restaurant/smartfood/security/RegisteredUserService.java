@@ -32,13 +32,20 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RegisteredUserService {
     private final EmployeeRepository employeeRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthentication jwtAuthentication;
     private final JwtAuthorization jwtAuthorization;
+    @Autowired
+    public RegisteredUserService(EmployeeRepository employeeRepository, MemberRepository memberRepository, PasswordEncoder passwordEncoder, JwtAuthentication jwtAuthentication, JwtAuthorization jwtAuthorization) {
+        this.employeeRepository = employeeRepository;
+        this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtAuthentication = jwtAuthentication;
+        this.jwtAuthorization = jwtAuthorization;
+    }
 
     public ResponseEntity<AuthorizationTokens> memberLogin(LoginAuthenticationRequest credentials) {
         var memberUser = new RegisteredUserPrincipal(memberRepository.findByPhoneNumber(credentials.getPhoneNumber())

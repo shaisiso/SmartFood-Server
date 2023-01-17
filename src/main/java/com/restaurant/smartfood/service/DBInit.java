@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.TreeSet;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DBInit implements CommandLineRunner {
 
     private final MenuItemRepository itemRepository;
@@ -40,6 +39,24 @@ public class DBInit implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     @Value("${timezone.name}")
     private String timezone;
+    @Autowired
+    public DBInit(MenuItemRepository itemRepository, RestaurantTableRepository restaurantTableRepository, PersonRepository personRepository, EmployeeRepository employeeRepository, ItemInOrderRepository itemInOrderRepository, TableReservationRepository tableReservationRepository, MemberRepository memberRepository, OrderOfTableRepository orderOfTableRepository, OrderRepository orderRepository, DeliveryRepository deliveryRepository, TakeAwayRepository takeAwayRepository, WaitingListRepository waitingListRepository, DiscountRepository discountRepository, CancelItemRequestRepository cancelItemRequestRepository, PasswordEncoder passwordEncoder) {
+        this.itemRepository = itemRepository;
+        this.restaurantTableRepository = restaurantTableRepository;
+        this.personRepository = personRepository;
+        this.employeeRepository = employeeRepository;
+        this.itemInOrderRepository = itemInOrderRepository;
+        this.tableReservationRepository = tableReservationRepository;
+        this.memberRepository = memberRepository;
+        this.orderOfTableRepository = orderOfTableRepository;
+        this.orderRepository = orderRepository;
+        this.deliveryRepository = deliveryRepository;
+        this.takeAwayRepository = takeAwayRepository;
+        this.waitingListRepository = waitingListRepository;
+        this.discountRepository = discountRepository;
+        this.cancelItemRequestRepository = cancelItemRequestRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public void run(String... args) {
@@ -64,7 +81,7 @@ public class DBInit implements CommandLineRunner {
         addTableReservation();
      //   addWaitingList();
         addDiscounts();
-        addOrders();
+       // addOrders();
     }
 
     private void addItemsToMenu() {

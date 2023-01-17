@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -37,6 +36,17 @@ public class OrderService {
     private final MessageService messageService;
     @Value("${timezone.name}")
     private String timezone;
+    @Autowired
+    public OrderService(OrderRepository orderRepository, ItemInOrderService itemInOrderService, MemberService memberService, DiscountService discountService, OrderOfTableService orderOfTableService, PersonService personService, WebSocketService webSocketService, MessageService messageService) {
+        this.orderRepository = orderRepository;
+        this.itemInOrderService = itemInOrderService;
+        this.memberService = memberService;
+        this.discountService = discountService;
+        this.orderOfTableService = orderOfTableService;
+        this.personService = personService;
+        this.webSocketService = webSocketService;
+        this.messageService = messageService;
+    }
 
     public List<Order> getAllOrders() {
         return orderRepository.findAll();

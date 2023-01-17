@@ -20,7 +20,6 @@ import java.util.List;
 @Transactional
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TakeAwayService {
 
     private final TakeAwayRepository takeAwayRepository;
@@ -30,6 +29,15 @@ public class TakeAwayService {
     private final WebSocketService webSocketService;
     private final MessageService messageService;
     private final MemberService memberService;
+    @Autowired
+    public TakeAwayService(TakeAwayRepository takeAwayRepository, ItemInOrderService itemInOrderService, OrderService orderService, WebSocketService webSocketService, MessageService messageService, MemberService memberService) {
+        this.takeAwayRepository = takeAwayRepository;
+        this.itemInOrderService = itemInOrderService;
+        this.orderService = orderService;
+        this.webSocketService = webSocketService;
+        this.messageService = messageService;
+        this.memberService = memberService;
+    }
 
 
     public TakeAway addTakeAway(TakeAway newTakeAway) {

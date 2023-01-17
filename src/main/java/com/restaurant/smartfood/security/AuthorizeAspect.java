@@ -14,10 +14,15 @@ import javax.servlet.http.HttpServletRequest;
 @Aspect
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired)) //Autowired annotated lombok generated constructor
 public class AuthorizeAspect {
     private final  HttpServletRequest request; //Inject request to have header access
     private final JwtAuthorization jwtAuthorization;
+
+    @Autowired
+    public AuthorizeAspect(HttpServletRequest request, JwtAuthorization jwtAuthorization) {
+        this.request = request;
+        this.jwtAuthorization = jwtAuthorization;
+    }
 
     @Before("@annotation(authorize)")
     public void authorizeAspect(Authorize authorize) {

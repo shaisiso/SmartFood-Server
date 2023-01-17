@@ -15,10 +15,14 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/table")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RestaurantTableController {
 
     private final RestaurantTableService tableService;
+
+    @Autowired
+    public RestaurantTableController(RestaurantTableService tableService) {
+        this.tableService = tableService;
+    }
 
     @GetMapping
     @AuthorizeEmployee

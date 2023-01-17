@@ -19,13 +19,21 @@ import java.util.*;
 @Service
 @Transactional
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReportService {
     private final OrderService orderService;
     private final CancelItemRequestRepository cancelRequestRepository;
     private final OrderOfTableService orderOfTableService;
     private final DeliveryService deliveryService;
     private final TakeAwayService takeAwayService;
+    @Autowired
+    public ReportService(OrderService orderService, CancelItemRequestRepository cancelRequestRepository, OrderOfTableService orderOfTableService, DeliveryService deliveryService, TakeAwayService takeAwayService) {
+        this.orderService = orderService;
+        this.cancelRequestRepository = cancelRequestRepository;
+        this.orderOfTableService = orderOfTableService;
+        this.deliveryService = deliveryService;
+        this.takeAwayService = takeAwayService;
+    }
+
     public List<DailyColumnReport<Double>> getIncomeDailyColumnReport(String startDateSt, String endDateSt) {
         var startDate = parseDate(startDateSt);
         var endDate = parseDate(endDateSt);

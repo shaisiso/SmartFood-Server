@@ -8,6 +8,7 @@ import com.restaurant.smartfood.service.MenuItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,13 @@ import java.util.Map;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/menu")
-@RequiredArgsConstructor(onConstructor_={@Autowired})
 public class MenuItemController {
     private final MenuItemService menuItemService;
+
+    @Autowired
+    public MenuItemController(MenuItemService menuItemService) {
+        this.menuItemService = menuItemService;
+    }
 
     @PostMapping
     @AuthorizeGeneralManager

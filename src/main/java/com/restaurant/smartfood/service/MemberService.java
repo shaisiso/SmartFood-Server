@@ -19,13 +19,20 @@ import java.util.List;
 @Slf4j
 @Transactional
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PersonService personService;
     private final PersonRepository personRepository;
     private final PasswordEncoder passwordEncoder;
     private final MessageService messageService;
+    @Autowired
+    public MemberService(MemberRepository memberRepository, PersonService personService, PersonRepository personRepository, PasswordEncoder passwordEncoder, MessageService messageService) {
+        this.memberRepository = memberRepository;
+        this.personService = personService;
+        this.personRepository = personRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.messageService = messageService;
+    }
 
     public Member updateMember(Member member) {
         memberRepository.findById(member.getId()).ifPresentOrElse(

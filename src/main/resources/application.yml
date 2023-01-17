@@ -2,10 +2,39 @@ spring:
   profiles:
     active: prod
 
+  mail:
+    host: smtp.gmail.com
+    username: smartfoood2023@gmail.com
+    password: gshwkbcikltxiadv
+    port: 587
+    #protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+
+twilio:
+  accountSid: AC293cfa6493761d996a084556eba8781e
+  authToken: 999b36daddd3613ca27c3fe9e244979a
+  trialNumber: +16672432439
+  phoneNumberTo: +972524453933  # trial account can send sms only to one verified phone number
+
+timezone:
+  name: Asia/Jerusalem
+
+reservation-duration: 2 # hours
+waiting-list:
+  reserve-time: 120 # minutes
 ---
-logging:
-  level:
-    com.restaurant.smartfood: trace
+-spring:
+  devtools:
+    restart:
+      enabled=true:
+
 spring:
   config:
     activate:
@@ -21,44 +50,65 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-    show-sql: true
-
+        # format_sql: true
+    show-sql: false
+logging:
+  level:
+    com.restaurant.smartfood: debug
 server:
+#  port: 443
+#  ssl:
+#    enabled: true
+#    key-store: src/main/resources/bootsecurity.p12
+#    key-store-password: password
+#    keyStoreType: PKCS12
+#    keyAlias: bootsecurity
+
+#  port: 443
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-password: password
+#    key-store-type: PKCS12
+#    key-alias: tomcat
+
   error:
     include-stacktrace: never
 
+message-service:
+  send-emails: false
+  default-mail: smartfoood2023@gmail.com # when send-emails is false, mails will be sent each time to this address instead of the real address
+domain-url: http://localhost:3000
 ---
+domain-url: https://www.smartfood-project.link
+message-service:
+  send-emails: true # to disable send of emails change to false
+  default-mail: smartfoood2023@gmail.com # when send-emails is false, mails will be sent each time to this address instead of the real address
 spring:
   config:
     activate:
       on-profile: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
-#    username: admin
-#    password: Aa123456
+    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
+    username: admin
+    password: Aa123456
+
     #heroku DB
-    url: jdbc:mysql://eu-cdbr-west-02.cleardb.net/heroku_a04d5356c8040dd
-    username: b90558b4068387
-    password: 41052d61
+  #    url: jdbc:mysql://eu-cdbr-west-02.cleardb.net/heroku_a04d5356c8040dd
+  #    username: b90558b4068387
+  #    password: 41052d61
+
   jpa:
     hibernate:
-      ddl-auto: update
-#    properties:
-#      hibernate:
-#        dialect: org.hibernate.dialect.MySQL8Dialect
-#        format_sql: true
-    show-sql: true
-    database-platform: org.hibernate.dialect.MySQL5Dialect
+      ddl-auto: update  # create-drop  #
+    #show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 
+logging:
+  level:
+    com.restaurant.smartfood: info
 server:
-  #  ssl:
-  #    key-store: classpath:springboot.p12
-  #    key-store-password: password
-  #    key-store-type: pkcs12
-  #    key-alias: springboot
-  #    key-password: password
-  #  port: 8443
+
   port: 5000
   error:
     include-stacktrace: never
@@ -73,6 +123,8 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     show-sql: true
+    hibernate:
+      ddl-auto: create-drop #update
   config:
     activate:
       on-profile: test

@@ -60,27 +60,27 @@ public class DBInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        tableReservationRepository.deleteAll();
-        cancelItemRequestRepository.deleteAll();
-        deliveryRepository.deleteAll();
-        orderOfTableRepository.deleteAll();
-        orderRepository.deleteAll();
-        takeAwayRepository.deleteAll();
-
-        employeeRepository.deleteAll();
-        personRepository.deleteAll();
-        itemRepository.deleteAll();
-        restaurantTableRepository.deleteAll();
-
-
-
-        addItemsToMenu();
-        createTables();
-        addEmployees();
-        addMember();
-        addTableReservation();
-     //   addWaitingList();
-        addDiscounts();
+//        tableReservationRepository.deleteAll();
+//        cancelItemRequestRepository.deleteAll();
+//        deliveryRepository.deleteAll();
+//        orderOfTableRepository.deleteAll();
+//        orderRepository.deleteAll();
+//        takeAwayRepository.deleteAll();
+//
+//        employeeRepository.deleteAll();
+//        personRepository.deleteAll();
+//        itemRepository.deleteAll();
+//        restaurantTableRepository.deleteAll();
+//
+//
+//
+//        addItemsToMenu();
+//        createTables();
+//        addEmployees();
+//        addMember();
+//        addTableReservation();
+//     //   addWaitingList();
+//        addDiscounts();
         addOrders();
     }
 

@@ -28,7 +28,7 @@ timezone:
 
 reservation-duration: 2 # hours
 waiting-list:
-  reserve-time: 120 # minutes
+  reserve-time: 60 # minutes
 ---
 -spring:
   devtools:

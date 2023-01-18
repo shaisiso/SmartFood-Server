@@ -81,7 +81,8 @@ public class DBInit implements CommandLineRunner {
 //        addTableReservation();
 //     //   addWaitingList();
 //        addDiscounts();
-        addOrders();
+
+       // addOrders();
     }
 
     private void addItemsToMenu() {

@@ -55,7 +55,6 @@ public class TableReservationController {
         return tableReservationService.getTableReservationsByCustomer(phoneNumber);
     }
     @GetMapping("/current")
-    @AuthorizeEmployee
     public List<TableReservation> getCurrentReservations(){
         return tableReservationService.findCurrentReservations();
     }

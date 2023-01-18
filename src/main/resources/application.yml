@@ -108,8 +108,8 @@ logging:
   level:
     com.restaurant.smartfood: info
 server:
-
-  port: 5000
+  port: ${PORT:5000}
+  #port: 5000
   error:
     include-stacktrace: never
 ---

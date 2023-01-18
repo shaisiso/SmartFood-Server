@@ -2,17 +2,16 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.OrderStatus;
 import com.restaurant.smartfood.entities.TakeAway;
+import com.restaurant.smartfood.exception.BadRequestException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.TakeAwayRepository;
 import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,7 +54,7 @@ public class TakeAwayService {
     }
     public void deleteTakeAway(Long orderId) {
         TakeAway takeAway = takeAwayRepository.findById(orderId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no take away with the id: " + orderId)
+                new ResourceNotFoundException( "There is no take away with the id: " + orderId)
         );
         takeAwayRepository.delete(takeAway);
         webSocketService.notifyExternalOrders(takeAway);
@@ -68,7 +67,7 @@ public class TakeAwayService {
             return takeAwayRepository.findByDateIsBetween(localStartDate, localEndDate);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException( "The request was in bad format");
         }
     }
 

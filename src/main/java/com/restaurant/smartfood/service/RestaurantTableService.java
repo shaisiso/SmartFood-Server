@@ -1,22 +1,20 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.RestaurantTable;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
-//@Getter
 public class RestaurantTableService {
     private final RestaurantTableRepository restaurantTableRepository;
     private final OrderOfTableService orderOfTableService;
@@ -31,7 +29,7 @@ public class RestaurantTableService {
     }
 
     public RestaurantTable updateRestaurantTable(RestaurantTable restaurantTable) {
-        RestaurantTable table = getTable(restaurantTable.getTableId());
+        RestaurantTable table = getTableById(restaurantTable.getTableId());
         boolean checkWaitingList=false;
         if (restaurantTable.getNumberOfSeats() != null) {
             if (restaurantTable.getNumberOfSeats() > table.getNumberOfSeats())
@@ -48,20 +46,15 @@ public class RestaurantTableService {
         return tableInDB;
     }
 
-    public RestaurantTable getTable(Integer id) {
-        return restaurantTableRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no table with the id: " + id));
+    public RestaurantTable getTableById(Integer tableId) {
+        return restaurantTableRepository.findById(tableId)
+                .orElseThrow(() -> new ResourceNotFoundException("There is no table with the id: " + tableId));
     }
 
     public List<RestaurantTable> getAllTables() {
         return restaurantTableRepository.findAll();
     }
 
-    public RestaurantTable getTableById(Integer tableId) {
-        return restaurantTableRepository.findById(tableId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no table with table id : " + tableId));
-    }
 
     public RestaurantTable changeTableBusy(Integer tableId, Boolean isBusy) {
         RestaurantTable table = getTableById(tableId);
@@ -70,7 +63,7 @@ public class RestaurantTableService {
                 if (to.getItems().isEmpty()) {
                     orderOfTableService.deleteOrderOfTable(to.getId());
                 } else {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Table " + tableId + " has active order, please close the order before");
+                    throw new ConflictException( "Table " + tableId + " has active order, please close the order before");
                 }
             });
         }
@@ -79,7 +72,7 @@ public class RestaurantTableService {
     }
 
     public void deleteTable(Integer tableId) {
-        restaurantTableRepository.delete(getTable(tableId));
+        restaurantTableRepository.delete(getTableById(tableId));
     }
 
     public RestaurantTable addTable(RestaurantTable table) {

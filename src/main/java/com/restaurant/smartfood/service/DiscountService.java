@@ -4,15 +4,16 @@ import com.restaurant.smartfood.entities.Discount;
 import com.restaurant.smartfood.entities.ItemCategory;
 import com.restaurant.smartfood.entities.ItemInOrder;
 import com.restaurant.smartfood.entities.Order;
+import com.restaurant.smartfood.exception.BadRequestException;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.repostitory.DiscountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -42,24 +43,23 @@ public class DiscountService {
 
     public Discount addDiscount(Discount discount) {
         if (isDiscountOverLap(discount))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is an overlap with a discount");
+            throw new ConflictException("There is an overlap with a discount");
         return discountRepository.save(discount);
     }
 
     public Discount updateDiscount(Discount discount) {
         if (discount.getDiscountId() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You have to have an id for the discount");
+            throw new BadRequestException("You have to have an id for the discount");
         discountRepository.findById(discount.getDiscountId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no discount with the id " + discount.getDiscountId()));
+                new ResourceNotFoundException("There is no discount with the id " + discount.getDiscountId()));
         if (isDiscountOverLap(discount))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is an overlap with a discount");
+            throw new ConflictException("There is an overlap with a discount");
         return discountRepository.save(discount);
     }
 
     public void deleteDiscount(Long id) {
         Discount d = discountRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no discount with the id " + id));
+                new ResourceNotFoundException("There is no discount with the id " + id));
         discountRepository.delete(d);
     }
 
@@ -70,7 +70,7 @@ public class DiscountService {
             return discountRepository.findByStartDateIsLessThanEqualAndEndDateIsGreaterThanEqual(localEndDate, localStartDate);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException( "The request was in bad format");
         }
     }
 
@@ -93,7 +93,7 @@ public class DiscountService {
             return getDiscountsByDatesAndHours(localStartDate, localEndDate, localStartHour, localEndHour);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException( "The request was in bad format");
         }
     }
 
@@ -105,22 +105,18 @@ public class DiscountService {
         List<Discount> relevantDiscounts = new ArrayList<>();
         Order order = orderService.getOrder(orderId);
         getDateRelevantDiscountsForOrder(order, isOnlyForMembers)
-                .forEach(discount -> {
-                    discount.getCategories()
-                            .stream()
-                            .filter(category -> {
-                                Long relevantItemsNumber = order.getItems()
-                                        .stream()
-                                        .map(itemInOrder -> itemInOrder.getItem())
-                                        .filter(menuItem -> menuItem.getCategory().equals(category))
-                                        .count();
-                                return relevantItemsNumber >= discount.getIfYouOrder() + discount.getYouGetDiscountFor();
-                            })
-                            .findAny()
-                            .ifPresent(c -> {
-                                relevantDiscounts.add(discount);
-                            });
-                });
+                .forEach(discount -> discount.getCategories()
+                        .stream()
+                        .filter(category -> {
+                            long relevantItemsNumber = order.getItems()
+                                    .stream()
+                                    .map(ItemInOrder::getItem)
+                                    .filter(menuItem -> menuItem.getCategory().equals(category))
+                                    .count();
+                            return relevantItemsNumber >= discount.getIfYouOrder() + discount.getYouGetDiscountFor();
+                        })
+                        .findAny()
+                        .ifPresent(c -> relevantDiscounts.add(discount)));
         return relevantDiscounts;
 
     }
@@ -141,17 +137,16 @@ public class DiscountService {
     public List<Discount> getAllDateRelevantDiscountsForOrder(Order order) {
         LocalDate dateNow = LocalDate.now(ZoneId.of(timezone));
         LocalTime timeNow = LocalTime.now(ZoneId.of(timezone));
-        List<Discount> discounts = discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
+        return discountRepository.findByDatesAndHours(order.getDate(), dateNow, order.getHour(), timeNow)
                 .stream()
                 .filter(d -> d.getDays().contains(dateNow.getDayOfWeek()))
+                .sorted(Comparator.comparing(Discount::getForMembersOnly))
                 .collect(Collectors.toList());
-        discounts.sort(Comparator.comparing(Discount::getForMembersOnly));
-        return discounts;
 
     }
 
     private boolean isDiscountOverLap(Discount discount) { // overlap is separate between members and rest
-        List<Discount>  overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
+        List<Discount> overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
                 discount.getStartHour(), discount.getEndHour());
         for (Discount d : overlappedDiscounts) {
             boolean isOverlap = d.getDays()

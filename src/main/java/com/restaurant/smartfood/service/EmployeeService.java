@@ -4,17 +4,17 @@ import com.restaurant.smartfood.entities.Delivery;
 import com.restaurant.smartfood.entities.Employee;
 import com.restaurant.smartfood.entities.EmployeeRole;
 import com.restaurant.smartfood.entities.Person;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import com.restaurant.smartfood.security.ChangePasswordRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-//import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +44,7 @@ public class EmployeeService {
             employee.setId(personFromDB.getId());
             // validate that was not saved already
             employeeRepository.findById(employee.getId()).ifPresent((p) -> {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee with this phone is existed: " + employee.getPhoneNumber());
+                throw new ConflictException( "Employee with this phone is existed: " + employee.getPhoneNumber());
             });
             employeeRepository.insertEmployee(personFromDB.getId(),
                     passwordEncoder.encode(employee.getPassword()), employee.getRole().toString());
@@ -65,7 +65,7 @@ public class EmployeeService {
             employeeRepository.updateEmployee(updatedEmployee.getId(),
                     employeeDB.getPassword(), updatedEmployee.getRole().toString());
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + updatedEmployee.getId());
+            throw new ResourceNotFoundException( "There is no member with this member id: " + updatedEmployee.getId());
         }
         return updatedEmployee;
     }
@@ -73,7 +73,7 @@ public class EmployeeService {
     public Employee updatePassword(ChangePasswordRequest changePasswordRequest) {
         Employee employee = getEmployeeByID(changePasswordRequest.getUserId());
         if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), employee.getPassword()))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Old password is wrong.");
+            throw new BadCredentialsException( "Old password is wrong.");
         String newEncryptedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
         employee.setPassword(newEncryptedPassword);
         return employeeRepository.save(employee);
@@ -81,7 +81,7 @@ public class EmployeeService {
 
     public Employee getEmployeeByPhoneNumber(String employeePhoneNumber) {
         return employeeRepository.findByPhoneNumber(employeePhoneNumber)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with phone number: " + employeePhoneNumber));
+                .orElseThrow(() -> new ResourceNotFoundException( "There is no employee with phone number: " + employeePhoneNumber));
     }
 
     public List<Employee> getAllEmployees() {
@@ -95,8 +95,7 @@ public class EmployeeService {
             onDeleteDeliveryGuySetNull(e);
             employeeRepository.delete(e);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "There is no employee with id: " + employeeId);
+            throw new ResourceNotFoundException(  "There is no employee with id: " + employeeId);
         }
     }
 
@@ -111,7 +110,7 @@ public class EmployeeService {
 
     public Employee getEmployeeByID(Long employeeID) {
         return employeeRepository.findById(employeeID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no employee with employeeID: " + employeeID));
+                .orElseThrow(() -> new ResourceNotFoundException( "There is no employee with employeeID: " + employeeID));
     }
 
 

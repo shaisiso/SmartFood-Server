@@ -6,9 +6,9 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ public class JwtAuthorization {
 
         if (header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
             log.warn("Authorization token is missing");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized for this action");
+            throw new BadCredentialsException("You are not authorized for this action");
         }
         try {
             DecodedJWT decodedJWT = verifyToken(request);
@@ -38,27 +38,25 @@ public class JwtAuthorization {
         } catch (SignatureVerificationException e) {
             log.error("Authorization was failed. " + e.getMessage());
             log.error("Token was changed and cannot be trusted");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authorization was failed.");
+            throw new BadCredentialsException("Authorization was failed.");
         } catch (TokenExpiredException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token is expired");
+            throw new BadCredentialsException("Token is expired");
         } catch (Exception e) {
-            if (e instanceof ResponseStatusException)
-                throw e;
-            else {
-                log.error("The authorization failed for a certain reason");
-                log.error(e.toString());
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized for this action.");
-            }
+            log.error("The authorization failed for a certain reason");
+            log.error(e.toString());
+            throw new BadCredentialsException("You are not authorized for this action.");
+
         }
     }
+
     public DecodedJWT verifyToken(String token) {
         Algorithm algorithm = Algorithm.HMAC512(JwtProperties.SECRET.getBytes());
         // parse the token and validate it
-        DecodedJWT decodedJWT = JWT.require(algorithm)
+        return JWT.require(algorithm)
                 .build()
                 .verify(token);
-        return decodedJWT;
     }
+
     public DecodedJWT verifyToken(HttpServletRequest request) {
         String token = request.getHeader(JwtProperties.HEADER_STRING)
                 .replace(JwtProperties.TOKEN_PREFIX, "");
@@ -72,12 +70,10 @@ public class JwtAuthorization {
         AtomicBoolean hasPermission = new AtomicBoolean(false);
         Stream.of(requestedAuthorities).forEach(requestedAuthority -> {
             if (roles.contains(requestedAuthority)) {
-               // log.debug("contain");
                 hasPermission.set(true);
-                return;
             }
         });
-        if (hasPermission.get() == false)
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have the permission for this request");
+        if (!hasPermission.get())
+            throw new AccessDeniedException("You don't have the permission for this request");
     }
 }

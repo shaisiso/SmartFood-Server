@@ -10,9 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
-import java.util.concurrent.CompletableFuture;
-
 @Service
 @Slf4j
 public class MessageService {

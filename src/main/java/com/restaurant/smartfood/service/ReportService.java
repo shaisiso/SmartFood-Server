@@ -1,17 +1,15 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.exception.BadRequestException;
 import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.utility.DailyColumnReport;
 import com.restaurant.smartfood.utility.MonthlyColumnReport;
 import com.restaurant.smartfood.utility.Utils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,7 +45,7 @@ public class ReportService {
                     .filter(o -> o.getDate().equals(finalCheckDate))
                     .mapToDouble(Order::getAlreadyPaid)
                     .sum();
-            DailyColumnReport column = DailyColumnReport.<Double>builder()
+            DailyColumnReport<Double> column = DailyColumnReport.<Double>builder()
                     .date(checkDate)
                     .dayOfWeek(checkDate.getDayOfWeek())
                     .value(sumOfDailyIncome)
@@ -71,7 +69,7 @@ public class ReportService {
                     .filter(o -> o.getDate().getMonth().equals(finalCheckDate.getMonth()) && o.getDate().getYear() == finalCheckDate.getYear())
                     .mapToDouble(Order::getAlreadyPaid)
                     .sum();
-            MonthlyColumnReport column = MonthlyColumnReport.<Double>builder()
+            MonthlyColumnReport<Double> column = MonthlyColumnReport.<Double>builder()
                     .month(checkDate.getMonth())
                     .value(sumOfMonthlyIncome)
                     .build();
@@ -92,7 +90,7 @@ public class ReportService {
         LocalDateTime endDateTime = parseDate(endDateSt).atTime(23, 59);
         Map<String, Integer> itemsCanceledMap = new HashMap<>();
         List<CancelItemRequest> cancelItemRequests = cancelRequestRepository.findByDateIsBetween(startDateTime, endDateTime);
-        cancelItemRequests.stream()
+        cancelItemRequests
                 .forEach(cr -> {
                     String menuItemName = cr.getMenuItem().getName();
                     if (itemsCanceledMap.containsKey(menuItemName))
@@ -122,7 +120,7 @@ public class ReportService {
             return Utils.parseToLocalDate(date);
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException("The request was in bad format");
         }
     }
 
@@ -149,17 +147,17 @@ public class ReportService {
             long totalOrdersOfTable = orderOfTableList.stream()
                     .filter(o -> o.getDate().equals(finalCheckDate))
                     .count();
-            DailyColumnReport columnDelivery = DailyColumnReport.<Long>builder()
+            DailyColumnReport<Long> columnDelivery = DailyColumnReport.<Long>builder()
                     .date(checkDate)
                     .dayOfWeek(checkDate.getDayOfWeek())
                     .value(totalDeliveries)
                     .build();
-            DailyColumnReport columnTA = DailyColumnReport.<Long>builder()
+            DailyColumnReport<Long> columnTA = DailyColumnReport.<Long>builder()
                     .date(checkDate)
                     .dayOfWeek(checkDate.getDayOfWeek())
                     .value(totalTakeAway)
                     .build();
-            DailyColumnReport columnTables = DailyColumnReport.<Long>builder()
+            DailyColumnReport<Long> columnTables = DailyColumnReport.<Long>builder()
                     .date(checkDate)
                     .dayOfWeek(checkDate.getDayOfWeek())
                     .value(totalOrdersOfTable)
@@ -199,15 +197,15 @@ public class ReportService {
             Long totalOrdersOfTable = orderOfTableList.stream()
                     .filter(o -> o.getDate().getMonth().equals(finalCheckDate.getMonth()) && o.getDate().getYear() == finalCheckDate.getYear())
                     .count();
-            MonthlyColumnReport columnDelivery = MonthlyColumnReport.<Long>builder()
+            MonthlyColumnReport<Long> columnDelivery = MonthlyColumnReport.<Long>builder()
                     .month(checkDate.getMonth())
                     .value(totalDeliveries)
                     .build();
-            MonthlyColumnReport columnTA = MonthlyColumnReport.<Long>builder()
+            MonthlyColumnReport<Long> columnTA = MonthlyColumnReport.<Long>builder()
                     .month(checkDate.getMonth())
                     .value(totalTakeAway)
                     .build();
-            MonthlyColumnReport columnTables = MonthlyColumnReport.<Long>builder()
+            MonthlyColumnReport<Long> columnTables = MonthlyColumnReport.<Long>builder()
                     .month(checkDate.getMonth())
                     .value(totalOrdersOfTable)
                     .build();

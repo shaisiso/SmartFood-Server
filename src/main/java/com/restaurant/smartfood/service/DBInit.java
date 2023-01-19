@@ -2,14 +2,11 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
 import com.restaurant.smartfood.repostitory.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -63,17 +60,17 @@ public class DBInit implements CommandLineRunner {
 //        tableReservationRepository.deleteAll();
 //        cancelItemRequestRepository.deleteAll();
 //        deliveryRepository.deleteAll();
-//        orderOfTableRepository.deleteAll();
-//        orderRepository.deleteAll();
-//        takeAwayRepository.deleteAll();
+////        orderOfTableRepository.deleteAll();
+////        orderRepository.deleteAll();
+////        takeAwayRepository.deleteAll();
 //
 //        employeeRepository.deleteAll();
 //        personRepository.deleteAll();
 //        itemRepository.deleteAll();
 //        restaurantTableRepository.deleteAll();
-//
-//
-//
+////
+////
+////
 //        addItemsToMenu();
 //        createTables();
 //        addEmployees();

@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# smartfood
+src/main/java/com/restaurant/smartfood/service/DBInit.java
+*.yml
+
 ### STS ###
 .apt_generated
 .classpath

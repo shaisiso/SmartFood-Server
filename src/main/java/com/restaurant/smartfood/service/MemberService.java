@@ -2,18 +2,16 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Member;
 import com.restaurant.smartfood.entities.Person;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.MemberRepository;
 import com.restaurant.smartfood.repostitory.PersonRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +42,7 @@ public class MemberService {
             memberRepository.updateMember(member.getId(),
                     passwordEncoder.encode(member.getPassword()));
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with this member id: " + member.getId());
+            throw new ResourceNotFoundException("There is no member with this member id: " + member.getId());
         }
         return member;
     }
@@ -60,7 +58,7 @@ public class MemberService {
             member.setId(personFromDB.getId());
             // validate that was not saved already
             memberRepository.findById(member.getId()).ifPresent((p) -> {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Member id existed");
+                throw new ConflictException( "Member id existed");
             });
             memberRepository.insertMember(personFromDB.getId(), member.getPassword());
         } else { // person is NOT in DB -> save new member
@@ -75,12 +73,12 @@ public class MemberService {
 
     public Member getMemberByPhoneNumber(String phoneNumber) {
         return memberRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with phone number: " + phoneNumber));
+                .orElseThrow(() -> new ResourceNotFoundException( "There is no member with phone number: " + phoneNumber));
     }
 
     public Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no member with id: " + memberId));
+                .orElseThrow(() -> new ResourceNotFoundException( "There is no member with id: " + memberId));
     }
 
     public Boolean isMember(String phoneNumber) {

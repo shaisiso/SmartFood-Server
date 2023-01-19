@@ -1,18 +1,16 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.exception.BadRequestException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.DeliveryRepository;
 import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -54,7 +52,7 @@ public class DeliveryService {
 
     public Delivery updateDelivery(Delivery delivery) { //only updates delivery guy and person details
         deliveryRepository.findById(delivery.getId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + delivery.getId())
+                new ResourceNotFoundException("There is no delivery with the id: " + delivery.getId())
         );
         //  var d = connectPersonToDelivery(delivery);
         Long deliveryGuyId = delivery.getDeliveryGuy() != null ? delivery.getDeliveryGuy().getId() : null;
@@ -65,7 +63,7 @@ public class DeliveryService {
 
     public void deleteDelivery(Long orderId) {
         Delivery delivery = deliveryRepository.findById(orderId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no delivery with the id: " + orderId)
+                new ResourceNotFoundException("There is no delivery with the id: " + orderId)
         );
         deliveryRepository.delete(delivery);
         webSocketService.notifyExternalOrders(delivery);
@@ -78,7 +76,7 @@ public class DeliveryService {
             return deliveryRepository.findByDateIsBetween(localStartDate, localEndDate);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException( "The request was in bad format");
         }
     }
 

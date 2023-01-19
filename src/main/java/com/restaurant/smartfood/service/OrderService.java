@@ -1,18 +1,18 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.exception.BadRequestException;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.OrderRepository;
 import com.restaurant.smartfood.utility.Utils;
 import com.restaurant.smartfood.websocket.WebSocketService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -80,7 +80,6 @@ public class OrderService {
         item.setOrder(order);
         ItemInOrder itemInOrder = itemInOrderService.addItemToOrder(item);
         order.getItems().add(itemInOrder);
-        // order.setOriginalTotalPrice(calculateTotalPrice(order));
         calculateTotalPrices(order);
         order = orderRepository.save(order);
         webSocketService.notifyExternalOrders(order);
@@ -89,7 +88,7 @@ public class OrderService {
 
     public Order deleteItemsListFromOrder(List<Long> itemsInOrderId) {
         if (itemsInOrderId == null || itemsInOrderId.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "List of items is missing");
+            throw new BadRequestException( "List of items is missing");
         Order order = itemInOrderService.getItemInOrderById(itemsInOrderId.get(0)).getOrder();
         itemInOrderService.deleteItemsListFromOrder(itemsInOrderId);
         calculateTotalPrices(order);
@@ -133,11 +132,11 @@ public class OrderService {
 
     public Order payment(Long orderId, Float amount) {
         if (amount <= 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please provide valid payment amount.");
+            throw new BadRequestException( "Please provide valid payment amount.");
         Order order = getOrder(orderId);
         amount = normalizeAmount(amount, order);
         if (order.getTotalPriceToPay() < amount + order.getAlreadyPaid())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't pay more then the remaining amount.");
+            throw new BadRequestException( "You can't pay more then the remaining amount.");
         order.setAlreadyPaid(order.getAlreadyPaid() + amount);
         if (order.getAlreadyPaid().equals(order.getTotalPriceToPay())) {
             orderOfTableService.closeIfOrderOfTable(order);
@@ -164,8 +163,7 @@ public class OrderService {
     public Order updateTotalPrice(Long orderId, Float amount) {
         Order order = getOrder(orderId);
         if (amount > order.getOriginalTotalPrice())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "The amount is bigger than the total price");
+            throw new BadRequestException("The amount is bigger than the total price");
         order.setTotalPriceToPay(order.getOriginalTotalPrice() - amount);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);
@@ -181,8 +179,7 @@ public class OrderService {
 
     public Order getOrder(Long orderId) {
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no order with the id: " + orderId));
+                .orElseThrow(() -> new ResourceNotFoundException(  "There is no order with the id: " + orderId));
     }
 
     public List<Order> getOrdersByDatesAndHours(String startDateStr, String endDateStr, String startTimeStr, String endTimeStr) {
@@ -194,14 +191,14 @@ public class OrderService {
             return orderRepository.findByDateIsBetweenAndHourIsBetween(startDate, endDate, startTime, endTime);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException( "The request was in bad format");
         }
     }
 
     public Order updateStatus(Long orderId, OrderStatus status) {
         Order order = getOrder(orderId);
         if (status.equals(OrderStatus.CLOSED) && !order.getAlreadyPaid().equals(order.getTotalPriceToPay()))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "This order currently cannot be closed because it first need to pay the bill.");
+            throw new ConflictException( "This order currently cannot be closed because it first need to pay the bill.");
         order.setStatus(status);
         order = orderRepository.save(order);
         webSocketService.notifyExternalOrders(order);
@@ -250,7 +247,6 @@ public class OrderService {
     public Order updateItemInOrder(ItemInOrder item) {
         ItemInOrder i = itemInOrderService.updateItemInOrder(item);
         Order order = getOrder(i.getOrder().getId());
-        //order.setOriginalTotalPrice(calculateTotalPrice(order));
         calculateTotalPrices(order);
         webSocketService.notifyExternalOrders(order);
         return orderRepository.save(order);

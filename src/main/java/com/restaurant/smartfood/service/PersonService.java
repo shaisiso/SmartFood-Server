@@ -1,11 +1,11 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.Person;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.repostitory.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -32,12 +32,11 @@ public class PersonService {
         return newPerson;
     }
 
-    private Person copyPerson(Person from, Person to) {
+    private void copyPerson(Person from, Person to) {
         to.setName(from.getName());
         to.setEmail(from.getEmail());
         to.setAddress(from.getAddress());
         to.setPhoneNumber(from.getPhoneNumber());
-        return to;
     }
 
     public Person updatePerson(Person person) {
@@ -53,7 +52,7 @@ public class PersonService {
             setPersonDetails(person, personFromDB);
             personRepository.save(personFromDB);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no one with id : " + person.getId());
+            throw new ResourceNotFoundException("There is no one with id : " + person.getId());
         }
 
         return person;
@@ -68,23 +67,18 @@ public class PersonService {
 
     public Person getPersonByPhone(String phoneNumber) {
         return personRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no person with phone number: " + phoneNumber));
+                .orElseThrow(() -> new ResourceNotFoundException("There is no person with phone number: " + phoneNumber));
     }
 
     public Optional<Person> getOptionalPersonByPhone(String phoneNumber) {
         return personRepository.findByPhoneNumber(phoneNumber);
     }
 
-    public void deletePerson(Person person) {
-        personRepository.delete(person);
-    } //TODO: maybe not needed
-
     public void validatePhoneNumber(Person person) {
         personRepository.findByPhoneNumber(person.getPhoneNumber())
                 .ifPresent(p -> {
                     if (person.getId() != null && !person.getId().equals(p.getId()))
-                        throw new ResponseStatusException
-                                (HttpStatus.CONFLICT, p.getName() + " has this phone number: " + person.getPhoneNumber());
+                        throw new ConflictException(p.getName() + " has this phone number: " + person.getPhoneNumber());
                 });
     }
 
@@ -93,8 +87,7 @@ public class PersonService {
             personRepository.findByEmail(person.getEmail())
                     .ifPresent(p -> {
                         if (person.getId() != null && !person.getId().equals(p.getId()))
-                            throw new ResponseStatusException
-                                    (HttpStatus.CONFLICT, p.getName() + " has this email: " + person.getEmail());
+                            throw new ConflictException(p.getName() + " has this email: " + person.getEmail());
                     });
         }
     }

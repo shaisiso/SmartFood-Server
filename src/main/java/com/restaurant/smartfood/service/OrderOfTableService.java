@@ -1,6 +1,9 @@
 package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.*;
+import com.restaurant.smartfood.exception.BadRequestException;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
@@ -10,10 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -57,7 +58,7 @@ public class OrderOfTableService {
     public OrderOfTable addOrderOfTable(OrderOfTable orderOfTable) {
         optionalActiveTableOrder(orderOfTable.getTable().getTableId())
                 .ifPresent(o -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Table number " + o.getTable().getTableId() + " has active order");
+                    throw new ConflictException("Table number " + o.getTable().getTableId() + " has active order");
                 });
         return orderOfTableRepository.save(prepareOrderToSave(orderOfTable));
     }
@@ -78,8 +79,7 @@ public class OrderOfTableService {
 
     public OrderOfTable updateOrderOfTable(OrderOfTable orderOfTable) {
         OrderOfTable originalOrder = orderOfTableRepository.findById(orderOfTable.getId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no order of table with the id: " + orderOfTable.getId())
+                new ResourceNotFoundException("There is no order of table with the id: " + orderOfTable.getId())
         );
         if (!originalOrder.getTable().getTableId().equals(orderOfTable.getTable().getTableId())) {
             checkTableIsNotBusy(orderOfTable);
@@ -89,8 +89,7 @@ public class OrderOfTableService {
                     .map(TableReservation::getTable)
                     .collect(Collectors.toList());
             if (reservedTables.contains(orderOfTable.getTable()))
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Table number " + orderOfTable.getTable().getTableId() + " is reserved.");
+                throw new ConflictException( "Table number " + orderOfTable.getTable().getTableId() + " is reserved.");
         }
 
         orderOfTableRepository.updateOrderOfTable(orderOfTable.getNumberOfDiners(),
@@ -99,10 +98,8 @@ public class OrderOfTableService {
     }
 
     public void deleteOrderOfTable(Long id) {
-        OrderOfTable o = orderOfTableRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no order of table with the id " + id));
-        List<CancelItemRequest>  cancelRequests = cancelItemRequestRepository.findByOrderOfTableId(o.getId());
+        OrderOfTable o = orderOfTableRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("There is no order of table with the id " + id));
+        List<CancelItemRequest> cancelRequests = cancelItemRequestRepository.findByOrderOfTableId(o.getId());
         for (CancelItemRequest cancelRequest : cancelRequests) {
             cancelRequest.setOrderOfTable(null);
         }
@@ -112,8 +109,7 @@ public class OrderOfTableService {
 
     public OrderOfTable getOrderOfTableByOrderId(Long orderId) {
         return orderOfTableRepository.findById(orderId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "There is no order of table with the id: " + orderId));
+                new ResourceNotFoundException( "There is no order of table with the id: " + orderId));
     }
 
     public List<OrderOfTable> getActiveOrdersOfTables() {
@@ -127,7 +123,7 @@ public class OrderOfTableService {
             return orderOfTableRepository.findByDateIsBetween(localStartDate, localEndDate);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException( "The request was in bad format");
         }
     }
 
@@ -137,9 +133,9 @@ public class OrderOfTableService {
 
 
     private void checkTableIsNotBusy(OrderOfTable orderOfTable) {
-        RestaurantTable table = restaurantTableService.getTable(orderOfTable.getTable().getTableId());
+        RestaurantTable table = restaurantTableService.getTableById(orderOfTable.getTable().getTableId());
         if (table.getIsBusy())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Table number " + table.getTableId() + " is busy");
+            throw new ConflictException( "Table number " + table.getTableId() + " is busy");
         table.setIsBusy(true);
         restaurantTableService.updateRestaurantTable(table);
     }
@@ -153,7 +149,7 @@ public class OrderOfTableService {
 
     public OrderOfTable getActiveOrdersOfTable(Integer tableId) {
         return optionalActiveTableOrder(tableId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no active order for this table"));
+                .orElseThrow(() -> new ResourceNotFoundException("There is no active order for this table"));
     }
 
     public CancelItemRequest addRequestForCancelItem(CancelItemRequest cancelItemRequest) {
@@ -165,7 +161,6 @@ public class OrderOfTableService {
     public CancelItemRequest addCancelItemRequestAndDeleteItem(CancelItemRequest cancelItemRequest) {
         CancelItemRequest fullRequest = buildFullRequest(cancelItemRequest, true);
         orderService.deleteItemFromOrder(fullRequest.getItemInOrder().getId());
-        // itemInOrderService.deleteItemFromOrder();
         fullRequest.setItemInOrder(null);
         return cancelItemRequestRepository.save(fullRequest);
     }
@@ -174,7 +169,7 @@ public class OrderOfTableService {
         ItemInOrder itemInOrder = itemInOrderService.getItemInOrderById(cancelItemRequest.getItemInOrder().getId());
         cancelItemRequestRepository.findByItemInOrderIdAndIsApprovedIsFalse(itemInOrder.getId())
                 .ifPresent(r -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "This item was already sent for cancel");
+                    throw new ConflictException( "This item was already sent for cancel");
                 });
         OrderOfTable orderOfTable = getOrderOfTableByOrderId(itemInOrder.getOrder().getId());
         return CancelItemRequest.builder()
@@ -202,13 +197,13 @@ public class OrderOfTableService {
     }
 
     public CancelItemRequest getCancelItemRequestById(Long id) {
-        return cancelItemRequestRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no request with id: " + id));
+        return cancelItemRequestRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException( "There is no request with id: " + id));
     }
 
     public List<ItemInOrderResponse> getItemsInOrderOfTableForCancel(Integer tableId) {
         RestaurantTable table = restaurantTableService.getTableById(tableId);
         if (!table.getIsBusy())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The requested table is not busy");
+            throw new BadRequestException("The requested table is not busy");
         OrderOfTable orderOfTable = getActiveOrdersOfTable(tableId);
         return cancelItemRequestRepository.findByOrderOfTableIdAndIsApprovedIsFalse(orderOfTable.getId())
                 .stream()

@@ -1,7 +1,5 @@
 package com.restaurant.smartfood.utility;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# smartfood
+env.properties
+
 ### STS ###
 .apt_generated
 .classpath

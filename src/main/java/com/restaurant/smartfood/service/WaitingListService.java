@@ -8,6 +8,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.restaurant.smartfood.entities.Person;
 import com.restaurant.smartfood.entities.TableReservation;
 import com.restaurant.smartfood.entities.WaitingList;
+import com.restaurant.smartfood.exception.BadRequestException;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.WaitingListRepository;
 import com.restaurant.smartfood.security.JwtProperties;
@@ -16,12 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -64,8 +66,7 @@ public class WaitingListService {
         Person person = personService.savePerson(waitingList.getPerson());
         waitingListRepository.findByPersonIdAndDateAndHour(person.getId(), waitingList.getDate(), waitingList.getHour())
                 .ifPresent(w -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "There is already waiting list request with those details.");
+                    throw new ConflictException("There is already waiting list request with those details.");
                 });
         waitingList.setWasNotified(false);
         messageService.sendMessages(waitingList.getPerson(), "Waiting List Request", getNewWaitingListMsg(waitingList));
@@ -80,8 +81,8 @@ public class WaitingListService {
 
     @Transactional
     public WaitingList updateWaitingList(WaitingList waitingList) {
-        WaitingList w = waitingListRepository.findById(waitingList.getId()).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no waiting list request with those details."));
+        WaitingList w = waitingListRepository.findById(waitingList.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("There is no waiting list request with those details."));
         if (waitingList.getDate().equals(w.getDate()) && waitingList.getHour().equals(w.getHour())) {
             w.setNumberOfDiners(waitingList.getNumberOfDiners());
             return waitingListRepository.save(w);
@@ -102,7 +103,7 @@ public class WaitingListService {
             return waitingListRepository.findByDateAndHour(localDate, localHour);
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException("The request was in bad format");
         }
     }
 
@@ -112,20 +113,23 @@ public class WaitingListService {
 
     public WaitingList getWaitingListRequestById(Long waitingListId) {
         return waitingListRepository.findById(waitingListId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no waiting list request with this id: " + waitingListId));
+                .orElseThrow(() -> new ResourceNotFoundException("There is no waiting list request with this id: " + waitingListId));
     }
+
     @Async
-    public void checkAllWaitingLists(){
+    public void checkAllWaitingLists() {
         List<WaitingList> waitingList = waitingListRepository.findByDateIsGreaterThanEqual(LocalDate.now(ZoneId.of(timezone)));
         checkWaitingList(waitingList);
     }
+
     @Async
     public void checkWaitingListsForTime(LocalDate date, LocalTime hour) {
         List<WaitingList> waitingList = waitingListRepository
                 .findByDateIsAndHourIsBetween(date, hour.minusHours(durationForReservation), Utils.hourPlusDurationForReservation(hour, durationForReservation));
         checkWaitingList(waitingList);
     }
-    private void checkWaitingList(List<WaitingList> waitingList){
+
+    private void checkWaitingList(List<WaitingList> waitingList) {
         // Waiting list returned  fifo
         log.debug("waitingList: size -" + waitingList.size() + " , " + waitingList);
         if (waitingList.isEmpty())
@@ -163,77 +167,42 @@ public class WaitingListService {
             }
         }, new Date(System.currentTimeMillis() + getMsForResponse()), getMsForResponse());
 
-
-        // Start timer for response
-//        var timer = new Timer();
-//        timer.schedule(new TimerTask() {
-//            private int i=0;
-//            @Override
-//            public void run() {
-//                log.debug("savedReservation from timer: size: " + savedReservationsMap.size());
-//                var mapIterator = savedReservationsMap.entrySet().iterator();
-//                while (mapIterator.hasNext()) {
-//                    var entry= mapIterator.next();
-//                    var reservation = entry.getKey();
-//                    var waitingRequest =entry.getValue();
-//                    if (waitingListRepository.findById(waitingRequest.getId()).isPresent()) { // if waiting list was not deleted it means that the time passed, and we need to move to the next
-//                        waitingList.removeIf(w -> w.getId().equals(waitingRequest.getId()));
-//                        deleteFromWaitingList(waitingRequest.getId());  // delete table reservation and waiting list
-//                        tableReservationService.deleteWaitingListReservation(reservation);
-//                    }
-//                    mapIterator.remove();
-//                }
-//                log.debug("round: "+i+" waitingList size: " + waitingList.size());
-//                i++;
-//                if (waitingList.isEmpty()){  // if no one is on waiting list we can stop this action, otherwise we send messages to rest of the list
-//                    log.debug("Stopped because waiting list was empty");
-//                    cancel();
-//                }
-//
-//                savedReservationsMap.putAll(saveWaitingAsReservations(waitingList));
-//                if (savedReservationsMap.isEmpty()) {  // if no one is on waiting list we can stop this action, otherwise we send messages to rest of the list
-//                    log.debug("Stopped because could not enter more reservations");
-//                    cancel();
-//                }
-//            }
-//        }, 30*1000, 30*1000);
     }
+
     private long getMsForResponse() {
-        return minutesForWaitingListResponse * 60 * 1000;
+        return (long) minutesForWaitingListResponse * 60 * 1000;
     }
 
     private String getMessageForAvailableReservation(TableReservation savedReservation, WaitingList waitingListRequest) {
         String reservationToken = getReservationToken(savedReservation, waitingListRequest);
-        String url = domainUrl + "/waiting-list/" + reservationToken; // TODO: Return this
-       // var url = reservationToken;
+        String url = domainUrl + "/waiting-list/" + reservationToken;
         return "Hi, your reservation at: " + savedReservation.getDate() + " " + savedReservation.getHour() +
                 " can now take place please confirm on the link: " + url +
-                "<div>If you won't response in "+minutesForWaitingListResponse+" minutes, it will be cancelled automatically!</div>";
+                "<div>If you won't response in " + minutesForWaitingListResponse + " minutes, it will be cancelled automatically!</div>";
     }
 
     private String getReservationToken(TableReservation savedReservation, WaitingList waitingListRequest) {
         Algorithm algorithm = Algorithm.HMAC512(JwtProperties.SECRET.getBytes());
         // Create JWT Token
-        String token = JWT.create()
+        return JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + getMsForResponse()))
                 .withClaim("reservationId", savedReservation.getReservationId())
                 .withClaim("waitingListId", waitingListRequest.getId())
                 .sign(algorithm);
-        return token;
     }
 
     private Map<TableReservation, WaitingList> saveWaitingAsReservations(List<WaitingList> waitingList) {
         Map<TableReservation, WaitingList> savedReservations = new LinkedHashMap<>(); //Order is important
-        Iterator< WaitingList> iterator = waitingList.iterator();
+        Iterator<WaitingList> iterator = waitingList.iterator();
         while (iterator.hasNext()) {
             WaitingList waitingRequest = iterator.next();
             Optional<WaitingList> optionalWR = waitingListRepository.findById(waitingRequest.getId());
-            if (!optionalWR.isPresent()){
+            if (!optionalWR.isPresent()) {
                 iterator.remove();
                 continue;
             }
             WaitingList waitingRequestInDB = optionalWR.get();
-            if (waitingRequestInDB.getWasNotified()){
+            if (waitingRequestInDB.getWasNotified()) {
                 iterator.remove();
                 continue;
             }
@@ -252,14 +221,14 @@ public class WaitingListService {
                 messageService.sendMessages(savedReservation.getPerson(), "Request For Table Reservation",
                         getMessageForAvailableReservation(savedReservation, waitingRequestInDB));
                 log.info("Send Reservation fulfilled requests to: " + savedReservation.getHour() + " " + reservation.getDate() + " " + reservation.getPerson().getName());
-            } catch (ResponseStatusException e) {
-                if (!e.getStatus().equals(HttpStatus.CONFLICT)) {
+            } catch (Exception e) {
+                if (!(e instanceof ConflictException)) {
                     log.warn("Unexpected response status");
+                    log.error(e.getMessage());
                     throw e;
                 }
             }
         }
-
         return savedReservations;
     }
 
@@ -278,18 +247,16 @@ public class WaitingListService {
         } catch (SignatureVerificationException e) {
             log.error("Authorization was failed . " + e.getMessage());
             log.error("Token was changed and cannot be trusted");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "This link is invalid.");
+            throw new BadCredentialsException("This link is invalid.");
         } catch (TokenExpiredException e) {
             log.warn("Token expired");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "This link is expired");
+            throw new BadCredentialsException("This link is expired");
         } catch (Exception e) {
-            if (e instanceof ResponseStatusException)
-                throw e;
-            else {
-                log.error("Could not verify token for a certain reason");
-                log.error(e.toString());
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "This link is invalid");
-            }
+
+            log.error("Could not verify token for a certain reason");
+            log.error(e.toString());
+            throw new BadCredentialsException("This link is invalid");
+
         }
     }
 }

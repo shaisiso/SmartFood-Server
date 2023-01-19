@@ -3,18 +3,19 @@ package com.restaurant.smartfood.service;
 
 import com.restaurant.smartfood.entities.RestaurantTable;
 import com.restaurant.smartfood.entities.TableReservation;
+import com.restaurant.smartfood.exception.BadRequestException;
+import com.restaurant.smartfood.exception.ConflictException;
+import com.restaurant.smartfood.exception.ResourceNotFoundException;
+import com.restaurant.smartfood.exception.UnprocessableEntityException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.RestaurantTableRepository;
 import com.restaurant.smartfood.repostitory.TableReservationRepository;
 import com.restaurant.smartfood.utility.Utils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,7 +60,7 @@ public class TableReservationService {
         String messageTitle = "New Reservation";
         List<RestaurantTable> freeTables = findSuitableTablesForReservation(reservation);
         if (freeTables.isEmpty())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
+            throw new ConflictException("There is no suitable table for your reservation request.");
         personService.savePerson(reservation.getPerson());
         reservation.setTable(freeTables.get(0));
         TableReservation savedReservation = tableReservationRepository.save(reservation);
@@ -89,7 +90,7 @@ public class TableReservationService {
             List<RestaurantTable> freeTables = findSuitableTablesForReservation(reservation);
             if (freeTables.isEmpty()) {
                 if (!oldTableFlag)
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "There is no suitable table for your reservation request.");
+                    throw new ConflictException("There is no suitable table for your reservation request.");
             } else {
                 reservation.setTable(freeTables.get(0));
                 checkWaitingList = true;  // the previous table was cleared, so maybe waiting list requests can be fulfilled
@@ -107,7 +108,7 @@ public class TableReservationService {
         LocalDateTime reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getHour());
         LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of(timezone));
         if (reservationDateTime.compareTo(currentDateTime) <= 0)
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Reservation date and time should be in the future.");
+            throw new UnprocessableEntityException("Reservation date and time should be in the future.");
     }
 
     private String getNewReservationMsg(TableReservation reservation) {
@@ -122,7 +123,7 @@ public class TableReservationService {
             tableReservationRepository.delete(reservation);
             waitingListService.checkWaitingListsForTime(reservation.getDate(), reservation.getHour());
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no reservation with ID: " + reservationId);
+            throw new ResourceNotFoundException("There is no reservation with ID: " + reservationId);
         }
     }
 
@@ -133,7 +134,7 @@ public class TableReservationService {
 
     public TableReservation getTableReservationById(Long reservationId) {
         return tableReservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no reservation with ID: " + reservationId));
+                .orElseThrow(() -> new ResourceNotFoundException("There is no reservation with ID: " + reservationId));
     }
 
     public List<TableReservation> getTableReservationsByDates(String startDateSt, String endDateSt) {
@@ -146,7 +147,7 @@ public class TableReservationService {
             return sortedReservation(tableReservationRepository.findByDateIsBetween(startDate, endDate));
         } catch (Exception exception) {
             log.error(exception.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in bad format");
+            throw new BadRequestException("The request was in bad format");
         }
 
     }
@@ -232,7 +233,7 @@ public class TableReservationService {
         } catch (Exception e) {
             log.error(e.getMessage());
             log.error(e.getLocalizedMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The request was in a bad format");
+            throw new BadRequestException("The request was in a bad format");
         }
     }
 

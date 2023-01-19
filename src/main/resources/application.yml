@@ -4,8 +4,8 @@ spring:
 
   mail:
     host: smtp.gmail.com
-    username: smartfoood2023@gmail.com
-    password: gshwkbcikltxiadv
+    username:
+    password: 
     port: 587
     #protocol: smtp
     properties:
@@ -18,10 +18,10 @@ spring:
 
 
 twilio:
-  accountSid: AC293cfa6493761d996a084556eba8781e
-  authToken: 999b36daddd3613ca27c3fe9e244979a
-  trialNumber: +16672432439
-  phoneNumberTo: +972524453933  # trial account can send sms only to one verified phone number
+  accountSid: 
+  authToken: 
+  trialNumber: 
+  phoneNumberTo:   # trial account can send sms only to one verified phone number
 
 timezone:
   name: Asia/Jerusalem

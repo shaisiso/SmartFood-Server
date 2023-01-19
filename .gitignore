@@ -5,8 +5,7 @@ target/
 !**/src/test/**/target/
 
 # smartfood
-src/main/java/com/restaurant/smartfood/service/DBInit.java
-*.yml
+env.properties
 
 ### STS ###
 .apt_generated

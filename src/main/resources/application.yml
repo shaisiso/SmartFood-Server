@@ -15,7 +15,7 @@ spring:
           starttls:
             enable: true
 twilio:
-  accountSid: ${TWILIO_ACCOUNTSID}
+  accountSid: ${TWILIO_SID}
   authToken: ${TWILIO_TOKEN}
   trialNumber: ${TWILIO_TRIAL}
   phoneNumberTo: ${TWILIO_TO}  # trial account can send sms only to one verified phone number

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: prod
+    active: dev
   config:
     import: file:env.properties # env.properties
   mail:

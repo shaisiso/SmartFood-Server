@@ -28,7 +28,7 @@ reservation-duration: 2 # hours
 waiting-list:
   reserve-time: 60 # minutes
 
----
+--- #------------------------------------------------------ dev profile -------------------------------------------------------------#
 
 -spring:
   devtools:
@@ -64,7 +64,7 @@ message-service:
   default-mail: ${MAIL_USER}   # when send-emails is false, mails will be sent each time to this address instead of the real address
 domain-url: http://localhost:3000
 
----
+--- #------------------------------------------------------ prod profile -------------------------------------------------------------#
 
 domain-url: https://www.smartfood-project.link
 message-service:
@@ -94,7 +94,7 @@ server:
   error:
     include-stacktrace: never
 
----
+--- #------------------------------------------------------ test profile -------------------------------------------------------------#
 
 spring:
   config:

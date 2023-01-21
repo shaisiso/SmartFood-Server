@@ -2,7 +2,7 @@ spring:
   profiles:
     active: prod
   config:
-    import: file:env.properties
+    import: file:env.properties # env.properties
   mail:
     host: smtp.gmail.com
     username: ${MAIL_USER}
@@ -15,12 +15,12 @@ spring:
           starttls:
             enable: true
 twilio:
-  accountSid: ${TWILIO_ACCOUNTSID}
+  accountSid: ${TWILIO_SID}
   authToken: ${TWILIO_TOKEN}
   trialNumber: ${TWILIO_TRIAL}
   phoneNumberTo: ${TWILIO_TO}  # trial account can send sms only to one verified phone number
 
-logo-path: https://s3.eu-central-1.amazonaws.com/smartfood-project.link/SmartFood.png
+logo-path: https://s3.eu-central-1.amazonaws.com/smartfood-project.link/SmartFood2.png
 timezone:
   name: Asia/Jerusalem
 

@@ -59,10 +59,7 @@ public class DBInit implements CommandLineRunner {
     public void run(String... args) {
 //        tableReservationRepository.deleteAll();
 //        cancelItemRequestRepository.deleteAll();
-//        deliveryRepository.deleteAll();
-////        orderOfTableRepository.deleteAll();
-////        orderRepository.deleteAll();
-////        takeAwayRepository.deleteAll();
+
 //
 //        employeeRepository.deleteAll();
 //        personRepository.deleteAll();
@@ -75,11 +72,8 @@ public class DBInit implements CommandLineRunner {
 //        createTables();
 //        addEmployees();
 //        addMember();
-//        addTableReservation();
-//     //   addWaitingList();
 //        addDiscounts();
 
-       // addOrders();
     }
 
     private void addItemsToMenu() {

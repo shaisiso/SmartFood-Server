@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.activation.URLDataSource;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;

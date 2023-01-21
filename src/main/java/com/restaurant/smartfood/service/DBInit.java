@@ -57,17 +57,7 @@ public class DBInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        tableReservationRepository.deleteAll();
-//        cancelItemRequestRepository.deleteAll();
 
-//
-//        employeeRepository.deleteAll();
-//        personRepository.deleteAll();
-//        itemRepository.deleteAll();
-//        restaurantTableRepository.deleteAll();
-////
-////
-////
 //        addItemsToMenu();
 //        createTables();
 //        addEmployees();

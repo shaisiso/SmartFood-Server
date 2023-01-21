@@ -128,16 +128,39 @@
     </dependencies>
 
     <build>
+        <filters>
+            <filter>env.properties</filter>
+        </filters>
         <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>*.yml</include>
+                </includes>
+            </resource>
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes>
-                    <include>config.properties</include>
+                    <include>env.properties</include>
                 </includes>
             </resource>
-
         </resources>
+<!--        <resources>-->
+<!--            <resource>-->
+<!--                <directory>${project.basedir}</directory>-->
+<!--                <includes>-->
+<!--                    <include>env.properties</include>-->
+<!--                </includes>-->
+<!--            </resource>-->
+
+<!--        </resources>-->
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+            </plugin>
             <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>

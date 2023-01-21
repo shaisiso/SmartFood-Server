@@ -10,11 +10,11 @@
     </parent>
     <groupId>com.restaurant</groupId>
     <artifactId>smarfood</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>smartfood-server</name>
     <description>smartfood-server</description>
     <properties>
-        <java.version>8</java.version>
+        <java.version>11</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -146,15 +146,6 @@
                 </includes>
             </resource>
         </resources>
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>${project.basedir}</directory>-->
-<!--                <includes>-->
-<!--                    <include>env.properties</include>-->
-<!--                </includes>-->
-<!--            </resource>-->
-
-<!--        </resources>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -199,14 +190,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-compiler-plugin</artifactId>-->
-            <!--                <configuration>-->
-            <!--                    <source>9</source>-->
-            <!--                    <target>9</target>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
         </plugins>
     </build>
 

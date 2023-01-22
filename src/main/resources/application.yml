@@ -1,35 +1,35 @@
 spring:
   profiles:
     active: dev
-
+  config:
+    import: file:env.properties # env.properties
   mail:
     host: smtp.gmail.com
-    username: smartfoood2023@gmail.com
-    password: gshwkbcikltxiadv
+    username: ${MAIL_USER}
+    password: ${MAIL_PASSWORD}
     port: 587
-    #protocol: smtp
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-
-
-
 twilio:
-  accountSid: AC293cfa6493761d996a084556eba8781e
-  authToken: 999b36daddd3613ca27c3fe9e244979a
-  trialNumber: +16672432439
-  phoneNumberTo: +972524453933  # trial account can send sms only to one verified phone number
+  accountSid: ${TWILIO_SID}
+  authToken: ${TWILIO_TOKEN}
+  trialNumber: ${TWILIO_TRIAL}
+  phoneNumberTo: ${TWILIO_TO}  # trial account can send sms only to one verified phone number
 
+logo-path: https://s3.eu-central-1.amazonaws.com/smartfood-project.link/SmartFood2.png
 timezone:
   name: Asia/Jerusalem
 
 reservation-duration: 2 # hours
 waiting-list:
   reserve-time: 60 # minutes
----
+
+--- #------------------------------------------------------ dev profile -------------------------------------------------------------#
+
 -spring:
   devtools:
     restart:
@@ -56,42 +56,33 @@ logging:
   level:
     com.restaurant.smartfood: debug
 server:
-#  port: 443
-#  ssl:
-#    enabled: true
-#    key-store: src/main/resources/bootsecurity.p12
-#    key-store-password: password
-#    keyStoreType: PKCS12
-#    keyAlias: bootsecurity
-
-
-
   error:
     include-stacktrace: never
 
 message-service:
   send-emails: false
-  default-mail: smartfoood2023@gmail.com # when send-emails is false, mails will be sent each time to this address instead of the real address
+  default-mail: ${MAIL_USER}   # when send-emails is false, mails will be sent each time to this address instead of the real address
 domain-url: http://localhost:3000
----
+
+--- #------------------------------------------------------ prod profile -------------------------------------------------------------#
+
 domain-url: https://www.smartfood-project.link
 message-service:
   send-emails: true # to disable send of emails change to false
-  default-mail: smartfoood2023@gmail.com # when send-emails is false, mails will be sent each time to this address instead of the real address
+  default-mail: ${MAIL_USER} # when send-emails is false, mails will be sent each time to this address instead of the real address
 spring:
   config:
     activate:
       on-profile: prod
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://smartfood-db.cfveqwj8ivr1.eu-central-1.rds.amazonaws.com:3306/sys
-    username: admin
-    password: Aa123456
-
+    url: ${DB_AWS}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto:  update  #  create-drop  #
+      ddl-auto: update  #  create-drop  #
     #show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
@@ -100,11 +91,15 @@ logging:
     com.restaurant.smartfood: info
 server:
   port: ${PORT:5000}
-  #port: 5000
   error:
     include-stacktrace: never
----
+
+--- #------------------------------------------------------ test profile -------------------------------------------------------------#
+
 spring:
+  config:
+    activate:
+      on-profile: test
   h2.console.enabled: true
   datasource:
     driver-class-name: org.h2.Driver
@@ -116,6 +111,4 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create-drop #update
-  config:
-    activate:
-      on-profile: test
+

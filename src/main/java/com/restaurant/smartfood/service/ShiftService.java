@@ -8,7 +8,7 @@ import com.restaurant.smartfood.exception.ConflictException;
 import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.repostitory.EmployeeRepository;
 import com.restaurant.smartfood.repostitory.ShiftRepository;
-import com.restaurant.smartfood.websocket.WebSocketService;
+import com.restaurant.smartfood.utility.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -8,7 +8,7 @@ import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.CancelItemRequestRepository;
 import com.restaurant.smartfood.repostitory.OrderOfTableRepository;
 import com.restaurant.smartfood.utility.ItemInOrderResponse;
-import com.restaurant.smartfood.websocket.WebSocketService;
+import com.restaurant.smartfood.utility.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

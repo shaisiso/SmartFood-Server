@@ -1,4 +1,4 @@
-package com.restaurant.smartfood.websocket;
+package com.restaurant.smartfood.utility.websocket;
 
 import com.restaurant.smartfood.entities.CancelItemRequest;
 import com.restaurant.smartfood.entities.Order;

@@ -7,7 +7,7 @@ import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.messages.MessageService;
 import com.restaurant.smartfood.repostitory.TakeAwayRepository;
 import com.restaurant.smartfood.utility.Utils;
-import com.restaurant.smartfood.websocket.WebSocketService;
+import com.restaurant.smartfood.utility.websocket.WebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

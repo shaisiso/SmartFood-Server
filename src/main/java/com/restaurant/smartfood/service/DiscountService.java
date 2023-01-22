@@ -145,7 +145,7 @@ public class DiscountService {
 
     }
 
-    private boolean isDiscountOverLap(Discount discount) { // overlap is separate between members and rest
+    public boolean isDiscountOverLap(Discount discount) { // overlap is separate between members and rest
         List<Discount> overlappedDiscounts = getDiscountsByDatesAndHours(discount.getStartDate(), discount.getEndDate(),
                 discount.getStartHour(), discount.getEndHour());
         for (Discount d : overlappedDiscounts) {

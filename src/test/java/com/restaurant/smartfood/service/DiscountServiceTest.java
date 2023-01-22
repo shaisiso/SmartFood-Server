@@ -1,9 +1,7 @@
 package com.restaurant.smartfood.service;
 
-import com.restaurant.smartfood.entities.MenuItem;
 import com.restaurant.smartfood.exception.ResourceNotFoundException;
 import com.restaurant.smartfood.repostitory.DiscountRepository;
-import com.restaurant.smartfood.repostitory.MenuItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

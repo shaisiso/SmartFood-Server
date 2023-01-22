@@ -49,8 +49,6 @@ class OrderServiceTest {
         Mockito.doReturn(order).when(orderRepository).save(order);
         Mockito.doReturn(Optional.of(order)).when(orderRepository).findById(order.getId());
         Mockito.doReturn(new ArrayList<>()).when(discountService).getDateRelevantDiscountsForOrder(order);
-
-
     }
 
     @Test

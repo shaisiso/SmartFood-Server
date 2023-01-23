@@ -1,8 +1,8 @@
 spring:
   profiles:
-    active: prod
+    active: test
   config:
-    import: file:env.properties # env.properties
+    import: env.properties # file:env.properties #
   mail:
     host: smtp.gmail.com
     username: ${MAIL_USER}
@@ -111,4 +111,7 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create-drop #update
-
+message-service:
+  send-emails: false
+  default-mail: ${MAIL_USER}   # when send-emails is false, mails will be sent each time to this address instead of the real address
+domain-url: http://localhost:3000

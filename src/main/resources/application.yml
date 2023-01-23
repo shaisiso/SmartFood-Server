@@ -2,7 +2,7 @@ spring:
   profiles:
     active: test
   config:
-    import: env.properties # file:env.properties #
+    import:  file:env.properties #  env.properties #
   mail:
     host: smtp.gmail.com
     username: ${MAIL_USER}

@@ -92,6 +92,8 @@ public class ShiftService {
     public Shift updateShift(Shift shift) {
         shiftRepository.findById(shift.getShiftID())
                 .orElseThrow(() -> new ResourceNotFoundException( "The requested shift was not found"));
+        if (shift.getShiftEntrance().compareTo(shift.getShiftExit())>0)
+            throw new BadRequestException("Shift exit must be after shift entrance");
         if (!isManagers(shift.getEmployee())) {
             Shift updatedShift = shiftRepository.save(shift);
             webSocketService.notifyShiftsChange(updatedShift);
@@ -148,5 +150,17 @@ public class ShiftService {
                 .stream()
                 .map(Shift::getEmployee)
                 .collect(Collectors.toList());
+    }
+
+    public List<Shift> getShiftsByEmployeeIdAndDates(Long employeeId, String startDate, String endDate) {
+        try {
+            LocalDate start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
+            return shiftRepository.findByEmployeeIdAndShiftEntranceIsBetween(employeeId, start.atStartOfDay(), end.atTime(23, 59));
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new BadRequestException( "The request was in bad format");
+        }
     }
 }

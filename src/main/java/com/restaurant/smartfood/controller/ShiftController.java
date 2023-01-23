@@ -52,6 +52,14 @@ public class ShiftController {
             @PathVariable("endDate") String endDate) {
         return shiftService.getShiftsByEmployeeAndDates(phoneNumber, startDate, endDate);
     }
+    @GetMapping("/id/{id}/{startDate}/{endDate}")
+    @AuthorizeEmployee
+    public List<Shift> getShiftsByEmployeeIdAndDates(
+            @PathVariable("id") Long employeeId,
+            @PathVariable("startDate") String startDate,
+            @PathVariable("endDate") String endDate) {
+        return shiftService.getShiftsByEmployeeIdAndDates(employeeId, startDate, endDate);
+    }
 
     @GetMapping("/{startDate}/{endDate}")
     @AuthorizeManagers
